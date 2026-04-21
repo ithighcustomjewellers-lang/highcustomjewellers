@@ -56,13 +56,14 @@
 
 @endsection
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <script>
     $(document).ready(function() {
 
         $('#registerForm').submit(function(e) {
-            e.preventDefault(); // ✅ STOP normal submit
+            e.preventDefault();
 
             let formData = new FormData(this);
 
@@ -74,14 +75,17 @@
                 contentType: false,
 
                 success: function(response) {
-                    alert(response.message);
+                    toastr.success(response.message);
                     $('#registerForm')[0].reset();
                     $('.error-text').remove();
+
+                    setTimeout(function() {
+                        window.location.href = "{{ route('login-data') }}";
+                    }, 1000);
                 },
 
                 error: function(xhr) {
                     let errors = xhr.responseJSON.errors;
-
                     $('.error-text').remove();
                     $('.input-field').removeClass('has-error');
 
@@ -89,13 +93,12 @@
                         let input = $('#' + key);
                         // Add error message
                         input.closest('.input-field') .append('<span class="error-text">' + value[0] + '</span>');
-                        // ✅ ADD ERROR CLASS
+                        //ADD ERROR CLASS
                         input.closest('.input-field').addClass('has-error');
                     });
                 }
             });
         });
-
     });
 </script>
 

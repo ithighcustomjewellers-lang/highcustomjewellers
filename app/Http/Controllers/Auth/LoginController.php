@@ -7,7 +7,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+
 
 class LoginController extends Controller
 {
@@ -18,7 +19,7 @@ class LoginController extends Controller
 
     public function SubmitRegister(Request $request)
     {
-        // ✅ 1. VALIDATE FIRST
+        // 1. VALIDATE FIRST
         $validator = Validator::make($request->all(), [
             'firstname' => 'required|string|max:50',
             'lastname'  => 'required|string|max:50',
@@ -34,18 +35,17 @@ class LoginController extends Controller
             ], 422);
         }
 
-        // ✅ 2. SAVE USER (ONLY AFTER VALIDATION PASSES)
+        // 2. SAVE USER (ONLY AFTER VALIDATION PASSES)
         $user = User::create([
             'name' => $request->firstname,
             'lastname'  => $request->lastname,
             'email'     => $request->email,
-            'phone'     => $request->phone,
+            'mobile'     => $request->phone,
             'password'  => Hash::make($request->password),
-            'user_code' => 'CHJ' . now()->format('mYHis'),
-
+            'user_code' => 'HC' . now()->format('mYHis'),
         ]);
 
-        // ✅ 3. SUCCESS RESPONSE
+        // 3. SUCCESS RESPONSE
         return response()->json([
             'status' => true,
             'message' => 'Registration successful',
@@ -60,7 +60,7 @@ class LoginController extends Controller
 
     public function SubmitLogin(Request $request)
     {
-        // ✅ 1. VALIDATE FIRST
+        // 1. VALIDATION
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required',
@@ -73,21 +73,34 @@ class LoginController extends Controller
             ], 422);
         }
 
-        // ✅ 2. CHECK USER CREDENTIALS
-        $user = User::where('email', $request->email)->first();
+        // 2. LOGIN (THIS CREATES SESSION)
+        if (Auth::attempt($request->only('email', 'password'))) {
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+            $request->session()->regenerate();
+
             return response()->json([
-                'status' => false,
-                'message' => 'Invalid email or password'
-            ], 401);
+                'status' => true,
+                'message' => 'Login successful'
+            ]);
         }
 
-        // ✅ 3. SUCCESS RESPONSE (You can also generate a token here if using API authentication)
+        // 3. INVALID
+        return response()->json([
+            'status' => false,
+            'message' => 'Invalid email or password'
+        ], 401);
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         return response()->json([
             'status' => true,
-            'message' => 'Login successful',
-            'data' => $user
+            'message' => 'Logged out successfully'
         ]);
     }
 }
