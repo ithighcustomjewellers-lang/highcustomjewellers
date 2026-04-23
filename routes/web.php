@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Auth\DashboardController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -29,3 +30,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/user-profile', [DashboardController::class, 'UserProfile'])->name('user-profile');
     Route::post('/submit-profile-update', [DashboardController::class, 'submitProfileUpdate'])->name('submit-profile-update');
 });
+
+Route::prefix('admin')->group(function () {
+
+    Route::get('/', [AdminDashboardController::class, 'AdminDashboard'])->name('admin-dashboard');
+    Route::get('/users', [AdminDashboardController::class, 'AdminUsers'])->name('admin-users-index');
+    Route::post('/users/data', [AdminDashboardController::class, 'AdminGetUsers'])->name('admin-users-data');
+    Route::get('/users/{id}', [AdminDashboardController::class, 'updateUser'])->name('updateUser');
+    Route::post('/users/update', [AdminDashboardController::class, 'adminUpdateData'])->name('admin-update-data');
+    Route::delete('/users/destroy', [AdminDashboardController::class, 'adminDestroyUser'])->name('admin-users-destroy');
+
+});
+
+
