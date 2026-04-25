@@ -60,47 +60,41 @@ class LoginController extends Controller
 
     public function SubmitLogin(Request $request)
     {
-        // 1. VALIDATION
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        // 2. LOGIN (THIS CREATES SESSION)
         if (Auth::attempt($request->only('email', 'password'))) {
 
             $request->session()->regenerate();
 
+            $user = Auth::user();
+
             return response()->json([
                 'status' => true,
-                'message' => 'Login successful'
+                'role' => $user->is_admin ? 'admin' : 'user'
             ]);
         }
 
-        // 3. INVALID
         return response()->json([
             'status' => false,
-            'message' => 'Invalid email or password'
+            'message' => 'Invalid credentials'
         ], 401);
     }
 
     public function logout(Request $request)
-    {
-        Auth::logout();
+{
+    Auth::logout(); // logout user
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+    $request->session()->invalidate(); // session destroy
+    $request->session()->regenerateToken(); // CSRF refresh
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Logged out successfully'
-        ]);
-    }
+    return response()->json([
+        'status' => true,
+        'message' => 'Logout successful'
+    ]);
+}
+
+
 }

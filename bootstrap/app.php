@@ -13,15 +13,13 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
 
         $middleware->alias([
-            'auth' => \App\Http\Middleware\Authenticate::class,
-            'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+            // 'auth' => \App\Http\Middleware\Authenticate::class,
+            // 'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'user' => \App\Http\Middleware\UserMiddleware::class,
+
         ]);
-
-        $middleware->redirectGuestsTo(function () {
-            return route('admin-login');
-        });
-
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

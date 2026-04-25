@@ -56,16 +56,17 @@
     $(document).ready(function() {
         $('#LoginForm').submit(function(e) {
             e.preventDefault(); // Prevent the default form submission
-
-            var formData = $(this).serialize(); // Serialize the form data
-
+            var formData = $(this).serialize();
             $.ajax({
-                url: "{{ route('submit_login') }}", // The route to handle login
+                url: "{{ route('login') }}",
                 type: "POST",
                 data: formData,
                 success: function(response) {
-                    // Handle successful login (e.g., redirect to dashboard)
-                    window.location.href = "{{ route('dashboard') }}";
+                    if (response.role === 'admin') {
+                        window.location.href = "{{ route('admin-dashboard') }}";
+                    } else {
+                        window.location.href = "{{ route('dashboard') }}";
+                    }
                 },
                 error: function(xhr) {
                     // Handle errors (e.g., display error messages)
