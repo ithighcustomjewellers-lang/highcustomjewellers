@@ -41,9 +41,12 @@
     }
 </style>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="{{ asset('js/jquery.min.js') }}"></script>
+<script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('js/dataTables.bootstrap5.min.js') }}"></script>
+
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     $(document).ready(function() {
@@ -101,35 +104,60 @@
         });
     });
 
+function deleteuserList(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'No, cancel!',
+    }).then((result) => {
 
-    function deleteuserList(id) {
-
-      if (confirm("Are you sure you want to delete this user?")) {
+        if (result.isConfirmed) {
+            // Proceed with delete
             $.ajax({
                 url: "{{ route('admin-users-destroy') }}",
                 type: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
+                data: {
+                    id: id
+                },
                 success: function(response) {
                     Swal.fire({
-                        title: 'Success!',
+                        title: 'Deleted!',
                         text: response.message,
                         icon: 'success',
-                        confirmButtonText: 'OK'
+                        timer: 2000,
+                        showConfirmButton: false
                     });
+
                     $('#usersTable').DataTable().ajax.reload();
                 },
-                error: function() {
+                error: function(xhr) {
+                    console.log(xhr.responseText);
+
                     Swal.fire({
                         title: 'Error!',
                         text: 'Failed to delete user.',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
+                        icon: 'error'
                     });
                 }
             });
+
+        } else {
+            // Cancel clicked
+            Swal.fire({
+                title: 'Cancelled',
+                text: 'User is safe 🙂',
+                icon: 'info',
+                timer: 1500,
+                showConfirmButton: false
+            });
         }
 
-    }
+    });
+}
 </script>

@@ -25,7 +25,7 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><a class="dropdown-item" href="#">Profile</a></li>
-                    <li><a class="dropdown-item text-danger" href="#">Logout</a></li>
+                    <li><a class="dropdown-item text-danger" href="{{ route('admin-logout') }}">Logout</a></li>
                 </ul>
             </div>
         </div>

@@ -15,6 +15,7 @@ class CustomResetPassword extends Notification
 
     public function __construct($token)
     {
+
         $this->token = $token;
     }
 
@@ -34,11 +35,5 @@ class CustomResetPassword extends Notification
             ->action('Reset Password', $url)
             ->line('If you did not request, ignore this email.');
 
-        // return (new MailMessage)
-        //     ->subject('Reset Password')
-        //     ->view('emails.reset-password', [
-        //         'url' => $url,
-        //         'user' => $notifiable
-        //     ]);
     }
 }

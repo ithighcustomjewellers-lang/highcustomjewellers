@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Auth\Notifications\ResetPassword;
 
+use App\Notifications\CustomResetPassword;
+
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -53,6 +55,6 @@ class User extends Authenticatable
 
     public function sendPasswordResetNotification($token)
     {
-        $this->notify(new \App\Notifications\CustomResetPassword($token));
+        $this->notify(new CustomResetPassword($token));
     }
 }

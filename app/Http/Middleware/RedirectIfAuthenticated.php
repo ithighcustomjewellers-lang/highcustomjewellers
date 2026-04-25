@@ -8,11 +8,20 @@ use Illuminate\Support\Facades\Auth;
 
 class RedirectIfAuthenticated
 {
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next, ...$guards)
     {
-        if (Auth::check()) {
-            return redirect()->route('dashboard');
+        foreach ($guards as $guard) {
+
+            if (Auth::guard($guard)->check()) {
+
+                if ($guard === 'admin') {
+                    return redirect()->route('admin-dashboard');
+                }
+
+                return redirect()->route('dashboard'); // normal user
+            }
         }
+
         return $next($request);
     }
 }

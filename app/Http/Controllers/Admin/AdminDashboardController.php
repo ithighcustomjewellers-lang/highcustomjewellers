@@ -134,7 +134,7 @@ class AdminDashboardController extends Controller
     public function adminDestroyUser(Request $request)
     {
 
-        $user = User::where('id', $request->id)->first();
+        $user = User::findOrFail($request->id)->first();
         $user->delete();
 
         return response()->json([
