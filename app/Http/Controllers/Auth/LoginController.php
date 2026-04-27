@@ -84,17 +84,16 @@ class LoginController extends Controller
     }
 
     public function logout(Request $request)
-{
-    Auth::logout(); // logout user
+    {
+        Auth::logout(); // logout user
 
-    $request->session()->invalidate(); // session destroy
-    $request->session()->regenerateToken(); // CSRF refresh
+        $request->session()->invalidate(); // session destroy
+        $request->session()->regenerateToken(); // CSRF refresh
 
-    return response()->json([
-        'status' => true,
-        'message' => 'Logout successful'
-    ]);
-}
-
+        return response()->json([
+            'status' => true,
+            'message' => 'Logout successful'
+        ]);
+    }
 
 }

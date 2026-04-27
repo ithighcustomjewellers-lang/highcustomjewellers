@@ -11,8 +11,8 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthLoginController::class, 'Register'])->name('register-data');
     Route::post('/register', [AuthLoginController::class, 'SubmitRegister'])->name('submit_register');
 
-    Route::get('/login', [AuthLoginController::class, 'Login'])->name('login-data');
-    Route::post('/login', [AuthLoginController::class, 'SubmitLogin'])->name('login');
+    Route::get('/', [AuthLoginController::class, 'Login'])->name('login-data');
+    Route::post('/', [AuthLoginController::class, 'SubmitLogin'])->name('login');
 
     Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotForm'])->name('password.request');
     Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink'])->name('password.email');
