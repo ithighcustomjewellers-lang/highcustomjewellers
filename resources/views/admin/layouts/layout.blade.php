@@ -2,9 +2,11 @@
 <html>
 <head>
     <title>@yield('title')</title>
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- CSS -->
-    <link rel="stylesheet" href="{{ asset('css/admin/layouts.css') }}">
+    <script src="{{ asset('js/jquery.min.js') }}"></script>
+    @include('admin.layouts.main')
+
 </head>
 
 <body>
@@ -16,6 +18,8 @@
         <h4>Admin Panel</h4>
         <a href="{{ route('admin-dashboard') }}">Dashboard</a>
         <a href="{{ route('admin-users-index') }}">Users</a>
+        <a href="{{ route('admin-sequences-create') }}">Master</a>
+         <a href="{{ route('admin-contacts-index') }}">Contacts</a>
     </div>
 
     <!-- Content -->
@@ -44,10 +48,6 @@
     </div>
 </main>
 
-
-<script src="{{ asset('js/jquery.min.js') }}"></script>
-
-@include('admin.layouts.main')
 
 <!-- Common JS -->
 <script>

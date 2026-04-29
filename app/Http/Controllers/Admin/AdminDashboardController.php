@@ -58,13 +58,15 @@ class AdminDashboardController extends Controller
         $draw = $request->input('draw');
 
         // Sorting
-        if ($request->has('order')) {
-            $columnIndex = $request->order[0]['column'];
+        $columnIndex = $request->order[0]['column'];
+
+        if (isset($columns_list[$columnIndex])) {
             $columnName = $columns_list[$columnIndex];
             $columnSortOrder = $request->order[0]['dir'];
 
             $query->orderBy($columnName, $columnSortOrder);
         } else {
+            // fallback
             $query->orderBy('id', 'desc');
         }
 

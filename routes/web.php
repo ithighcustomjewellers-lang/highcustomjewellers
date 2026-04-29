@@ -4,6 +4,9 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Auth\DashboardController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController as AuthLoginController;
+use App\Http\Controllers\CampaignController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\SequenceController;
 use Illuminate\Support\Facades\Route;
 
 // user info
@@ -38,8 +41,24 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::post('/users/update', [AdminDashboardController::class, 'adminUpdateData'])->name('admin-update-data');
 
     Route::delete('/users/destroy', [AdminDashboardController::class, 'adminDestroyUser'])->name('admin-users-destroy');
+
+    Route::get('/sequences', [SequenceController::class, 'sequencesIndex'])->name('admin-sequences-index');
+    Route::get('/sequences/create', [SequenceController::class, 'sequencesCreate'])->name('admin-sequences-create');
+    Route::post('/sequences/store', [SequenceController::class, 'sequencesStore'])->name('admin-sequences-store');
+
+    Route::get('/contacts', [ContactController::class, 'index'])->name('admin-contacts-index');
+    Route::get('/contacts/create', [ContactController::class,'create'])->name('admin-contacts-create');
+    Route::post('/contacts/store', [ContactController::class,'store'])->name('admin-contacts-store');
+    // Route::get('/campaign/start/{id}', [CampaignController::class, 'start'])->name('campaign.start');
 });
 
 Route::post('/logout', [AuthLoginController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
+
+
+
+
+
+
+

@@ -6,7 +6,6 @@
     <div class="container mt-4">
         <div class="card p-4">
             <h4 class="mb-3">User List</h4>
-
             <table id="usersTable" class="table table-bordered table-hover">
                 <thead>
                     <tr>
@@ -27,7 +26,9 @@
         </div>
     </div>
 @endsection
+
 <script src="{{ asset('js/jquery.min.js') }}"></script>
+
 <script>
     $(document).ready(function() {
 
@@ -43,6 +44,15 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 }
             },
+
+            columnDefs: [{
+                targets: 1, // serial column (ID replace)
+                orderable: false,
+                searchable: false,
+                render: function (data, type, row, meta) {
+                    return meta.row + meta.settings._iDisplayStart + 1;
+                }
+            }],
 
             columns: [{
                     data: 'edit',
@@ -84,9 +94,8 @@
             ],
 
             order: [
-                [1, 'desc']
-            ], // ID pe sort (correct)
-
+                [2, 'desc']
+            ],
             pageLength: 10,
             lengthMenu: [10, 25, 50, 100]
         });

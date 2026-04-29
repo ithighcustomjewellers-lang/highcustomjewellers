@@ -19,6 +19,7 @@ class UserMiddleware
             return $next($request);
         }
 
-        abort(403, 'Unauthorized');
+        // abort(403, 'Unauthorized');
+       return redirect()->route('admin-dashboard');
     }
 }
