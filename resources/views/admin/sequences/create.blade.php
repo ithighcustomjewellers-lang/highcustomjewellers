@@ -10,12 +10,12 @@
                 <h4>Add Sequence - Custom Email Designer</h4>
 
                 <!-- IMPORTANT: Added enctype="multipart/form-data" -->
-                <form id="emailForm" action="{{ route('admin-sequences-store') }}" method="POST" enctype="multipart/form-data">
+                <form id="emailForm" method="POST" enctype="multipart/form-data">
                     @csrf
 
-                    <input type="number" name="step" class="form-control mb-2" placeholder="Step (1,2,3)" required>
+                    <input type="number" name="step" id="step" class="form-control mb-2" placeholder="Step (1,2,3)">
 
-                    <input type="text" name="subject" class="form-control mb-2" id="subject" placeholder="Subject" required>
+                    <input type="text" name="subject" class="form-control mb-2" id="subject" placeholder="Subject">
 
                     <!-- Toolbar for Text Formatting -->
                     <div class="toolbar mb-2">
@@ -32,6 +32,7 @@
                         </select>
 
                         <select id="fontSizeSelect" onchange="changeFontSize(this.value)" class="form-control-sm">
+                            <option value="10px">10px</option>
                             <option value="12px">12px</option>
                             <option value="14px">14px</option>
                             <option value="16px" selected>16px</option>
@@ -40,6 +41,8 @@
                             <option value="24px">24px</option>
                             <option value="28px">28px</option>
                             <option value="32px">32px</option>
+                            <option value="34px">34px</option>
+                            <option value="36px">36px</option>
                         </select>
 
                         <select onchange="formatText('foreColor', this.value)" class="form-control-sm">
@@ -50,6 +53,7 @@
                             <option value="#FFA500">Orange</option>
                             <option value="#800080">Purple</option>
                         </select>
+
 
                         <button type="button" onclick="formatText('insertUnorderedList')" class="btn btn-sm btn-outline-secondary">• List</button>
                         <button type="button" onclick="formatText('insertOrderedList')" class="btn btn-sm btn-outline-secondary">1. List</button>
@@ -66,6 +70,7 @@
 
                     <textarea name="message" id="message" style="display:none;"></textarea>
 
+
                     <input type="number" name="gap_days" class="form-control mb-2" placeholder="Gap Days">
 
                     <input type="text" name="variant" class="form-control mb-2" placeholder="Variant (A/B)">
@@ -81,7 +86,7 @@
                         <input type="file" name="hero_image" class="form-control" id="heroImage" accept="image/*" onchange="previewHeroImage(this)">
                         <small class="text-muted">Recommended size: 600x300px. Max 2MB</small>
                         <div id="heroImagePreview" class="mt-2" style="display:none;">
-                            <img id="heroImagePreviewImg" src="" style="max-width: 20%; max-height: 150px; border-radius: 5px;">
+                            <img id="heroImagePreviewImg" src="" style="max-width: 100%; max-height: 150px; border-radius: 5px;">
                             <button type="button" class="btn btn-sm btn-danger mt-1" onclick="removeHeroImage()">Remove Hero Image</button>
                         </div>
                     </div>
@@ -107,7 +112,12 @@
                         <input type="text" name="business_link" class="form-control mb-2" id="businessLink" placeholder="Business Link (https://...)">
                     </div>
 
-                    <button type="submit" class="btn btn-success">Save Sequence</button>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-success">Save Sequence</button>
+                        <a href="{{ route('admin-sequences-index') }}" class="btn btn-secondary">
+                            Back
+                        </a>
+                    </div>
                 </form>
             </div>
         </div>
@@ -154,7 +164,7 @@
     .toolbar {
         padding: 8px;
         background: #f8f9fa;
-        border-radius: 5px;
+        border-radius: 25px;
         border: 1px solid #ddd;
         position: sticky;
         top: 0;
@@ -234,16 +244,7 @@
     }
 </style>
 
-<!-- Modal for Full Preview -->
-<div id="emailModal" class="modal-preview">
-    <div class="modal-preview-content">
-        <span class="close-preview">&times;</span>
-        <h4>Email Preview</h4>
-        <div id="modalEmailContent" class="email-preview-modal">
-            <!-- Modal content will be injected here -->
-        </div>
-    </div>
-</div>
+
 
 <script>
     let currentEditor = document.getElementById('emailEditor');
@@ -331,7 +332,7 @@
 
         // Add hero image ONLY ONCE at the top
         if (currentHeroImage) {
-            previewHtml += `<img src="${currentHeroImage.data}" alt="Hero Image" style="max-width: 20%; border-radius: 8px; margin-bottom: 20px;"><br>`;
+            previewHtml += `<img src="${currentHeroImage.data}" alt="Hero Image" style="max-width: 100%; border-radius: 8px; margin-bottom: 20px;"><br>`;
         }
 
         // Add email content
@@ -377,48 +378,7 @@
         document.getElementById('message').value = currentEditor.innerHTML;
     }
 
-    // Show full preview modal
-    function showFullPreview() {
-        const subject = document.getElementById('subject').value;
-        let content = currentEditor.innerHTML;
 
-        let modalHtml = `<h2 style="color:#333; margin-bottom:20px;">${subject || 'No Subject'}</h2>`;
-
-        if (currentHeroImage) {
-            modalHtml += `<img src="${currentHeroImage.data}" alt="Hero Image" style="max-width: 20%; border-radius: 8px; margin-bottom: 20px;">`;
-        }
-
-        modalHtml += `<div style="font-size: 16px; line-height: 1.6;">${content}</div>`;
-
-        if (currentAttachment) {
-            modalHtml += `<div style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
-                        📎 Attachment: ${currentAttachment.name} (${currentAttachment.size})
-                        </div>`;
-        }
-
-        const whatsapp = document.getElementById('whatsappLink').value;
-        const telegram = document.getElementById('telegramLink').value;
-        const business = document.getElementById('businessLink').value;
-
-        if (whatsapp || telegram || business) {
-            modalHtml += '<div style="margin-top: 20px; padding: 15px; text-align: center; background: #f8f9fa; border-radius: 8px;">';
-
-            if (whatsapp) {
-                modalHtml += `<a href="${whatsapp}" style="background-color:#25D366; color:white; padding:10px 20px; margin:5px; text-decoration:none; border-radius:5px; display:inline-block;">📱 WhatsApp</a>`;
-            }
-            if (telegram) {
-                modalHtml += `<a href="${telegram}" style="background-color:#0088cc; color:white; padding:10px 20px; margin:5px; text-decoration:none; border-radius:5px; display:inline-block;">📨 Telegram</a>`;
-            }
-            if (business) {
-                modalHtml += `<a href="${business}" style="background-color:#007bff; color:white; padding:10px 20px; margin:5px; text-decoration:none; border-radius:5px; display:inline-block;">💼 Business</a>`;
-            }
-
-            modalHtml += '</div>';
-        }
-
-        document.getElementById('modalEmailContent').innerHTML = modalHtml;
-        document.getElementById('emailModal').style.display = 'block';
-    }
 
     // Toggle inline preview
     function toggleInlinePreview() {
@@ -448,27 +408,7 @@
     document.getElementById('telegramLink').addEventListener('input', updatePreview);
     document.getElementById('businessLink').addEventListener('input', updatePreview);
 
-    // Add eye icon to toggle full preview
-    const eyeIcon = document.createElement('button');
-    eyeIcon.innerHTML = '👁️ Full Preview';
-    eyeIcon.className = 'btn btn-sm btn-warning mt-2';
-    eyeIcon.style.marginLeft = '10px';
-    eyeIcon.onclick = showFullPreview;
-    document.querySelector('.email-preview-header').appendChild(eyeIcon);
 
-    // Modal close functionality
-    const modal = document.getElementById('emailModal');
-    const closeBtn = document.getElementsByClassName('close-preview')[0];
-
-    closeBtn.onclick = function() {
-        modal.style.display = 'none';
-    }
-
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
-        }
-    }
 
     // Save content before form submission
     document.getElementById('emailForm').addEventListener('submit', function(e) {
@@ -492,3 +432,80 @@
 </script>
 
 @endsection
+
+
+<script src="{{ asset('js/jquery.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+
+    $('#emailForm').submit(function(e) {
+        e.preventDefault();
+
+        // 🔥 message fix
+        let editorContent = $('#emailEditor').html().trim();
+        $('#message').val(editorContent);
+
+        // 🔥 manual validation
+        if ($('#step').val() == '') {
+            toastr.error('Step is required');
+            return;
+        }
+
+        if ($('#subject').val() == '') {
+            toastr.error('Subject is required');
+            return;
+        }
+
+        if (editorContent === '' || editorContent === '<p><br></p>') {
+            toastr.error('Message is required');
+            return;
+        }
+
+        if ($('input[name="gap_days"]').val() == '') {
+            toastr.error('Gap days is required');
+            return;
+        }
+
+        if ($('input[name="variant"]').val() == '') {
+            toastr.error('variant is required');
+            return;
+        }
+
+        var formData = new FormData(this);
+
+        $.ajax({
+            url: '{{ route('admin-sequences-store') }}',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+
+            success: function(response) {
+                toastr.success(response.message);
+
+                $('#emailForm')[0].reset();
+                $('#emailEditor').html('<p>Start typing your email here...</p>');
+            },
+
+            error: function(xhr) {
+
+                if (xhr.status === 422) {
+                    let errors = xhr.responseJSON.errors;
+
+                    $.each(errors, function(key, value) {
+                        toastr.error(value[0]);
+                    });
+
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    toastr.error(xhr.responseJSON.message);
+
+                } else {
+                    toastr.error('Something went wrong ❌');
+                }
+            }
+        });
+
+    });
+
+});
+</script>

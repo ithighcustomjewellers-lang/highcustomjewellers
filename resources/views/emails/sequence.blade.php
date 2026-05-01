@@ -57,9 +57,9 @@
 <body>
     <div class="container">
         {{-- Hero Image (if exists) --}}
-            {{-- @if($sequence->hero_image && file_exists(public_path($sequence->hero_image)))
+            @if($sequence->hero_image && file_exists(public_path($sequence->hero_image)))
                 <img src="{{ asset($sequence->hero_image) }}" class="hero-image" alt="Hero Image">
-            @endif --}}
+            @endif
 
         <div class="content">
             {{-- Hello message --}}

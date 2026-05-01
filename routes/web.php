@@ -42,14 +42,21 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
     Route::delete('/users/destroy', [AdminDashboardController::class, 'adminDestroyUser'])->name('admin-users-destroy');
 
+    Route::get('/profile', [AdminDashboardController::class, 'adminProfile'])->name('admin-profile');
+    Route::post('/admin-submit', [AdminDashboardController::class, 'adminUpdateDataUpdate'])->name('admin-submit-profile-update');
+
     Route::get('/sequences', [SequenceController::class, 'sequencesIndex'])->name('admin-sequences-index');
     Route::get('/sequences/create', [SequenceController::class, 'sequencesCreate'])->name('admin-sequences-create');
     Route::post('/sequences/store', [SequenceController::class, 'sequencesStore'])->name('admin-sequences-store');
+    Route::post('/admin/sequences-data', [SequenceController::class, 'AdminGetSequences'])->name('admin-sequences-data');
+    Route::get('/admin/sequences-edit/{id}', [SequenceController::class, 'edit'])->name('admin-sequences-edit');
 
     Route::get('/contacts', [ContactController::class, 'index'])->name('admin-contacts-index');
     Route::get('/contacts/create', [ContactController::class,'create'])->name('admin-contacts-create');
     Route::post('/contacts/store', [ContactController::class,'store'])->name('admin-contacts-store');
     // Route::get('/campaign/start/{id}', [CampaignController::class, 'start'])->name('campaign.start');
+
+    Route::get('/admin/sequences-details/{id}', [SequenceController::class, 'getSequenceDetails'])->name('admin-sequences-details');
 });
 
 Route::post('/logout', [AuthLoginController::class, 'logout'])

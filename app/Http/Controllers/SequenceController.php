@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Sequence;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use App\Models\CampaignLog;
+use App\Jobs\SendCampaignJob;
+use App\Models\Contact;
 
 class SequenceController extends Controller
 {
@@ -22,21 +25,19 @@ class SequenceController extends Controller
         return view('admin.sequences.create');
     }
 
-    // Store data
     public function sequencesStore(Request $request)
     {
-        // Log incoming request for debugging
+        // 🔍 Debug log
         Log::info('Store sequence request received', [
-            'all_data' => $request->all(),
-            'has_hero_image' => $request->hasFile('hero_image'),
-            'has_attachment' => $request->hasFile('attachments_image')
+            'data' => $request->all()
         ]);
 
+        // ✅ VALIDATION
         $request->validate([
             'step' => 'required|integer',
             'subject' => 'required|string',
             'message' => 'required|string',
-            'gap_days' => 'nullable|integer',
+            'gap_days' => 'required|integer',
             'variant' => 'nullable|string',
             'type' => 'required|in:B2B,B2C',
             'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -47,59 +48,263 @@ class SequenceController extends Controller
         ]);
 
         $data = $request->except(['hero_image', 'attachments_image']);
-        // Handle hero image upload with unique filename
+
+        // =========================
+        // ✅ HERO IMAGE UPLOAD
+        // =========================
         if ($request->hasFile('hero_image')) {
 
             $file = $request->file('hero_image');
-
             $filename = time() . '_hero_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
             $destination = public_path('hero_image');
 
-            // folder create if not exists
             if (!file_exists($destination)) {
                 mkdir($destination, 0777, true);
             }
 
             $file->move($destination, $filename);
 
-            // save path in DB
             $data['hero_image'] = 'hero_image/' . $filename;
         }
 
-        // ✅ ATTACHMENT IMAGE UPLOAD
+        // =========================
+        // ✅ ATTACHMENT UPLOAD
+        // =========================
         if ($request->hasFile('attachments_image')) {
+
             $file = $request->file('attachments_image');
 
-            // ✅ Get name and size BEFORE moving
             $originalName = $file->getClientOriginalName();
-            $fileSize = $file->getSize();  // Works before move
+            $fileSize = $file->getSize();
 
-            // Generate unique filename
             $filename = date('Ymd_His') . '_attach_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
             $destination = public_path('attachments_image');
 
             if (!file_exists($destination)) {
                 mkdir($destination, 0777, true);
             }
 
-            // Move the file
             $file->move($destination, $filename);
 
-            // Save to database
             $data['attachments_image'] = 'attachments_image/' . $filename;
             $data['attachment_name'] = $originalName;
-            $data['attachment_size'] = $fileSize;  // Now it's safe
+            $data['attachment_size'] = $fileSize;
         }
 
+        // =========================
+        // ✅ MAIN LOGIC
+        // =========================
         try {
+
+            // 🔥 STEP SAVE
             $sequence = Sequence::create($data);
-            Log::info('Sequence created successfully', ['id' => $sequence->id]);
-            return redirect()->back()->with('success', 'Sequence added successfully!');
+
+            // 🔥 all contacts of same type
+            $contacts = Contact::whereRaw('UPPER(type) = ?', [strtoupper($sequence->type)])
+                ->get();
+
+            foreach ($contacts as $contact) {
+
+                // ❌ duplicate check
+                $alreadySent = CampaignLog::where('contact_id', $contact->id)
+                    ->where('sequence_id', $sequence->id)
+                    ->exists();
+
+                if ($alreadySent) continue;
+
+                // 🔥 cumulative gap
+                $totalGap = Sequence::where('type', $sequence->type)
+                    ->where('step', '<=', $sequence->step)
+                    ->sum('gap_days');
+
+                $delay = now()->addDays((int) $totalGap);
+
+                SendCampaignJob::dispatch($contact, $sequence)
+                    ->delay($delay);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Sequence added & scheduled 🚀'
+            ]);
         } catch (\Exception $e) {
-            Log::error('Error creating sequence', ['error' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Error saving sequence: ' . $e->getMessage());
+
+            Log::error('Sequence error', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 
+    public function AdminGetSequences(Request $request)
+    {
+        $columns_list = [
+            0 => 'id',
+            1 => 'step',
+            2 => 'subject',
+            3 => 'type',
+            4 => 'gap_days',
+            5 => 'variant',
+            6 => 'created_at',
+            7 => 'updated_at'
+        ];
+
+        $query = Sequence::query();
+
+        // Total records BEFORE search
+        $totalData = $query->count();
+
+        // Search filter
+        if ($request->has('search') && $request->search['value'] != '') {
+            $searchValue = $request->search['value'];
+            $query->where(function ($q) use ($searchValue) {
+                $q->where('subject', 'LIKE', "%$searchValue%")
+                    ->orWhere('step', 'LIKE', "%$searchValue%")
+                    ->orWhere('type', 'LIKE', "%$searchValue%")
+                    ->orWhere('variant', 'LIKE', "%$searchValue%");
+            });
+        }
+
+        // Total AFTER search
+        $totalFiltered = $query->count();
+
+        // Pagination
+        $limit = $request->input('length', 10);
+        $start = $request->input('start', 0);
+        $draw = $request->input('draw', 1);
+
+        // Sorting
+        $orderColumnIndex = $request->input('order.0.column', 0);
+        $orderDir = $request->input('order.0.dir', 'desc');
+
+        if (isset($columns_list[$orderColumnIndex])) {
+            $query->orderBy($columns_list[$orderColumnIndex], $orderDir);
+        } else {
+            $query->orderBy('id', 'desc');
+        }
+
+        $sequences = $query->offset($start)->limit($limit)->get();
+
+        $data = [];
+
+        foreach ($sequences as $seq) {
+            $row = [];
+
+            // Edit button (first column)
+            $row['view'] = '<button class="btn btn-sm btn-info" onclick="viewSequence(' . $seq->id . ')">👁️ View</button>';
+            $row['edit'] = '<a href="' . route('admin-sequences-edit', $seq->id) . '" class="btn btn-sm btn-primary">Edit</a>';
+            $row['id'] = $seq->id;
+            $row['step'] = $seq->step;
+            $row['subject'] = $seq->subject;
+            $row['type'] = $seq->type;
+            $row['gap_days'] = $seq->gap_days ?? '-';
+            $row['variant'] = $seq->variant ?? '-';
+            $row['created_at'] = date('Y-m-d', strtotime($seq->created_at));
+            $row['updated_at'] = date('Y-m-d', strtotime($seq->updated_at));
+
+            // Delete button (last column)
+            $row['delete'] = '<button onclick="deleteSequence(' . $seq->id . ')" class="btn btn-sm btn-danger">Delete</button>';
+
+            $data[] = $row;
+        }
+
+        return response()->json([
+            'draw' => intval($draw),
+            'recordsTotal' => intval($totalData),
+            'recordsFiltered' => intval($totalFiltered),
+            'data' => $data
+        ]);
+    }
+
+
+    public function getSequenceDetails(Request $request) {}
+
+
+    // public function sequencesStore(Request $request)
+    // {
+    //     // Log incoming request for debugging
+    //     Log::info('Store sequence request received', [
+    //         'all_data' => $request->all(),
+    //         'has_hero_image' => $request->hasFile('hero_image'),
+    //         'has_attachment' => $request->hasFile('attachments_image')
+    //     ]);
+
+    //     $request->validate([
+    //         'step' => 'required|integer',
+    //         'subject' => 'required|string',
+    //         'message' => 'required|string',
+    //         'gap_days' => 'nullable|integer',
+    //         'variant' => 'nullable|string',
+    //         'type' => 'required|in:B2B,B2C',
+    //         'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    //         'attachments_image' => 'nullable|file|max:5120',
+    //         'whatsapp_link' => 'nullable|url',
+    //         'telegram_link' => 'nullable|url',
+    //         'business_link' => 'nullable|url'
+    //     ]);
+
+    //     $data = $request->except(['hero_image', 'attachments_image']);
+    //     // Handle hero image upload with unique filename
+    //     if ($request->hasFile('hero_image')) {
+
+    //         $file = $request->file('hero_image');
+
+    //         $filename = time() . '_hero_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+    //         // 👇 public_html me save
+    //         $destination = base_path('../public_html/hero_image');
+
+    //         if (!file_exists($destination)) {
+    //             mkdir($destination, 0777, true);
+    //         }
+
+    //         $file->move($destination, $filename);
+
+    //         $data['hero_image'] = 'hero_image/' . $filename;
+    //     }
+
+    //     // ✅ ATTACHMENT IMAGE UPLOAD
+    //     if ($request->hasFile('attachments_image')) {
+
+    //         $file = $request->file('attachments_image');
+
+    //         // ✅ name & size
+    //         $originalName = $file->getClientOriginalName();
+    //         $fileSize = $file->getSize();
+
+    //         // ✅ unique filename
+    //         $filename = date('Ymd_His') . '_attach_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+    //         // ✅ IMPORTANT: public_html path
+    //         $destination = base_path('../public_html/attachments_image');
+
+    //         // folder create
+    //         if (!file_exists($destination)) {
+    //             mkdir($destination, 0777, true);
+    //         }
+
+    //         // move file
+    //         $file->move($destination, $filename);
+
+    //         // save DB
+    //         $data['attachments_image'] = 'attachments_image/' . $filename;
+    //         $data['attachment_name'] = $originalName;
+    //         $data['attachment_size'] = $fileSize;
+    //     }
+
+    //     try {
+    //         $sequence = Sequence::create($data);
+    //         Log::info('Sequence created successfully', ['id' => $sequence->id]);
+    //         return redirect()->back()->with('success', 'Sequence added successfully!');
+    //     } catch (\Exception $e) {
+    //         Log::error('Error creating sequence', ['error' => $e->getMessage()]);
+    //         return redirect()->back()->with('error', 'Error saving sequence: ' . $e->getMessage());
+    //     }
+    // }
 }

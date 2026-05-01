@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Contact;
 use App\Models\Sequence;
+use App\Models\CampaignLog;
 use App\Jobs\SendCampaignJob;
 
 class CampaignController extends Controller
@@ -13,22 +14,27 @@ class CampaignController extends Controller
     {
         $contact = Contact::findOrFail($id);
 
-        // 👉 user type ke hisab se sequence
-        $sequences = Sequence::where('type', $contact->type)
-            ->orderBy('id')
+        $sequences = Sequence::whereRaw('UPPER(type) = ?', [strtoupper($contact->type)])
+            ->orderBy('step')
             ->get();
+
+        $delay = now();
 
         foreach ($sequences as $sequence) {
 
-            // ⏱️ delay calculate
-            $delay = now()->addDays($sequence->gap_days);
+            $alreadySent = CampaignLog::where('contact_id', $contact->id)
+                ->where('sequence_id', $sequence->id)
+                ->exists();
 
-            // 🚀 job dispatch
-            dispatch( (new SendCampaignJob($contact, $sequence))
-                    ->delay($delay)
-            );
+            if ($alreadySent) continue;
+
+            // cumulative delay
+            $delay = $delay->copy()->addDays((int) $sequence->gap_days);
+
+            SendCampaignJob::dispatch($contact, $sequence)
+                ->delay($delay);
         }
 
-        return "Campaign Started for " . $contact->name;
+        return "Campaign Started";
     }
 }

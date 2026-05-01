@@ -66,4 +66,6 @@ class DashboardController extends Controller
             'message' => 'Profile updated successfully'
         ]);
     }
+
+
 }

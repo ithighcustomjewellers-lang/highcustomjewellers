@@ -10,7 +10,7 @@ class Contact extends Model
         'name',
         'email',
         'company_name',
-        'type'
+        'type',
     ];
 
      // 🔗 relation with logs

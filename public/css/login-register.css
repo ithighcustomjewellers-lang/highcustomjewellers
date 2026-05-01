@@ -9,10 +9,11 @@
 /* Body */
 body {
   min-height: 100vh;
-  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  background: url('../login-logo/logo.jpg');
   display: flex;
   align-items: center;
   justify-content: center;
+  background-size: cover;
 }
 
 /* Blur Background */
@@ -27,7 +28,7 @@ body {
 /* Popup Container */
 .form-popup {
   position: relative;
-  width: 850px;
+  width: 500px;
   max-width: 95%;
   background: #fff;
   border-radius: 12px;
@@ -56,12 +57,12 @@ body {
 /* Left Side */
 .form-details {
   width: 50%;
-  background: linear-gradient(135deg, #6a11cb, #2575fc);
   color: #fff;
   padding: 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
 }
 
 .form-details h2 {
@@ -78,6 +79,7 @@ body {
 .form-content {
   width: 100%;
   padding: 40px;
+  background-color: rgb(179 61 125 / 39%);
 }
 
 .form-content h2 {
