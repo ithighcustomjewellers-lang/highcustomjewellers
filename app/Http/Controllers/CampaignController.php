@@ -31,8 +31,11 @@ class CampaignController extends Controller
             // cumulative delay
             $delay = $delay->copy()->addDays((int) $sequence->gap_days);
 
-            SendCampaignJob::dispatch($contact, $sequence)
-                ->delay($delay);
+            // SendCampaignJob::dispatch($contact, $sequence)
+            //     ->delay($delay);
+
+            SendCampaignJob::dispatch($contact, $sequence, auth()->id())
+            ->delay($delay);
         }
 
         return "Campaign Started";

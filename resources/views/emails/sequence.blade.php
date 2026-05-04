@@ -75,7 +75,7 @@
                     📎 <strong>{{ $sequence->attachment_name ?? 'Attachment' }}</strong>
                     ({{ round(($sequence->attachment_size ?? 0) / 1024) }} KB)
                     <br>
-                    <a href="{{ asset($sequence->attachments_image) }}" download>⬇️ Download</a>
+                    <a href="{{ asset($sequence->attachments_image) }}" download>⬇️ Show</a>
                 </div>
             @endif
         </div>

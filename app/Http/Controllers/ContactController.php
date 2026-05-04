@@ -46,6 +46,8 @@ class ContactController extends Controller
 
             app(CampaignController::class)->start($contact->id);
 
+
+
             DB::commit();
 
             return response()->json([

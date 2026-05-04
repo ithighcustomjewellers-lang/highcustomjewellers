@@ -29,6 +29,8 @@ class User extends Authenticatable
         'password',
         'user_code',
         'is_admin',
+        'gmail_token',
+        'gmail_refresh_token',
     ];
 
     /**

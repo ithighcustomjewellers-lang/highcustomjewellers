@@ -25,20 +25,133 @@ class SequenceController extends Controller
         return view('admin.sequences.create');
     }
 
+    // public function sequencesStore(Request $request)
+    // {
+    //     // 🔍 Debug log
+    //     Log::info('Store sequence request received', [
+    //         'data' => $request->all()
+    //     ]);
+
+    //     // ✅ VALIDATION
+    //     $request->validate([
+    //         'step' => 'required|integer',
+    //         'subject' => 'required|string',
+    //         'message' => 'required|string',
+    //         'gap_days' => 'required|integer',
+    //         'variant' => 'nullable|string',
+    //         'type' => 'required|in:B2B,B2C',
+    //         'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    //         'attachments_image' => 'nullable|file|max:5120',
+    //         'whatsapp_link' => 'nullable|url',
+    //         'telegram_link' => 'nullable|url',
+    //         'business_link' => 'nullable|url'
+    //     ]);
+
+    //     $data = $request->except(['hero_image', 'attachments_image']);
+
+    //     // =========================
+    //     // ✅ HERO IMAGE UPLOAD
+    //     // =========================
+    //     if ($request->hasFile('hero_image')) {
+
+    //         $file = $request->file('hero_image');
+    //         $filename = time() . '_hero_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+    //         $destination = public_path('hero_image');
+
+    //         if (!file_exists($destination)) {
+    //             mkdir($destination, 0777, true);
+    //         }
+
+    //         $file->move($destination, $filename);
+
+    //         $data['hero_image'] = 'hero_image/' . $filename;
+    //     }
+
+    //     // =========================
+    //     // ✅ ATTACHMENT UPLOAD
+    //     // =========================
+    //     if ($request->hasFile('attachments_image')) {
+
+    //         $file = $request->file('attachments_image');
+
+    //         $originalName = $file->getClientOriginalName();
+    //         $fileSize = $file->getSize();
+
+    //         $filename = date('Ymd_His') . '_attach_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+    //         $destination = public_path('attachments_image');
+
+    //         if (!file_exists($destination)) {
+    //             mkdir($destination, 0777, true);
+    //         }
+
+    //         $file->move($destination, $filename);
+
+    //         $data['attachments_image'] = 'attachments_image/' . $filename;
+    //         $data['attachment_name'] = $originalName;
+    //         $data['attachment_size'] = $fileSize;
+    //     }
+
+    //     // =========================
+    //     // ✅ MAIN LOGIC
+    //     // =========================
+    //     try {
+
+    //         // 🔥 STEP SAVE
+    //         $sequence = Sequence::create($data);
+
+    //         // 🔥 all contacts of same type
+    //         $contacts = Contact::whereRaw('UPPER(type) = ?', [strtoupper($sequence->type)])
+    //             ->get();
+
+    //         foreach ($contacts as $contact) {
+
+    //             // ❌ duplicate check
+    //             $alreadySent = CampaignLog::where('contact_id', $contact->id)
+    //                 ->where('sequence_id', $sequence->id)
+    //                 ->exists();
+
+    //             if ($alreadySent) continue;
+
+    //             $delay = now()->addDays($sequence->gap_days);
+
+    //             SendCampaignJob::dispatch($contact, $sequence)
+    //                 ->delay($delay);
+    //         }
+
+    //         return response()->json([
+    //             'status' => true,
+    //             'message' => 'Sequence added & scheduled 🚀'
+    //         ]);
+    //     } catch (\Exception $e) {
+
+    //         Log::error('Sequence error', [
+    //             'error' => $e->getMessage()
+    //         ]);
+
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     public function sequencesStore(Request $request)
     {
-        // 🔍 Debug log
         Log::info('Store sequence request received', [
             'data' => $request->all()
         ]);
 
+        // =========================
         // ✅ VALIDATION
+        // =========================
         $request->validate([
             'step' => 'required|integer',
             'subject' => 'required|string',
             'message' => 'required|string',
             'gap_days' => 'required|integer',
-            'variant' => 'nullable|string',
+            'variant' => 'nullable|string|regex:/^[A-Za-z]+$/',
             'type' => 'required|in:B2B,B2C',
             'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'attachments_image' => 'nullable|file|max:5120',
@@ -47,7 +160,37 @@ class SequenceController extends Controller
             'business_link' => 'nullable|url'
         ]);
 
+        // normalize type (important)
+        $type = strtoupper($request->type);
+
+        // =========================
+        // ❌ DUPLICATE CHECK
+        // =========================
+        $exists = Sequence::where('step', $request->step)
+            ->where('gap_days', $request->gap_days)
+            ->whereRaw('UPPER(type) = ?', [$type])
+            ->where(function ($q) use ($request) {
+                if ($request->variant) {
+                    $q->where('variant', $request->variant);
+                } else {
+                    $q->whereNull('variant');
+                }
+            })
+            ->exists();
+
+       if ($exists) {
+            return response()->json([
+                'errors' => [
+                    'step' => ['Step already exists ❌']
+                ]
+            ], 422);
+        }
+
+        // =========================
+        // 📦 PREPARE DATA
+        // =========================
         $data = $request->except(['hero_image', 'attachments_image']);
+        $data['type'] = $type;
 
         // =========================
         // ✅ HERO IMAGE UPLOAD
@@ -94,35 +237,34 @@ class SequenceController extends Controller
         }
 
         // =========================
-        // ✅ MAIN LOGIC
+        // 🚀 MAIN LOGIC
         // =========================
         try {
 
-            // 🔥 STEP SAVE
+            // ✅ CREATE SEQUENCE
             $sequence = Sequence::create($data);
 
-            // 🔥 all contacts of same type
-            $contacts = Contact::whereRaw('UPPER(type) = ?', [strtoupper($sequence->type)])
-                ->get();
+            // ✅ GET CONTACTS (TYPE BASED)
+            $contacts = Contact::whereRaw('UPPER(type) = ?', [$type])->get();
 
             foreach ($contacts as $contact) {
 
-                // ❌ duplicate check
+                // ❌ prevent duplicate job
                 $alreadySent = CampaignLog::where('contact_id', $contact->id)
                     ->where('sequence_id', $sequence->id)
                     ->exists();
 
                 if ($alreadySent) continue;
 
-                // 🔥 cumulative gap
-                $totalGap = Sequence::where('type', $sequence->type)
-                    ->where('step', '<=', $sequence->step)
-                    ->sum('gap_days');
+                // ✅ DIRECT GAP (NO SUM)
+                $delay = now()->addDays((int) $sequence->gap_days);
 
-                $delay = now()->addDays((int) $totalGap);
+                // 🚀 DISPATCH JOB
+                // SendCampaignJob::dispatch($contact, $sequence)
+                //     ->delay($delay);
 
-                SendCampaignJob::dispatch($contact, $sequence)
-                    ->delay($delay);
+                SendCampaignJob::dispatch($contact, $sequence, auth()->id())
+                ->delay($delay);
             }
 
             return response()->json([

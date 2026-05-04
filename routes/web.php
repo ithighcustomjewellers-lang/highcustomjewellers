@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController as AuthLoginController;
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\SequenceController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,9 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'Dashboard'])->name('dashboard');
     Route::get('/user-profile', [DashboardController::class, 'UserProfile'])->name('user-profile');
     Route::post('/submit-profile-update', [DashboardController::class, 'submitProfileUpdate'])->name('submit-profile-update');
+
+    Route::get('/connect-gmail', [GoogleController::class, 'redirect']);
+    Route::get('/google/callback', [GoogleController::class, 'callback']);
 });
 
 // admin info
@@ -55,6 +59,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/contacts/create', [ContactController::class,'create'])->name('admin-contacts-create');
     Route::post('/contacts/store', [ContactController::class,'store'])->name('admin-contacts-store');
     // Route::get('/campaign/start/{id}', [CampaignController::class, 'start'])->name('campaign.start');
+
+
 
     Route::get('/admin/sequences-details/{id}', [SequenceController::class, 'getSequenceDetails'])->name('admin-sequences-details');
 });

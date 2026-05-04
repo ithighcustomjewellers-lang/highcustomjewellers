@@ -106,6 +106,9 @@
 
             <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="{{ route('user-profile') }}">Profile</a></li>
+                <li>
+                    <a class="dropdown-item" href="{{ url('/connect-gmail') }}">Connect Gmail</a>
+                </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <a class="dropdown-item text-danger" href="#" id="logoutBtn">Logout</a>

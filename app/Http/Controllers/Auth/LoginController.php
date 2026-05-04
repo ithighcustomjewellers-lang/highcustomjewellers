@@ -21,10 +21,10 @@ class LoginController extends Controller
     {
         // 1. VALIDATE FIRST
         $validator = Validator::make($request->all(), [
-            'firstname' => 'required|string|max:50',
-            'lastname'  => 'required|string|max:50',
+            'first_name' => 'required|string|max:50',
+            'last_name'  => 'required|string|max:50',
             'email'     => 'required|email|unique:users,email',
-            'phone'     => 'required|digits:10',
+            'phone' => 'required|string|regex:/^\+[1-9]\d{6,14}$/',
             'password'  => 'required|min:8|confirmed',
         ]);
 
@@ -37,12 +37,12 @@ class LoginController extends Controller
 
         // 2. SAVE USER (ONLY AFTER VALIDATION PASSES)
         $user = User::create([
-            'name' => $request->firstname,
-            'lastname'  => $request->lastname,
+            'name' => $request->first_name,
+            'lastname'  => $request->last_name,
             'email'     => $request->email,
             'mobile'     => $request->phone,
             'password'  => Hash::make($request->password),
-            'user_code' => 'HC' . now()->format('mYHis'),
+            'user_code' => $request->employee_code,
         ]);
 
         // 3. SUCCESS RESPONSE
@@ -60,6 +60,7 @@ class LoginController extends Controller
 
     public function SubmitLogin(Request $request)
     {
+
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
