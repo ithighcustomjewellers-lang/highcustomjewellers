@@ -299,8 +299,8 @@
                 $('#password_error').text('Password is required.');
                 $('#password').addClass('has-error');
                 isValid = false;
-            } else if (password.length < 6) {
-                $('#password_error').text('Password must be at least 6 characters.');
+            } else if (password.length < 8) {
+                $('#password_error').text('Password must be at least 8 characters.');
                 $('#password').addClass('has-error');
                 isValid = false;
             } else if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {

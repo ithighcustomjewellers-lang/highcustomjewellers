@@ -24,19 +24,17 @@ class DashboardController extends Controller
     public function submitProfileUpdate(Request $request)
     {
         $request->validate([
-            'name'   => 'required|string|max:255',
-            'email'  => 'required|email|unique:users,email,' . Auth::id(),
-            'phone'  => 'required|digits:10',
+            'first_name'   => 'required|string|max:255',
+            'last_name'   => 'required|string|max:255',
+            'phone' => 'required|string|regex:/^\+[1-9]\d{6,14}$/',
             'image'  => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
         ]);
 
         $user = Auth::user();
 
-        // ✅ Basic update
-        $user->name   = $request->name;
-        $user->lastname = $request->lastname;
-        $user->email  = $request->email;
-        $user->mobile = $request->phone;
+        $user->name     = $request->first_name;
+        $user->lastname = $request->last_name;
+        $user->mobile   = $request->phone;
 
         // ✅ Password update
         if ($request->filled('password')) {
@@ -44,14 +42,14 @@ class DashboardController extends Controller
         }
 
         // ✅ Image upload
-        if ($request->hasFile('image')) {
+        if ($request->hasFile('user_image')) {
 
             // delete old image (optional)
             if ($user->image && file_exists(public_path($user->image))) {
                 unlink(public_path($user->image));
             }
 
-            $file = $request->file('image');
+            $file = $request->file('user_image');
             $filename = time() . '.' . $file->getClientOriginalExtension();
 
             $file->move(public_path('uploads/users'), $filename);

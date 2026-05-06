@@ -31,6 +31,9 @@ class User extends Authenticatable
         'is_admin',
         'gmail_token',
         'gmail_refresh_token',
+        'app_rights',
+        'access_rights',
+        'status'
     ];
 
     /**

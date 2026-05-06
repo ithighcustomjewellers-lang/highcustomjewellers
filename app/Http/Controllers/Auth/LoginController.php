@@ -60,13 +60,21 @@ class LoginController extends Controller
 
     public function SubmitLogin(Request $request)
     {
-
         $request->validate([
-            'email' => 'required|email',
+            'login' => 'required',
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($request->only('email', 'password'))) {
+        // 🔥 Detect Email or User Code
+        $fieldType = filter_var($request->login, FILTER_VALIDATE_EMAIL)
+            ? 'email'
+            : 'user_code';
+
+        if (Auth::attempt([
+            $fieldType => $request->login,
+            'password' => $request->password,
+            'status' => 'active'
+        ])) {
 
             $request->session()->regenerate();
 
@@ -74,13 +82,24 @@ class LoginController extends Controller
 
             return response()->json([
                 'status' => true,
+                'message' => 'Login successful ✅',
                 'role' => $user->is_admin ? 'admin' : 'user'
             ]);
         }
 
+           // ❗ Better message handling
+            $user = User::where($fieldType, $request->login)->first();
+
+            if ($user && $user->status !== 'active') {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Your account is inactive. Please wait until the admin activates it.'
+                ], 403);
+            }
+
         return response()->json([
             'status' => false,
-            'message' => 'Invalid credentials'
+            'message' => 'Invalid credentials ❌'
         ], 401);
     }
 
@@ -96,6 +115,4 @@ class LoginController extends Controller
             'message' => 'Logout successful'
         ]);
     }
-
-
 }
