@@ -34,10 +34,18 @@ class UserController extends Controller
 
         $query = User::query();
 
-        // Filter inactive
-        if ($request->has('filter_inactive') && $request->filter_inactive == 1) {
+        // // Filter inactive
+        // if ($request->has('filter_inactive') && $request->filter_inactive == 1) {
+        //     $query->where('status', 'inactive');
+        // }
+
+        $filterStatus = $request->input('filter_status', 'active');
+        if ($filterStatus == 'active') {
+            $query->where('status', 'active');
+        } elseif ($filterStatus == 'inactive') {
             $query->where('status', 'inactive');
         }
+
 
         // Global search
         if ($request->has('global_search') && !empty($request->global_search)) {
@@ -50,16 +58,16 @@ class UserController extends Controller
                     ->orWhere('user_code', 'LIKE', "%{$search}%");
             });
         }
-        if ($request->has('search') && !empty($request->search['value'])) {
-            $search = $request->search['value'];
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('lastname', 'LIKE', "%{$search}%")
-                    ->orWhere('email', 'LIKE', "%{$search}%")
-                    ->orWhere('mobile', 'LIKE', "%{$search}%")
-                    ->orWhere('user_code', 'LIKE', "%{$search}%");
-            });
-        }
+        // if ($request->has('search') && !empty($request->search['value'])) {
+        //     $search = $request->search['value'];
+        //     $query->where(function ($q) use ($search) {
+        //         $q->where('name', 'LIKE', "%{$search}%")
+        //             ->orWhere('lastname', 'LIKE', "%{$search}%")
+        //             ->orWhere('email', 'LIKE', "%{$search}%")
+        //             ->orWhere('mobile', 'LIKE', "%{$search}%")
+        //             ->orWhere('user_code', 'LIKE', "%{$search}%");
+        //     });
+        // }
 
         $totalData = $query->count();
         $totalFiltered = $totalData;
@@ -94,6 +102,7 @@ class UserController extends Controller
 
         $data_val = [];
         foreach ($users as $user) {
+            $imageUrl = $user->user_image ? asset($user->user_image) : asset('images/user-icon.jpg');
             $appRights = json_decode($user->app_rights ?? '[]', true);
             $accessRights = json_decode($user->access_rights ?? '[]', true);
             $isSuperAdmin = ($user->is_admin == 1);
@@ -116,10 +125,15 @@ class UserController extends Controller
             $row = [];
             $row['edit'] = $isSuperAdmin
                 ? '<button class="btn btn-sm btn-secondary" disabled><i class="fas fa-edit"></i> Edit</button>'
-                : '<button class="btn btn-sm btn-outline-primary edit-user-btn" data-id="' . $user->id . '"><i class="fas fa-edit"></i></button>';
+                : '<a href="' . route('admin-users-edit', $user->id) . '"class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>';
 
             $row['user_code'] = $user->user_code ?? 'E' . str_pad($user->id, 3, '0', STR_PAD_LEFT);
-            $row['fullname'] = e($user->name . ' ' . $user->lastname);
+            $row['fullname'] = '
+                <div class="d-flex align-items-center">
+                    <img src="' . $imageUrl . '" class="profile-img-sm me-2">
+                    <span>' . e($user->name . ' ' . $user->lastname) . '</span>
+                </div>
+            ';
             $row['mobile'] = e($user->mobile);
             $row['email'] = e($user->email);
             $row['is_admin'] = $isSuperAdmin ? '<span class="badge bg-danger">Admin</span>' : '<span class="badge bg-secondary">User</span>';
@@ -177,11 +191,7 @@ class UserController extends Controller
         return response()->json(['message' => 'User created successfully']);
     }
 
-    public function edit(Request $request)
-    {
-        $user = User::findOrFail($request->id);
-        return response()->json($user);
-    }
+
 
     public function update(Request $request)
     {
@@ -242,19 +252,19 @@ class UserController extends Controller
                     ->orWhere('email', 'like', '%' . $request->global_search . '%');
             });
         }
-        if ($request->filter_inactive) $query->where('is_active', 0);
+
+        // $query->where('is_admin', 0);
         $users = $query->get();
+
         $csv = fopen('php://temp', 'w+');
-        fputcsv($csv, ['User Code', 'Full Name', 'Mobile', 'Email', 'App Rights', 'Access Rights', 'Status']);
+        fputcsv($csv, ['User Code', 'Full Name', 'Mobile', 'Email', 'Status']);
         foreach ($users as $user) {
             fputcsv($csv, [
                 $user->user_code,
                 $user->name . ' ' . $user->lastname,
                 $user->mobile,
                 $user->email,
-                implode(',', json_decode($user->app_rights ?? '[]')),
-                implode(',', json_decode($user->access_rights ?? '[]')),
-                $user->is_active ? 'Active' : 'Inactive'
+                $user->status
             ]);
         }
         rewind($csv);
@@ -268,6 +278,38 @@ class UserController extends Controller
     public function printCard()
     {
         $users = User::all();
-        return view('admin.users.print_cards', compact('users'));
+        return view('admin.users.print-card', compact('users'));
+    }
+
+    public function editUserData($id)
+    {
+        $user = User::findOrFail($id);
+        return view('admin.users.edit', compact('user'));
+    }
+
+    public function updateUserData(Request $request)
+    {
+        $request->validate([
+            'name'   => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'email'  => 'required|email|unique:users,email,' . $request->id,
+            'phone' => 'required|string|regex:/^\+[1-9]\d{6,14}$/',
+            'user_code' => 'nullable|unique:users,user_code,' . $request->id,
+        ]);
+
+        $user = User::findOrFail($request->id);
+
+        $user->update([
+            'name' => $request->name,
+            'lastname' => $request->lastname,
+            'email' => $request->email,
+            'mobile' => $request->phone,
+            'user_code' => $request->user_code,
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'User updated successfully'
+        ]);
     }
 }

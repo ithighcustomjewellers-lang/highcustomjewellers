@@ -13,22 +13,32 @@
                 <div class="row">
                     <div class="col-md-6 mb-3 input-field">
                         <label>Name</label>
-                        <input type="text" name="name" id="name" value="{{ $user->name }}" class="form-control">
+                        <input type="text" name="name" id="name" value="{{ $user->name }}" class="form-control"
+                            placeholder="First Name">
                     </div>
 
                     <div class="col-md-6 mb-3 input-field">
                         <label>Last Name</label>
-                        <input type="text" name="lastname" id="lastname" value="{{ $user->lastname }}" class="form-control">
+                        <input type="text" name="lastname" id="lastname" value="{{ $user->lastname }}"
+                            class="form-control" placeholder="Last Name">
+                    </div>
+
+                    <div class="col-md-6 mb-3 input-field">
+                        <label>E.Code</label>
+                        <input type="text" name="user_code" id="user_code" value="{{ $user->user_code }}"
+                            class="form-control" placeholder="E Code">
                     </div>
 
                     <div class="col-md-6 mb-3 input-field">
                         <label>Email</label>
-                        <input type="email" name="email" id="email" value="{{ $user->email }}" class="form-control">
+                        <input type="email" name="email" id="email" value="{{ $user->email }}" class="form-control"
+                            placeholder="Email">
                     </div>
 
                     <div class="col-md-6 mb-3 input-field">
                         <label>Mobile</label>
-                        <input type="text" name="phone" id="phone" value="{{ $user->mobile }}" class="form-control">
+                        <input type="text" name="phone" id="phone" value="{{ $user->mobile }}" class="form-control"
+                            placeholder="Mobile Number">
                     </div>
 
                     <div class="col-md-12">
@@ -50,7 +60,7 @@
             let formData = new FormData(this);
 
             $.ajax({
-                url: "{{ route('admin-update-data') }}", // ✅ PASS ID HERE
+                url: "{{ route('admin-update-user-data') }}", // ✅ PASS ID HERE
                 type: "POST",
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -83,7 +93,8 @@
                         input.addClass('is-invalid');
 
                         // show error text
-                        input.closest('.input-field').append('<span class="error-text">' + value[0] + '</span>');
+                        input.closest('.input-field').append(
+                            '<span class="error-text">' + value[0] + '</span>');
 
                     });
                 }

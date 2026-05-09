@@ -150,6 +150,13 @@
         input:checked+.slider:before {
             transform: translateX(36px);
         }
+
+        .profile-img-sm {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
     </style>
 
     <div class="container-fluid px-4 mt-3">
@@ -166,14 +173,11 @@
                         <input type="text" id="globalSearch" class="form-control form-control-sm rounded-pill"
                             placeholder="Search All...">
                     </div>
-                    <button id="filterInactiveBtn" class="btn btn-outline-danger btn-sm rounded-pill">De-Active
-                        List</button>
+                    <button id="filterInactiveBtn" class="btn btn-outline-danger btn-sm rounded-pill">De-Active List</button>
                     <button id="showAllBtn" class="btn btn-outline-secondary btn-sm rounded-pill">All Users</button>
                     <!-- Removed the duplicate "Add New" button -->
-                    <button class="btn btn-info btn-sm rounded-pill text-white" id="exportExcelBtn"><i
-                            class="fas fa-file-excel"></i> Excel</button>
-                    <button class="btn btn-secondary btn-sm rounded-pill" id="printCardBtn"><i class="fas fa-print"></i>
-                        Print Card</button>
+                    <button class="btn btn-info btn-sm rounded-pill text-white" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Excel</button>
+                    <button class="btn btn-secondary btn-sm rounded-pill" id="printCardBtn"><i class="fas fa-print"></i>Print Card</button>
                     <span class="total-users-badge ms-2" id="totalUsersCount">Total Users: 0</span>
                 </div>
             </div>
@@ -183,7 +187,7 @@
                     <table id="usersTable" class="table table-bordered table-hover align-middle mb-0" style="width:100%">
                         <thead class="table-light">
                             <tr>
-                                <th width="5%">Edit</th>
+                                <th width="5%">EDIT</th>
                                 <th width="8%">E.CODE</th>
                                 <th width="12%">FULLNAME</th>
                                 <th width="10%">MOBILE</th>
@@ -269,18 +273,18 @@
     </div>
 @endsection
 
-
 <script src="{{ asset('js/jquery.min.js') }}"></script>
 <script>
     $(document).ready(function() {
         let table;
-        let filterInactiveActive = false;
+        let filterStatus = 'active';
 
         // Initialize DataTable
         table = $('#usersTable').DataTable({
             processing: true,
             serverSide: true,
             responsive: true,
+            searching: false,
             ajax: {
                 url: '{{ route('admin-users-data') }}',
                 type: 'POST',
@@ -289,7 +293,7 @@
                 },
                 data: function(d) {
                     d.global_search = $('#globalSearch').val();
-                    d.filter_inactive = filterInactiveActive ? 1 : 0;
+                    d.filter_status = filterStatus;
                 }
             },
             columns: [{
@@ -358,15 +362,17 @@
         }
         updateTotalCount();
 
-            $('#globalSearch').on('keyup', function() { table.ajax.reload(); });
-            $('#filterInactiveBtn').on('click', function() {
-                filterInactiveActive = true;
-                table.ajax.reload();
-            });
-            $('#showAllBtn').on('click', function() {
-                filterInactiveActive = false;
-                table.ajax.reload();
-            });
+        $('#globalSearch').on('keyup', function() {
+            table.ajax.reload();
+        });
+        $('#filterInactiveBtn').on('click', function() {
+            filterStatus = 'inactive';
+            table.ajax.reload();
+        });
+        $('#showAllBtn').on('click', function() {
+            filterStatus = 'all';
+            table.ajax.reload();
+        });
 
         function resetModal() {
             $('#userForm')[0].reset();
@@ -432,40 +438,6 @@
     });
 
 
-
-    function editUser(id) {
-        $.ajax({
-            url: '{{ route('admin-users-edit') }}',
-            type: 'GET',
-            data: {
-                id: id
-            },
-            success: function(user) {
-                $('#userId').val(user.id);
-                $('#name').val(user.name);
-                $('#lastname').val(user.lastname);
-                $('#mobile').val(user.mobile);
-                $('#email').val(user.email);
-                $('#user_code').val(user.user_code);
-                if (user.profile_image) $('#imagePreview').attr('src', '/storage/' + user.profile_image);
-                else $('#imagePreview').attr('src', '{{ asset('images/default-avatar.png') }}');
-                $('#statusSwitch').prop('checked', user.is_active == 1);
-                let appRights = user.app_rights ? JSON.parse(user.app_rights) : [];
-                let accessRights = user.access_rights ? JSON.parse(user.access_rights) : [];
-                $('.app-right').prop('checked', false);
-                $('.access-right').prop('checked', false);
-                appRights.forEach(r => {
-                    $(`.app-right[value="${r}"]`).prop('checked', true);
-                });
-                accessRights.forEach(r => {
-                    $(`.access-right[value="${r}"]`).prop('checked', true);
-                });
-                $('#modalTitle').text('Edit Team Member');
-                // $('#addEditUserModal').modal('show');
-            }
-        });
-    }
-
     function deleteUser(id) {
         Swal.fire({
             title: 'Are you sure?',
@@ -497,13 +469,16 @@
         });
     }
 
-    $('#exportExcelBtn').on('click', function() {
-        window.location.href = '{{ route('admin-users-export') }}?global_search=' + $('#globalSearch').val() +
-            '&filter_inactive=' + (window.filterInactiveActive ? 1 : 0);
-    });
-    $('#printCardBtn').on('click', function() {
-        let printWindow = window.open('{{ route('admin-users-print') }}', '_blank');
-        printWindow.focus();
+
+    $(document).ready(function() {
+        $('#exportExcelBtn').on('click', function() {
+            window.location.href = '{{ route('admin-users-export') }}?global_search=' + $('#globalSearch').val();
+        });
+
+        $('#printCardBtn').on('click', function() {
+            let printWindow = window.open('{{ route('admin-users-print') }}', '_blank');
+            printWindow.focus();
+        });
     });
 
 

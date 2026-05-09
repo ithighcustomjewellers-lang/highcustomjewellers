@@ -9,6 +9,8 @@ use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\SequenceController;
+use App\Http\Controllers\Users\Master;
+use App\Http\Controllers\Users\MasterController;
 use Illuminate\Support\Facades\Route;
 
 // user info
@@ -28,15 +30,21 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'Dashboard'])->name('dashboard');
+
+    // profile page
     Route::get('/user-profile', [DashboardController::class, 'UserProfile'])->name('user-profile');
     Route::post('/submit-profile-update', [DashboardController::class, 'submitProfileUpdate'])->name('submit-profile-update');
     Route::get('/submit-profile', [DashboardController::class, 'profile'])->name('profile-remove-image');
 
+    // user google mail send
     Route::get('/connect-gmail', [GoogleController::class, 'redirect']);
     Route::get('/google/callback', [GoogleController::class, 'callback']);
+
+    // master page
+    Route::get('/master', [MasterController::class, 'masterViewPage'])->name('master-view-page');
+    Route::get('/Link', [MasterController::class, 'masterLinkDocument'])->name('master-link-document');
+    Route::post('/BusinessLinks', [MasterController::class, 'submitBusinessLinks'])->name('submit-business-links');
 });
-
-
 
 // admin info
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
@@ -48,7 +56,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin-users-store', [UserController::class, 'store'])->name('admin-users-store');
     Route::get('/admin-users-total', [UserController::class, 'totalUsers'])->name('admin-users-total');
     Route::put('/admin-users-update', [UserController::class, 'update'])->name('admin-users-update');
-    Route::get('/admin-users-edit', [UserController::class, 'edit'])->name('admin-users-edit');
+    Route::get('/admin-users-edit/{id}', [UserController::class, 'editUserData'])->name('admin-users-edit');
+    Route::post('/admin-update-users', [UserController::class, 'updateUserData'])->name('admin-update-user-data');
     Route::post('/admin-users-toggle-status', [UserController::class, 'toggleStatus'])->name('admin-users-toggle-status');
     Route::delete('/users-destroy', [UserController::class, 'destroy'])->name('admin-users-destroy');
     Route::get('/users-export', [UserController::class, 'export'])->name('admin-users-export');

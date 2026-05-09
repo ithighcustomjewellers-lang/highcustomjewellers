@@ -8,20 +8,28 @@
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('js/jquery.min.js') }}"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
         body {
             overflow-x: hidden;
+            background:#f5f7fb;
         }
 
-        .sidebar {
-            height: 100vh;
-            width: 250px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background: #343a40;
-            padding-top: 20px;
+        .sidebar{
+            height:100vh;
+            width:250px;
+            position:fixed;
+            top:0;
+            left:0;
+            background:#111827;
+            padding-top:20px;
+            overflow-y:auto;
+            z-index:999;
         }
 
         .sidebar a {
@@ -41,8 +49,22 @@
             padding: 20px;
         }
 
-        .navbar {
-            margin-left: 250px;
+        .navbar{
+            position:fixed;
+            top:0;
+            right:0;
+            left:250px;
+            height:70px;
+            z-index:998;
+            background:#ffffff !important;
+            box-shadow:0 2px 10px rgba(0,0,0,0.06);
+            padding:0 20px;
+        }
+
+        .main-content{
+            margin-left:250px;
+            margin-top:70px;
+            padding:20px;
         }
 
         .profile-img {
@@ -79,57 +101,51 @@
 </head>
 
 <body>
-
+  {{-- <div class="content">
+        <h2>Welcome to Dashboard</h2>
+    </div> --}}
     <!-- Sidebar -->
     <div class="sidebar">
         <h4 class="text-white text-center">My Dashboard</h4>
         <a href="#">Dashboard</a>
+        <a href="{{ route('master-view-page') }}">Master</a>
+        <a href="{{ route('master-link-document') }}">Link</a>
     </div>
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid d-flex justify-content-end align-items-center gap-3">
+        <div class="container-fluid d-flex justify-content-end align-items-center gap-3">
+            <!-- User Code -->
+            <div class="hc-user-code">
+                <strong>{{ auth()->user()->user_code }}</strong>
+            </div>
+            <!-- User Dropdown -->
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle"
+                    id="dropdownUser" data-bs-toggle="dropdown">
 
-        <!-- User Code -->
-        <div class="hc-user-code">
-            <strong>{{ $user->user_code }}</strong>
+                    <img src="{{ asset(auth()->user()->user_image ?? 'images/user-icon.jpg') }}" class="profile-img me-2">
+                    <strong>{{ auth()->user()->name }} {{ auth()->user()->lastname }}</strong>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{{ route('user-profile') }}">Profile</a></li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url('/connect-gmail') }}">Connect Gmail</a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" id="logoutBtn">Logout</a>
+                    </li>
+                </ul>
+            </div>
         </div>
+    </nav>
 
-        <!-- User Dropdown -->
-        <div class="dropdown">
-            <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle"
-                id="dropdownUser" data-bs-toggle="dropdown">
-
-                <img src="{{ asset($user->user_image ?? 'images/user-icon.jpg') }}" class="profile-img me-2">
-                <strong>{{ $user->name }} {{ $user->lastname }}</strong>
-            </a>
-
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="{{ route('user-profile') }}">Profile</a></li>
-                <li>
-                    <a class="dropdown-item" href="{{ url('/connect-gmail') }}">Connect Gmail</a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <a class="dropdown-item text-danger" href="#" id="logoutBtn">Logout</a>
-                </li>
-            </ul>
-        </div>
-
-    </div>
-</nav>
-
-    <!-- Main Content -->
-    <div class="content">
-        <h2>Welcome to Dashboard</h2>
-    </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
+   <div class="main-content">
+    @yield('content')
+</div>
     <script>
         $(document).ready(function() {
 

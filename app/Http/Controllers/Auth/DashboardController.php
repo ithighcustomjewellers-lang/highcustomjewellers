@@ -11,8 +11,7 @@ class DashboardController extends Controller
 {
     public function Dashboard()
     {
-        $user = Auth::user();
-        return view('user.dashboard', compact('user'));
+        return view('user.dashboard');
     }
 
     public function UserProfile()
@@ -43,12 +42,10 @@ class DashboardController extends Controller
 
         // ✅ Image upload
         if ($request->hasFile('user_image')) {
-
             // delete old image (optional)
             if ($user->image && file_exists(public_path($user->image))) {
                 unlink(public_path($user->image));
             }
-
             $file = $request->file('user_image');
             $filename = time() . '.' . $file->getClientOriginalExtension();
 
@@ -56,9 +53,7 @@ class DashboardController extends Controller
 
             $user->user_image = 'uploads/users/' . $filename;
         }
-
         $user->save();
-
         return response()->json([
             'status' => true,
             'message' => 'Profile updated successfully'
