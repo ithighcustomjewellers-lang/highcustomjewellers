@@ -10,6 +10,7 @@ class BusinessLink extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id ',
         'whatsapp_link',
         'telegram_link',
         'business_link',

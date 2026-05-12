@@ -44,6 +44,9 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/master', [MasterController::class, 'masterViewPage'])->name('master-view-page');
     Route::get('/Link', [MasterController::class, 'masterLinkDocument'])->name('master-link-document');
     Route::post('/BusinessLinks', [MasterController::class, 'submitBusinessLinks'])->name('submit-business-links');
+    // In web.php
+    Route::get('/admin/business-links', [MasterController::class, 'getBusinessLinks'])->name('user-business-links');
+    Route::post('/sequences/store', [MasterController::class, 'sequencesStore'])->name('user-sequences-store');
 });
 
 // admin info
@@ -66,7 +69,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/sequences', [SequenceController::class, 'sequencesIndex'])->name('admin-sequences-index');
     Route::get('/sequences/create', [SequenceController::class, 'sequencesCreate'])->name('admin-sequences-create');
-    Route::post('/sequences/store', [SequenceController::class, 'sequencesStore'])->name('admin-sequences-store');
     Route::post('/admin/sequences-data', [SequenceController::class, 'AdminGetSequences'])->name('admin-sequences-data');
     Route::get('/admin/sequences-edit/{id}', [SequenceController::class, 'edit'])->name('admin-sequences-edit');
 

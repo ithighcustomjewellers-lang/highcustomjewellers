@@ -196,7 +196,9 @@
                         Company Logo
                     </label>
                     <div class="text-center">
-                        <img src="{{ asset('images/company-logo.jpg') }}" class="preview-image" id="imagePreview">
+                        {{-- <img src="{{ asset('images/company-logo.jpg') }}" class="preview-image" id="imagePreview"> --}}
+                        <img src="{{ isset($business->company_logo) ? asset($business->company_logo) : asset('images/company-logo.jpg') }}"
+                            class="preview-image" id="imagePreview">
                     </div>
                     <div class="mt-4">
                         <input type="file" name="company_logo" id="companyLogo" class="form-control custom-input">
@@ -211,7 +213,8 @@
                     </label>
                     <div class="input-wrapper">
                         <i class="bi bi-whatsapp input-icon text-success"></i>
-                        <input type="text" name="whatsapp_link" class="form-control custom-input" placeholder="https://wa.me/919999999999">
+                        <input type="text" name="whatsapp_link" class="form-control custom-input"
+                            value="{{ $business->whatsapp_link ?? '' }}" placeholder="https://wa.me/919999999999">
                     </div>
                     <small class="text-danger whatsapp_link_error"></small>
                 </div>
@@ -224,7 +227,8 @@
 
                     <div class="input-wrapper">
                         <i class="bi bi-telegram input-icon text-info"></i>
-                        <input type="text" name="telegram_link" class="form-control custom-input" placeholder="https://t.me/username">
+                        <input type="text" name="telegram_link" class="form-control custom-input"
+                            value="{{ $business->telegram_link ?? '' }}" placeholder="https://t.me/username">
                     </div>
                     <small class="text-danger telegram_link_error"></small>
                 </div>
@@ -236,7 +240,8 @@
                     </label>
                     <div class="input-wrapper">
                         <i class="bi bi-globe input-icon text-primary"></i>
-                        <input type="text" name="business_link" class="form-control custom-input" placeholder="https://yourbusiness.com">
+                        <input type="text" name="business_link" class="form-control custom-input"
+                            value="{{ $business->business_link ?? '' }}" placeholder="https://yourbusiness.com">
                     </div>
                     <small class="text-danger business_link_error"></small>
                 </div>
@@ -274,27 +279,14 @@
                 processData: false,
                 contentType: false,
                 beforeSend: function() {
-                    $('#saveBusinessBtn')
-                        .html('<i class="fas fa-spinner fa-spin me-2"></i> Saving...')
-                        .prop('disabled', true);
+                    $('#saveBusinessBtn').html('<i class="fas fa-spinner fa-spin me-2"></i> Saving...').prop('disabled', true);
                 },
-
                 success: function(response) {
-                    $('#saveBusinessBtn')
-                        .html('<i class="fas fa-check me-2"></i> Saved Successfully')
-                        .prop('disabled', false);
+                    $('#saveBusinessBtn').html('<i class="fas fa-check me-2"></i> Saved Successfully').prop('disabled', false);
                     toastr.success(response.message);
                     $('#businessForm')[0].reset();
-                    $('#imagePreview').attr('src',
-                        "{{ asset('images/company-logo.jpg') }}"
-                    );
-                    $('.text-danger').text('');
-                    setTimeout(function() {
-                        $('#saveBusinessBtn')
-                            .html('<i class="fas fa-save me-2"></i> Save Business Details');
-                    }, 2000);
+                    location.reload();
                 },
-
                 error: function(xhr) {
                     $('#saveBusinessBtn')
                         .html('<i class="fas fa-save me-2"></i> Save Business Details')

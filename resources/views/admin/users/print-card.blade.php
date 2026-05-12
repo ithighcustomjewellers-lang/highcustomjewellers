@@ -109,7 +109,9 @@
             <span class="badge">{{ $r }}</span>
         @endforeach
     </div>
+
 </div>
+
 @endforeach
 </div>
 
