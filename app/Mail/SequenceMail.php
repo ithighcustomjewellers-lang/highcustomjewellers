@@ -10,11 +10,11 @@ class SequenceMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $contact, $sequence, $finalMessage, $subjectLine;
+    public $lead, $sequence, $finalMessage, $subjectLine;
 
-    public function __construct($contact, $sequence, $finalMessage, $subjectLine)
+    public function __construct($lead, $sequence, $finalMessage, $subjectLine)
     {
-        $this->contact = $contact;
+        $this->lead = $lead;
         $this->sequence = $sequence;
         $this->finalMessage = $finalMessage;
         $this->subjectLine = $subjectLine;
@@ -25,27 +25,17 @@ class SequenceMail extends Mailable
         $mail = $this->subject($this->subjectLine)
             ->view('emails.sequence')
             ->with([
-                'contact' => $this->contact,
+                'lead' => $this->lead,
                 'sequence' => $this->sequence,
                 'finalMessage' => $this->finalMessage
             ]);
 
-        // Attach file if exists (as real email attachment)
         if ($this->sequence->attachments_image && file_exists(public_path($this->sequence->attachments_image))) {
             $mail->attach(public_path($this->sequence->attachments_image), [
                 'as' => $this->sequence->attachment_name ?? 'attachment',
                 'mime' => mime_content_type(public_path($this->sequence->attachments_image))
             ]);
         }
-
-        // if ($this->sequence->hero_image && file_exists(public_path($this->sequence->hero_image))) {
-        //     $mail->attach(public_path($this->sequence->hero_image), [
-        //         'as' => 'Image',
-        //         'mime' => mime_content_type(public_path($this->sequence->hero_image)),
-        //     ]);
-        //     $mail->with('hero_cid', 'hero');
-        // }
-
         return $mail;
     }
 }

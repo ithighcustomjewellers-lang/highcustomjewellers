@@ -42,7 +42,7 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::post('/sequences/store', [MasterController::class, 'sequencesStore'])->name('user-sequences-store');
     // Route::get('/Leads', [LeadsController::class, 'index'])->name('admin-Leads-index');
 
-    Route::get('/leads', [LeadsController::class, 'index'])->name('leads-index');
+    Route::get('/Leads', [LeadsController::class, 'index'])->name('leads-index');
     Route::post('/leads/store', [LeadsController::class, 'leadStore'])->name('lead-store');
     Route::get('/leads/list', [LeadsController::class, 'leadList'])->name('lead-list');
 

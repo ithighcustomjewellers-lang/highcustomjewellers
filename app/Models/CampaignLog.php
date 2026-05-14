@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CampaignLog extends Model
 {
     protected $fillable = [
-        'contact_id',
+        'lead_id',
         'sequence_id',
         'sent_at',
         'status',
@@ -15,9 +15,9 @@ class CampaignLog extends Model
     ];
 
     // 🔗 belongs to contact
-    public function contact()
+    public function lead()
     {
-        return $this->belongsTo(Contact::class);
+        return $this->belongsTo(lead::class);
     }
 
     // 🔗 belongs to sequence

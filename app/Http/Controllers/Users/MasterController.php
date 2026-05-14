@@ -131,6 +131,7 @@ class MasterController extends Controller
             'whatsapp_link' => 'nullable|url',
             'telegram_link' => 'nullable|url',
             'business_link' => 'nullable|url',
+            'company_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         // =========================
@@ -141,8 +142,26 @@ class MasterController extends Controller
             ? strtoupper($request->variant)
             : null;
 
+
         // ✅ existing image path
         $existingCompanyLogo = $request->existing_company_logo;
+        // ✅ If existing_company_logo is null
+        // then upload company_logo and store its path
+        if (empty($existingCompanyLogo) && $request->hasFile('company_logo')) {
+            $file = $request->file('company_logo');
+            // image name
+            $filename = time() . '_logo_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            // uploads/company_logo folder
+            $destination = public_path('uploads/company_logo');
+            // create folder if not exists
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+            // move file
+            $file->move($destination, $filename);
+            // save path in database
+            $existingCompanyLogo = 'uploads/company_logo/' . $filename;
+        }
 
         // =========================
         // ❌ DUPLICATE CHECK
@@ -199,7 +218,7 @@ class MasterController extends Controller
             $file = $request->file('attachments_image');
             $originalName = $file->getClientOriginalName();
             $fileSize = $file->getSize();
-            $filename = date('Ymd_His') .'_attach_' .uniqid() .'.' .$file->getClientOriginalExtension();
+            $filename = date('Ymd_His') . '_attach_' . uniqid() . '.' . $file->getClientOriginalExtension();
             $destination = public_path('attachments_image');
             if (!file_exists($destination)) {
                 mkdir($destination, 0777, true);
@@ -220,7 +239,7 @@ class MasterController extends Controller
             $leads = Lead::whereRaw('UPPER(type) = ?',[$type])->get();
             foreach ($leads as $lead) {
                 // ❌ PREVENT DUPLICATE JOB
-                $alreadySent = CampaignLog::where('contact_id', $lead->id)
+                $alreadySent = CampaignLog::where('lead_id', $lead->id)
                     ->where('sequence_id',$sequence->id)
                     ->exists();
 

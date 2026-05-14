@@ -23,8 +23,7 @@ class CampaignController extends Controller
         $delay = now();
 
         foreach ($sequences as $sequence) {
-
-            $alreadySent = CampaignLog::where('contact_id', $lead->id)
+            $alreadySent = CampaignLog::where('lead_id', $lead->id)
                 ->where('sequence_id', $sequence->id)
                 ->exists();
 
