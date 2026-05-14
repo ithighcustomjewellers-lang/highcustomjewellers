@@ -7,14 +7,16 @@ use App\Models\Contact;
 use App\Models\Sequence;
 use App\Models\CampaignLog;
 use App\Jobs\SendCampaignJob;
+use App\Models\Lead;
+use Illuminate\Support\Facades\Auth;
 
 class CampaignController extends Controller
 {
     public function start($id)
     {
-        $contact = Contact::findOrFail($id);
+        $lead = Lead::findOrFail($id);
 
-        $sequences = Sequence::whereRaw('UPPER(type) = ?', [strtoupper($contact->type)])
+        $sequences = Sequence::whereRaw('UPPER(type) = ?', [strtoupper($lead->type)])
             ->orderBy('step')
             ->get();
 
@@ -22,7 +24,7 @@ class CampaignController extends Controller
 
         foreach ($sequences as $sequence) {
 
-            $alreadySent = CampaignLog::where('contact_id', $contact->id)
+            $alreadySent = CampaignLog::where('contact_id', $lead->id)
                 ->where('sequence_id', $sequence->id)
                 ->exists();
 
@@ -34,7 +36,7 @@ class CampaignController extends Controller
             // SendCampaignJob::dispatch($contact, $sequence)
             //     ->delay($delay);
 
-            SendCampaignJob::dispatch($contact, $sequence, auth()->id())
+            SendCampaignJob::dispatch($lead, $sequence, Auth::id())
             ->delay($delay);
         }
 

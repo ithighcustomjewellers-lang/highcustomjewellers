@@ -5,15 +5,20 @@ namespace App\Http\Controllers\Users;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\BusinessLink;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Sequence;
+use App\Models\CampaignLog;
+use App\Jobs\SendCampaignJob;
+use App\Models\Lead;
 use Illuminate\Support\Facades\Validator;
+
 
 class MasterController extends Controller
 {
     public function masterViewPage()
     {
-
         return  view('user.master-mail');
     }
 
@@ -21,7 +26,7 @@ class MasterController extends Controller
     {
         $userId = Auth::id();
         $business = BusinessLink::where('user_id', $userId)->first();
-        return view('user.link-document',compact('business'));
+        return view('user.link-document', compact('business'));
     }
 
     public function submitBusinessLinks(Request $request)
@@ -41,7 +46,7 @@ class MasterController extends Controller
             ], 422);
         }
         // LOGIN USER ID
-        $userId = auth()->id();
+        $userId = Auth::id();
         // CHECK USER RECORD
         $business = BusinessLink::where('user_id', $userId)->first();
         // CREATE NEW RECORD IF NOT EXISTS
@@ -100,13 +105,147 @@ class MasterController extends Controller
         return response()->json($businessLinks);
     }
 
-
-
     public function sequencesStore(Request $request)
     {
-        dd($request);
-        die();
+        Log::info('Store sequence request received', [
+            'data' => $request->all()
+        ]);
+
+        // =========================
+        // ✅ VALIDATION
+        // =========================
+        $request->validate([
+            'step' => 'required|integer|min:1',
+            'gap_days' => 'required|integer|min:0',
+            'variant' => 'nullable|string|regex:/^[A-Z]+$/',
+            'type' => 'required|in:B2B,B2C',
+            'subject' => 'required|string',
+            // ✅ existing uploaded image path
+            'existing_company_logo' => 'nullable|string',
+            'image_type' => 'nullable|string',
+            'logo_position' => 'nullable|string',
+            'message' => 'required|string',
+            // ✅ new upload
+            'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'attachments_image' => 'nullable|file|max:5120',
+            'whatsapp_link' => 'nullable|url',
+            'telegram_link' => 'nullable|url',
+            'business_link' => 'nullable|url',
+        ]);
+
+        // =========================
+        // ✅ NORMALIZE DATA
+        // =========================
+        $type = strtoupper($request->type);
+        $variant = $request->variant
+            ? strtoupper($request->variant)
+            : null;
+
+        // ✅ existing image path
+        $existingCompanyLogo = $request->existing_company_logo;
+
+        // =========================
+        // ❌ DUPLICATE CHECK
+        // =========================
+        $exists = Sequence::where('step', $request->step)
+            ->where('gap_days', $request->gap_days)
+            ->whereRaw('UPPER(type) = ?', [$type])
+            ->where(function ($q) use ($variant) {
+                if ($variant) {
+                    $q->where('variant', $variant);
+                } else {
+                    $q->whereNull('variant');
+                }
+            })
+            ->exists();
+        if ($exists) {
+            return response()->json([
+                'errors' => [
+                    'step' => ['Step already exists ❌']
+                ]
+            ], 422);
+        }
+
+        // =========================
+        // 📦 PREPARE DATA
+        // =========================
+        $data = $request->except([
+            'hero_image',
+            'attachments_image'
+        ]);
+        $data['user_id'] = Auth::id();
+        $data['type'] = $type;
+        $data['variant'] = $variant;
+        $data['existing_company_logo'] = $existingCompanyLogo;
+
+        // =========================
+        // ✅ HERO IMAGE UPLOAD
+        // =========================
+        if ($request->hasFile('hero_image')) {
+            $file = $request->file('hero_image');
+            $filename = time() . '_hero_' . uniqid() . '.' .$file->getClientOriginalExtension();
+            $destination = public_path('hero_image');
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+            $file->move($destination, $filename);
+            $data['hero_image'] = 'hero_image/' . $filename;
+        }
+
+        // =========================
+        // ✅ ATTACHMENT UPLOAD
+        // =========================
+        if ($request->hasFile('attachments_image')) {
+            $file = $request->file('attachments_image');
+            $originalName = $file->getClientOriginalName();
+            $fileSize = $file->getSize();
+            $filename = date('Ymd_His') .'_attach_' .uniqid() .'.' .$file->getClientOriginalExtension();
+            $destination = public_path('attachments_image');
+            if (!file_exists($destination)) {
+                mkdir($destination, 0777, true);
+            }
+            $file->move($destination, $filename);
+            $data['attachments_image'] = 'attachments_image/' . $filename;
+            $data['attachment_name'] = $originalName;
+            $data['attachment_size'] = $fileSize;
+        }
+
+        // =========================
+        // 🚀 MAIN LOGIC
+        // =========================
+        try {
+            // ✅ CREATE SEQUENCE
+            $sequence = Sequence::create($data);
+            // ✅ GET CONTACTS
+            $leads = Lead::whereRaw('UPPER(type) = ?',[$type])->get();
+            foreach ($leads as $lead) {
+                // ❌ PREVENT DUPLICATE JOB
+                $alreadySent = CampaignLog::where('contact_id', $lead->id)
+                    ->where('sequence_id',$sequence->id)
+                    ->exists();
+
+                if ($alreadySent) {
+                    continue;
+                }
+                // ✅ DELAY
+                $delay = now()->addDays((int) $sequence->gap_days);
+
+                // 🚀 DISPATCH JOB
+                SendCampaignJob::dispatch($lead,$sequence,Auth::id())->delay($delay);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Sequence added & scheduled 🚀'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Sequence error', [
+                'error' => $e->getMessage()
+            ]);
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
-
-
 }

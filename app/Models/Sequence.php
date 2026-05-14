@@ -7,19 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 class Sequence extends Model
 {
     protected $fillable = [
+        'user_id',
         'step',
-        'subject',
-        'message',
         'gap_days',
         'variant',
         'type',
+        'subject',
+        'existing_company_logo',
+        'image_type',
+        'logo_position',
+        'message',
         'hero_image',
+        'attachments_image',
+        'attachment_name',
+        'attachment_size',
         'whatsapp_link',
         'telegram_link',
         'business_link',
-        'attachments_image',
-        'attachment_name',
-        'attachment_size'
     ];
 
     // 🔗 relation with attachments
