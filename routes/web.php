@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\LoginController as AuthLoginController;
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\LeadsController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\privacyPolicyController;
 use App\Http\Controllers\SequenceController;
 use App\Http\Controllers\Users\Master;
 use App\Http\Controllers\Users\MasterController;
@@ -35,7 +36,14 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/connect-gmail', [GoogleController::class, 'redirect']);
     Route::get('/google/callback', [GoogleController::class, 'callback']);
     // master page
+
+
+
+
+    Route::get('/masterList', [MasterController::class, 'masterList'])->name('master-masterList-page');
     Route::get('/master', [MasterController::class, 'masterViewPage'])->name('master-view-page');
+
+
     Route::get('/Link', [MasterController::class, 'masterLinkDocument'])->name('master-link-document');
     Route::post('/BusinessLinks', [MasterController::class, 'submitBusinessLinks'])->name('submit-business-links');
     Route::get('/admin/business-links', [MasterController::class, 'getBusinessLinks'])->name('user-business-links');
@@ -47,6 +55,7 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/leads/list', [LeadsController::class, 'leadList'])->name('lead-list');
 
 });
+
 
 // admin info
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
@@ -71,6 +80,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 Route::post('/logout', [AuthLoginController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
+
+Route::get('privacy-policy', [privacyPolicyController::class, 'privacyPolicy']);
+Route::get('terms', [privacyPolicyController::class, 'terms']);
+Route::get('landing-page', [privacyPolicyController::class, 'landingPage']);
 
 
 

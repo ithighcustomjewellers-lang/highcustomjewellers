@@ -19,7 +19,6 @@ class CampaignController extends Controller
         $sequences = Sequence::whereRaw('UPPER(type) = ?', [strtoupper($lead->type)])
             ->orderBy('step')
             ->get();
-
         $delay = now();
 
         foreach ($sequences as $sequence) {

@@ -28,6 +28,8 @@ class SendCampaignJob implements ShouldQueue
     protected $sequence;
     protected $userId;
 
+    protected $tries = 3;
+    protected $timeout = 120;
     /**
      * Create a new job instance.
      */
@@ -58,6 +60,7 @@ class SendCampaignJob implements ShouldQueue
         try {
 
             CampaignLog::create([
+                'user_id'     => $this->userId,
                 'lead_id'     => $this->lead->id,
                 'sequence_id' => $this->sequence->id,
                 'sent_at'     => now(),
@@ -66,6 +69,7 @@ class SendCampaignJob implements ShouldQueue
         } catch (UniqueConstraintViolationException $e) {
 
             Log::info("Duplicate send prevented", [
+                'user_id'     => $this->userId,
                 'lead_id'     => $this->lead->id,
                 'sequence_id' => $this->sequence->id
             ]);
@@ -86,9 +90,10 @@ class SendCampaignJob implements ShouldQueue
             $this->sequence->variant != $variant
         ) {
 
-            CampaignLog::where('lead_id', $this->lead->id)
-                ->where('sequence_id', $this->sequence->id)
-                ->delete();
+                CampaignLog::where('user_id', $this->userId)
+            ->where('lead_id', $this->lead->id)
+            ->where('sequence_id', $this->sequence->id)
+            ->delete();
 
             return;
         }
@@ -303,7 +308,8 @@ class SendCampaignJob implements ShouldQueue
         string $type
     ): ?string {
 
-        $variants = Sequence::where('type', $type)
+       $variants = Sequence::where('user_id', $this->userId)
+    ->where('type', $type)
             ->pluck('variant')
             ->filter()
             ->unique()

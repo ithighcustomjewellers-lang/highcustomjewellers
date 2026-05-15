@@ -111,6 +111,8 @@ class MasterController extends Controller
             'data' => $request->all()
         ]);
 
+        $userId = Auth::id();
+
         // =========================
         // ✅ VALIDATION
         // =========================
@@ -120,17 +122,22 @@ class MasterController extends Controller
             'variant' => 'nullable|string|regex:/^[A-Z]+$/',
             'type' => 'required|in:B2B,B2C',
             'subject' => 'required|string',
+
             // ✅ existing uploaded image path
             'existing_company_logo' => 'nullable|string',
             'image_type' => 'nullable|string',
             'logo_position' => 'nullable|string',
+
             'message' => 'required|string',
+
             // ✅ new upload
             'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'attachments_image' => 'nullable|file|max:5120',
+
             'whatsapp_link' => 'nullable|url',
             'telegram_link' => 'nullable|url',
             'business_link' => 'nullable|url',
+
             'company_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
@@ -138,38 +145,45 @@ class MasterController extends Controller
         // ✅ NORMALIZE DATA
         // =========================
         $type = strtoupper($request->type);
+
         $variant = $request->variant
             ? strtoupper($request->variant)
             : null;
 
-
-        // ✅ existing image path
+        // =========================
+        // ✅ COMPANY LOGO
+        // =========================
         $existingCompanyLogo = $request->existing_company_logo;
-        // ✅ If existing_company_logo is null
-        // then upload company_logo and store its path
+
+        // ✅ If existing_company_logo empty
+        // then upload company_logo
         if (empty($existingCompanyLogo) && $request->hasFile('company_logo')) {
+
             $file = $request->file('company_logo');
-            // image name
+
             $filename = time() . '_logo_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            // uploads/company_logo folder
+
             $destination = public_path('uploads/company_logo');
-            // create folder if not exists
+
             if (!file_exists($destination)) {
                 mkdir($destination, 0777, true);
             }
-            // move file
+
             $file->move($destination, $filename);
-            // save path in database
+
             $existingCompanyLogo = 'uploads/company_logo/' . $filename;
         }
 
         // =========================
         // ❌ DUPLICATE CHECK
+        // ✅ AUTH WISE
         // =========================
-        $exists = Sequence::where('step', $request->step)
+        $exists = Sequence::where('user_id', $userId)
+            ->where('step', $request->step)
             ->where('gap_days', $request->gap_days)
             ->whereRaw('UPPER(type) = ?', [$type])
             ->where(function ($q) use ($variant) {
+
                 if ($variant) {
                     $q->where('variant', $variant);
                 } else {
@@ -177,7 +191,9 @@ class MasterController extends Controller
                 }
             })
             ->exists();
+
         if ($exists) {
+
             return response()->json([
                 'errors' => [
                     'step' => ['Step already exists ❌']
@@ -190,9 +206,11 @@ class MasterController extends Controller
         // =========================
         $data = $request->except([
             'hero_image',
-            'attachments_image'
+            'attachments_image',
+            'company_logo'
         ]);
-        $data['user_id'] = Auth::id();
+
+        $data['user_id'] = $userId;
         $data['type'] = $type;
         $data['variant'] = $variant;
         $data['existing_company_logo'] = $existingCompanyLogo;
@@ -201,13 +219,19 @@ class MasterController extends Controller
         // ✅ HERO IMAGE UPLOAD
         // =========================
         if ($request->hasFile('hero_image')) {
+
             $file = $request->file('hero_image');
-            $filename = time() . '_hero_' . uniqid() . '.' .$file->getClientOriginalExtension();
+
+            $filename = time() . '_hero_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
             $destination = public_path('hero_image');
+
             if (!file_exists($destination)) {
                 mkdir($destination, 0777, true);
             }
+
             $file->move($destination, $filename);
+
             $data['hero_image'] = 'hero_image/' . $filename;
         }
 
@@ -233,24 +257,41 @@ class MasterController extends Controller
         // 🚀 MAIN LOGIC
         // =========================
         try {
+            // =========================
             // ✅ CREATE SEQUENCE
+            // =========================
             $sequence = Sequence::create($data);
-            // ✅ GET CONTACTS
-            $leads = Lead::whereRaw('UPPER(type) = ?',[$type])->get();
+            // =========================
+            // ✅ GET LEADS AUTH WISE
+            // =========================
+                $leads = Lead::where('user_id', $userId)
+                    ->whereRaw('UPPER(type) = ?', [$type])
+                    ->get();
+
             foreach ($leads as $lead) {
+                // =========================
                 // ❌ PREVENT DUPLICATE JOB
-                $alreadySent = CampaignLog::where('lead_id', $lead->id)
-                    ->where('sequence_id',$sequence->id)
+                // =========================
+                $alreadySent = CampaignLog::where('user_id', $userId)
+                    ->where('lead_id', $lead->id)
+                    ->where('sequence_id', $sequence->id)
                     ->exists();
 
                 if ($alreadySent) {
                     continue;
                 }
+                // =========================
                 // ✅ DELAY
+                // =========================
                 $delay = now()->addDays((int) $sequence->gap_days);
-
+                // =========================
                 // 🚀 DISPATCH JOB
-                SendCampaignJob::dispatch($lead,$sequence,Auth::id())->delay($delay);
+                // =========================
+                SendCampaignJob::dispatch(
+                    $lead,
+                    $sequence,
+                    $userId
+                )->delay($delay);
             }
 
             return response()->json([
@@ -258,13 +299,17 @@ class MasterController extends Controller
                 'message' => 'Sequence added & scheduled 🚀'
             ]);
         } catch (\Exception $e) {
+
             Log::error('Sequence error', [
                 'error' => $e->getMessage()
             ]);
+
             return response()->json([
                 'status' => false,
                 'message' => $e->getMessage()
             ], 500);
         }
     }
+
+    public function masterList() {}
 }
