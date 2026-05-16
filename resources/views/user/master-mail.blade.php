@@ -166,9 +166,12 @@
                             </div>
                         </div>
 
-                        <div class="d-flex gap-3 mt-4">
+                        <div class="d-flex gap-3 mt-4 flex-wrap">
                             <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">💾 Save Sequence</button>
+                        <a href="{{ route('master-data-list') }}" class="btn btn-light btn-lg px-5 rounded-pill shadow-sm back-btn">
+                            <i class="fa fa-arrow-left me-2"></i> Back </a>
                         </div>
+
                     </form>
                 </div>
             </div>
@@ -176,7 +179,7 @@
 
         <!-- Live Email Preview -->
         <div class="col-lg-6">
-            <div class="card border-0 shadow-lg rounded-4 sticky-top" style="top: 20px;">
+            <div class="card border-0 shadow-lg rounded-4" style="top: 20px;">
                 <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
                     <h3 class="h4 fw-bold mb-0">📱 Live Preview</h3>
                     <div class="btn-group" role="group">

@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Contact;
 use App\Models\Sequence;
 use App\Models\CampaignLog;
 use App\Jobs\SendCampaignJob;
 use App\Models\Lead;
-use Illuminate\Support\Facades\Auth;
 
 class CampaignController extends Controller
 {
@@ -16,28 +13,54 @@ class CampaignController extends Controller
     {
         $lead = Lead::findOrFail($id);
 
-        $sequences = Sequence::whereRaw('UPPER(type) = ?', [strtoupper($lead->type)])
+        // =========================
+        // ✅ USER WISE SEQUENCE
+        // =========================
+        $sequences = Sequence::where('user_id', $lead->user_id)
+            ->whereRaw('UPPER(type) = ?', [strtoupper($lead->type)])
             ->orderBy('step')
             ->get();
-        $delay = now();
 
         foreach ($sequences as $sequence) {
-            $alreadySent = CampaignLog::where('lead_id', $lead->id)
+
+            // =========================
+            // ❌ DUPLICATE CHECK
+            // =========================
+            $alreadyQueued = CampaignLog::where('user_id', $lead->user_id)
+                ->where('lead_id', $lead->id)
                 ->where('sequence_id', $sequence->id)
                 ->exists();
 
-            if ($alreadySent) continue;
+            if ($alreadyQueued) {
+                continue;
+            }
 
-            // cumulative delay
-            $delay = $delay->copy()->addDays((int) $sequence->gap_days);
+            // =========================
+            // ✅ SEND DATE
+            // =========================
+            $delay = now()->addDays((int) $sequence->gap_days);
 
-            // SendCampaignJob::dispatch($contact, $sequence)
-            //     ->delay($delay);
+            // =========================
+            // ✅ CREATE LOG
+            // =========================
+            CampaignLog::create([
+                'user_id' => $lead->user_id,
+                'lead_id' => $lead->id,
+                'sequence_id' => $sequence->id,
+                'status' => 'pending',
+                'scheduled_at' => $delay,
+            ]);
 
-            SendCampaignJob::dispatch($lead, $sequence, Auth::id())
-            ->delay($delay);
+            // =========================
+            // ✅ DISPATCH JOB
+            // =========================
+            SendCampaignJob::dispatch(
+                $lead->id,
+                $sequence->id,
+                $lead->user_id
+            )->delay($delay);
         }
 
-        return "Campaign Started";
+        return true;
     }
 }

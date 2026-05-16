@@ -10,6 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/jquery.min.js') }}"></script>
+    <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -108,7 +109,7 @@
     <div class="sidebar">
         <h4 class="text-white text-center">My Dashboard</h4>
         <a href="#">Dashboard</a>
-        <a href="{{ route('master-view-page') }}">Master</a>
+         <a href="{{ route('master-data-list') }}">Master</a>
         <a href="{{ route('master-link-document') }}">Link</a>
         <a href="{{ route('leads-index') }}">Leads</a>
     </div>
@@ -124,7 +125,6 @@
             <div class="dropdown">
                 <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle"
                     id="dropdownUser" data-bs-toggle="dropdown">
-
                     <img src="{{ asset(auth()->user()->user_image ?? 'images/user-icon.jpg') }}" class="profile-img me-2">
                     <strong>{{ auth()->user()->name }} {{ auth()->user()->lastname }}</strong>
                 </a>
@@ -149,10 +149,8 @@
 </div>
     <script>
         $(document).ready(function() {
-
             $('#logoutBtn').click(function(e) {
                 e.preventDefault();
-
                 $.ajax({
                     url: "{{ route('logout') }}",
                     type: "POST",
@@ -161,7 +159,6 @@
                     },
                     success: function(response) {
                         toastr.success("Logged out successfully");
-
                         // redirect after 1 second
                         setTimeout(function() {
                             window.location.href = "{{ route('login-data') }}";
@@ -172,10 +169,8 @@
                     }
                 });
             });
-
         });
     </script>
-
 </body>
 
 </html>

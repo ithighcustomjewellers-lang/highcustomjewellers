@@ -5,12 +5,9 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\DashboardController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController as AuthLoginController;
-use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\LeadsController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\privacyPolicyController;
-use App\Http\Controllers\SequenceController;
-use App\Http\Controllers\Users\Master;
 use App\Http\Controllers\Users\MasterController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,26 +33,20 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/connect-gmail', [GoogleController::class, 'redirect']);
     Route::get('/google/callback', [GoogleController::class, 'callback']);
     // master page
+    Route::get('masterList', [MasterController::class, 'masterDataList'])->name('master-data-list');
+    Route::post('sequences/inline-update', [MasterController::class, 'inlineUpdate'])->name('master-list-sequences-inlineUpdate');
+    Route::post('/sequences/data', [MasterController::class, 'getSequencesList'])->name('getSequences-data');
 
-
-
-
-    Route::get('/masterList', [MasterController::class, 'masterList'])->name('master-masterList-page');
     Route::get('/master', [MasterController::class, 'masterViewPage'])->name('master-view-page');
-
-
     Route::get('/Link', [MasterController::class, 'masterLinkDocument'])->name('master-link-document');
     Route::post('/BusinessLinks', [MasterController::class, 'submitBusinessLinks'])->name('submit-business-links');
     Route::get('/admin/business-links', [MasterController::class, 'getBusinessLinks'])->name('user-business-links');
     Route::post('/sequences/store', [MasterController::class, 'sequencesStore'])->name('user-sequences-store');
     // Route::get('/Leads', [LeadsController::class, 'index'])->name('admin-Leads-index');
-
     Route::get('/Leads', [LeadsController::class, 'index'])->name('leads-index');
     Route::post('/leads/store', [LeadsController::class, 'leadStore'])->name('lead-store');
     Route::get('/leads/list', [LeadsController::class, 'leadList'])->name('lead-list');
-
 });
-
 
 // admin info
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
@@ -73,8 +64,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/users-export', [UserController::class, 'export'])->name('admin-users-export');
     Route::get('/users-print', [UserController::class, 'printCard'])->name('admin-users-print');
     Route::get('/users', [UserController::class, 'index'])->name('admin-users-index');
-
-
 });
 
 Route::post('/logout', [AuthLoginController::class, 'logout'])
