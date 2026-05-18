@@ -350,9 +350,13 @@ class MasterController extends Controller
             11 => 'updated_at'
         ];
 
-        $query = Sequence::query();
+        // ✅ Base query with user_id filter
+        $query = Sequence::where('user_id', Auth::id());
+
+        // Total records (user wise)
         $totalData = $query->count();
-        // Search
+
+        // Search filter (same but on filtered query)
         if ($request->has('search') && $request->search['value'] != '') {
             $search = $request->search['value'];
             $query->where(function ($q) use ($search) {
@@ -364,10 +368,15 @@ class MasterController extends Controller
             });
         }
 
+        // Total after search
         $totalFiltered = $query->count();
+
+        // Ordering
         $orderColumn = $columns[$request->input('order.0.column', 0)];
         $orderDir = $request->input('order.0.dir', 'desc');
         $query->orderBy($orderColumn, $orderDir);
+
+        // Pagination
         $limit = $request->input('length', 10);
         $start = $request->input('start', 0);
         $sequences = $query->offset($start)->limit($limit)->get();
@@ -375,7 +384,7 @@ class MasterController extends Controller
         $data = [];
         foreach ($sequences as $seq) {
             $data[] = [
-                'edit' => '<a href="" class="btn btn-sm btn-primary">Edit</a>',
+                'edit' => '<a href="' . route('sequences-list-edit', $seq->id) . '" class="btn btn-sm btn-primary">Edit</a>',
                 'id' => $seq->id,
                 'step' => $seq->step,
                 'gap_days' => $seq->gap_days ?? '-',
@@ -397,5 +406,181 @@ class MasterController extends Controller
             'recordsFiltered' => $totalFiltered,
             'data' => $data
         ]);
+    }
+
+    public function sequencesListEdit($id)
+    {
+        $sequence = Sequence::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        return view('user.sequences-edit', compact('sequence'));
+    }
+
+    public function sequencesListUpdate(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $sequence = Sequence::where('id', $id)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+            // =========================
+            // VALIDATION
+            // =========================
+            $validated = $request->validate([
+                'step'           => 'required|integer|min:1',
+                'gap_days'       => 'required|integer|min:0',
+                'variant'        => 'nullable|string|max:10|regex:/^[A-Z0-9]+$/i',
+                'type'           => 'required|in:B2B,B2C',
+                'subject'        => 'required|string|max:255',
+                'message'        => 'required|string',
+                'whatsapp_link'  => 'nullable|url',
+                'telegram_link'  => 'nullable|url',
+                'business_link'  => 'nullable|url',
+                'logo_position'  => 'nullable|string',
+                'existing_company_logo' => 'nullable|string',
+                'image_type'     => 'nullable|string',
+                'hero_image'     => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'attachments_image' => 'nullable|file|max:5120',
+                'company_logo'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            ]);
+            // =========================
+            // NORMALIZE
+            // =========================
+            $validated['type'] = strtoupper($validated['type']);
+            $validated['variant'] = !empty($validated['variant']) ? strtoupper($validated['variant']) : null;
+            // =========================
+            // DUPLICATE CHECK
+            // =========================
+            $exists = Sequence::where('user_id', Auth::id())
+                ->where('id', '!=', $sequence->id)
+                ->where('step', $validated['step'])
+                ->where('gap_days', $validated['gap_days'])
+                ->whereRaw('UPPER(type) = ?', [$validated['type']])
+                ->where(function ($q) use ($validated) {
+                    if (!empty($validated['variant'])) {
+                        $q->where('variant', $validated['variant']);
+                    } else {
+                        $q->whereNull('variant');
+                    }
+                })
+                ->exists();
+            if ($exists) {
+                return response()->json([
+                    'status' => false,
+                    'errors' => [
+                        'step' => ['Sequence already exists ❌']
+                    ]
+                ], 422);
+            }
+
+            if ($request->hasFile('hero_image')) {
+                $request->validate(['hero_image' => 'image|mimes:jpeg,png,jpg,gif|max:2048']);
+                $file = $request->file('hero_image');
+                $filename = time() . '_hero_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $destination = public_path('hero_image');
+                if (!file_exists($destination)) mkdir($destination, 0777, true);
+                $file->move($destination, $filename);
+                $validated['hero_image'] = 'hero_image/' . $filename;
+            } else {
+                // Keep existing if no new file uploaded
+                $validated['hero_image'] = $sequence->hero_image;
+            }
+
+            // Handle attachment upload (replace)
+            if ($request->hasFile('attachments_image')) {
+                $request->validate(['attachments_image' => 'file|max:5120']);
+                $file = $request->file('attachments_image');
+                $filename = date('Ymd_His') . '_attach_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $destination = public_path('attachments_image');
+                if (!file_exists($destination)) mkdir($destination, 0777, true);
+                $file->move($destination, $filename);
+                $validated['attachments_image'] = 'attachments_image/' . $filename;
+                $validated['attachment_name'] = $file->getClientOriginalName();
+                $validated['attachment_size'] = $file->getSize();
+            } else {
+                $validated['attachments_image'] = $sequence->attachments_image;
+                $validated['attachment_name'] = $sequence->attachment_name;
+                $validated['attachment_size'] = $sequence->attachment_size;
+            }
+
+            // Handle company logo upload (replace)
+            if ($request->hasFile('company_logo')) {
+                $request->validate(['company_logo' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048']);
+                $file = $request->file('company_logo');
+                $filename = time() . '_logo_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $destination = public_path('uploads/company_logo');
+                if (!file_exists($destination)) mkdir($destination, 0777, true);
+                $file->move($destination, $filename);
+                $validated['existing_company_logo'] = 'uploads/company_logo/' . $filename;
+            } else {
+                // Keep existing (if not removed)
+                if ($request->input('remove_logo') == 1) {
+                    $validated['existing_company_logo'] = null;
+                } else {
+                    $validated['existing_company_logo'] = $sequence->existing_company_logo;
+                }
+            }
+
+            // =========================
+            // UPDATE SEQUENCE
+            // =========================
+            $sequence->update($validated);
+            // =========================
+            // DELETE OLD PENDING LOGS
+            // =========================
+            CampaignLog::where('sequence_id', $sequence->id)
+                ->where('status', 'pending')
+                ->delete();
+            // =========================
+            // GET MATCHING LEADS
+            // =========================
+            $leads = Lead::where('user_id', Auth::id())
+                ->whereRaw('UPPER(type) = ?', [$sequence->type])
+                ->get();
+            // =========================
+            // RECREATE JOBS
+            // =========================
+            foreach ($leads as $lead) {
+                // Prevent duplicate
+                $alreadyQueued = CampaignLog::where('lead_id', $lead->id)
+                    ->where('sequence_id', $sequence->id)
+                    ->where('status', 'pending')
+                    ->exists();
+                if ($alreadyQueued) {
+                    continue;
+                }
+                // Delay
+                $delay = now()->addDays((int) $sequence->gap_days);
+                // Create fresh log
+                CampaignLog::create([
+                    'user_id' => Auth::id(),
+                    'lead_id' => $lead->id,
+                    'sequence_id' => $sequence->id,
+                    'status' => 'pending',
+                    'scheduled_at' => $delay,
+                ]);
+                // Dispatch fresh job
+                SendCampaignJob::dispatch(
+                    $lead->id,
+                    $sequence->id,
+                    Auth::id()
+                )->delay($delay);
+            }
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => 'Sequence updated & campaign restarted successfully 🚀'
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Sequence Update Error', [
+                'message' => $e->getMessage()
+            ]);
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -364,15 +364,8 @@ body{
 }
 
 </style>
-
 <script src="{{ asset('js/jquery.min.js') }}"></script>
-
-<link rel="stylesheet"
-href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 <script>
-
 $(document).ready(function() {
 
     var table = $('#sequencesTable').DataTable({
@@ -466,29 +459,48 @@ $(document).ready(function() {
     // INLINE EDIT
     // =======================
 
-    $('#sequencesTable tbody').on('click','td.editable-cell',function(){
-        if($(this).find('input').length){
-            return;
-        }
+    $('#sequencesTable tbody').on('click', 'td.editable-cell', function() {
+        if ($(this).find('input').length) return;
+
         let td = $(this);
         let currentValue = td.text().trim();
         let field = td.data('field');
         let id = td.data('id');
-        let input = $('<input>',{
-            type:'text',
-            value:currentValue,
-            class:'editable-input'
+
+        let input = $('<input>', {
+            type: 'text',
+            value: currentValue,
+            class: 'editable-input'
         });
+
         td.html(input);
         input.focus();
-        input.on('blur',function(){
-            saveInlineEdit(td,id,field,input.val());
-        }).on('keypress',function(e){
-            if(e.which === 13){
-                input.blur();
+
+        // Optional: force uppercase while typing
+        input.on('input', function() {
+            if (field === 'variant') {
+                let start = this.selectionStart;
+                let end = this.selectionEnd;
+                let oldValue = $(this).val();
+                let newValue = oldValue.toUpperCase();
+                if (oldValue !== newValue) {
+                    $(this).val(newValue);
+                    this.setSelectionRange(start, end);
+                }
             }
         });
 
+        input.on('blur', function() {
+            let newValue = input.val().trim();
+            if (field === 'variant') {
+                newValue = newValue.toUpperCase();
+            }
+            saveInlineEdit(td, id, field, newValue);
+        }).on('keypress', function(e) {
+            if (e.which === 13) {
+                input.blur();
+            }
+        });
     });
 
 

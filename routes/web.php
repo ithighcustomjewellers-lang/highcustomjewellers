@@ -25,27 +25,35 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'Dashboard'])->name('dashboard');
+
     // profile page
     Route::get('/user-profile', [DashboardController::class, 'UserProfile'])->name('user-profile');
     Route::post('/submit-profile-update', [DashboardController::class, 'submitProfileUpdate'])->name('submit-profile-update');
     Route::get('/submit-profile', [DashboardController::class, 'profile'])->name('profile-remove-image');
+
     // user google mail send
     Route::get('/connect-gmail', [GoogleController::class, 'redirect']);
     Route::get('/google/callback', [GoogleController::class, 'callback']);
+
     // master page
     Route::get('masterList', [MasterController::class, 'masterDataList'])->name('master-data-list');
     Route::post('sequences/inline-update', [MasterController::class, 'inlineUpdate'])->name('master-list-sequences-inlineUpdate');
     Route::post('/sequences/data', [MasterController::class, 'getSequencesList'])->name('getSequences-data');
-
     Route::get('/master', [MasterController::class, 'masterViewPage'])->name('master-view-page');
+    Route::get('/sequenceslist/edit/{id}', [MasterController::class, 'sequencesListEdit'])->name('sequences-list-edit');
+    Route::post('/sequences/{id}/update', [MasterController::class, 'sequencesListUpdate'])->name('sequences-list-update');
+
+    // BusinessLinks page
     Route::get('/Link', [MasterController::class, 'masterLinkDocument'])->name('master-link-document');
     Route::post('/BusinessLinks', [MasterController::class, 'submitBusinessLinks'])->name('submit-business-links');
     Route::get('/admin/business-links', [MasterController::class, 'getBusinessLinks'])->name('user-business-links');
     Route::post('/sequences/store', [MasterController::class, 'sequencesStore'])->name('user-sequences-store');
-    // Route::get('/Leads', [LeadsController::class, 'index'])->name('admin-Leads-index');
+
     Route::get('/Leads', [LeadsController::class, 'index'])->name('leads-index');
     Route::post('/leads/store', [LeadsController::class, 'leadStore'])->name('lead-store');
     Route::get('/leads/list', [LeadsController::class, 'leadList'])->name('lead-list');
+    Route::PUT('/leads/{id}', [LeadsController::class, 'leadsUpdate'])->name('leads-update');
+    Route::post('/leads/bulk-upload', [LeadsController::class, 'bulkLeadsUpload'])->name('bulk-leads-upload');
 });
 
 // admin info

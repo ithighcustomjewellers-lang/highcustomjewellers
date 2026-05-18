@@ -20,23 +20,23 @@ class GoogleController extends Controller
     }
 
     public function callback()
-{
-    $googleUser = Socialite::driver('google')->stateless()->user();
+    {
+        $googleUser = Socialite::driver('google')->stateless()->user();
 
-    /** @var User $user */
-    $user = Auth::user();
+        /** @var User $user */
+        $user = Auth::user();
 
-    if (!$user) {
-        return redirect()->route('login')
-            ->with('error', 'User not logged in');
+        if (!$user) {
+            return redirect()->route('login')
+                ->with('error', 'User not logged in');
+        }
+
+        $user->gmail_token = $googleUser->token;
+        $user->gmail_refresh_token = $googleUser->refreshToken;
+
+        $user->save();
+
+        return redirect()->route('admin-dashboard')
+            ->with('success', 'Gmail connected successfully');
     }
-
-    $user->gmail_token = $googleUser->token;
-    $user->gmail_refresh_token = $googleUser->refreshToken;
-
-    $user->save();
-
-    return redirect()->route('admin-dashboard')
-        ->with('success', 'Gmail connected successfully');
-}
 }
