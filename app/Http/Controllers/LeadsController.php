@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\CampaignController;
+use App\Jobs\StartCampaignJob;
 use Illuminate\Support\Facades\DB;
 use App\Models\Lead;
 use Illuminate\Support\Facades\Auth;
@@ -234,65 +235,99 @@ class LeadsController extends Controller
         $request->validate([
             'excel_file' => 'required|mimes:xlsx,xls,csv'
         ]);
-        DB::beginTransaction();
+
         try {
+
+            // =========================
+            // READ EXCEL
+            // =========================
+
             $rows = Excel::toArray([], $request->file('excel_file'));
-            if (empty($rows) || empty($rows[0])){
-                return redirect()->back()->with('error',
+
+            if (empty($rows) || empty($rows[0])) {
+
+                return redirect()->back()->with(
+                    'error',
                     'Excel file is empty ❌'
                 );
             }
+
             $dataRows = $rows[0];
+
+            // Remove heading row
             unset($dataRows[0]);
+
             $userId = Auth::id();
+
             $inserted = 0;
             $duplicates = 0;
             $invalid = 0;
+
+            // =========================
+            // DELAY START
+            // =========================
+
+            $delaySeconds = 0;
+
             foreach ($dataRows as $row) {
+
                 // =========================
                 // SKIP EMPTY ROW
                 // =========================
-                if (empty($row[0]) && empty($row[1]) && empty($row[2])) {
+
+                if (empty($row[0]) && empty($row[1]) && empty($row[2]))
+                {
                     continue;
                 }
+
                 // =========================
                 // NORMALIZE DATA
                 // =========================
+
                 $email = strtolower(trim($row[0] ?? ''));
                 $name = trim($row[1] ?? '');
                 $lastname = trim($row[2] ?? '');
                 $company = trim($row[3] ?? '');
                 $type = strtoupper(trim($row[4] ?? 'B2B'));
+
                 // =========================
                 // VALIDATION
                 // =========================
-                if (empty($email) || empty($name) || empty($lastname) || empty($company)) {
+
+                if (empty($email) || empty($name) ||empty($lastname) ||empty($company)) {
                     $invalid++;
                     continue;
                 }
+
                 // Validate email
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $invalid++;
                     continue;
                 }
+
                 // Validate type
                 if (!in_array($type, ['B2B', 'B2C'])) {
                     $invalid++;
                     continue;
                 }
+
                 // =========================
                 // DUPLICATE CHECK
                 // =========================
+
                 $exists = Lead::where('user_id', $userId)
                     ->where('email', $email)
                     ->exists();
+
                 if ($exists) {
                     $duplicates++;
                     continue;
                 }
+
                 // =========================
                 // CREATE LEAD
                 // =========================
+
                 $lead = Lead::create([
                     'user_id' => $userId,
                     'email' => $email,
@@ -301,24 +336,44 @@ class LeadsController extends Controller
                     'company_name' => $company,
                     'type' => $type,
                     'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
+
                 // =========================
-                // START CAMPAIGN
+                // START CAMPAIGN WITH DELAY
                 // =========================
-                app(CampaignController::class)->start($lead->id);
+
+                StartCampaignJob::dispatch($lead->id)
+                    ->delay(now()->addSeconds($delaySeconds));
+
+                // Random delay
+                $delaySeconds += rand(20, 40);
+
                 $inserted++;
             }
-            DB::commit();
+
             return redirect()->back()->with(
                 'success',
-                "Upload completed 🚀 Inserted: {$inserted}, Duplicates Skipped: {$duplicates}, Invalid Rows: {$invalid}"
+                "Upload completed 🚀
+                Inserted: {$inserted},
+                Duplicates Skipped: {$duplicates},
+                Invalid Rows: {$invalid}"
             );
         } catch (\Throwable $e) {
-            DB::rollBack();
+
             return redirect()->back()->with(
                 'error',
                 $e->getMessage()
             );
         }
+    }
+
+    public function downloadDemo()
+    {
+        $path = public_path('excel/bulk-lead.xlsx');
+        while (ob_get_level()) ob_end_clean();
+        return response()->download($path, 'bulk-lead.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 }

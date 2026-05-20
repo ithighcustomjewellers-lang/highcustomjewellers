@@ -305,6 +305,38 @@
             }
         }
 
+        /* today badge */
+        .today-badge {
+            background: linear-gradient(125deg, #f6d58b, #e4b05a);
+            color: #0a0c12;
+            padding: 10px 22px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            white-space: nowrap;
+        }
+
+        /* download demo */
+        .download-box {
+            height: 46px;
+            padding: 0 18px;
+            border-radius: 60px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(246, 213, 139, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .download-box:hover {
+            background: rgba(246, 213, 139, 0.12);
+            border-color: #f6d58b;
+            transform: translateY(-2px);
+        }
+
         .upload-box {
             height: 48px;
             border-radius: 14px;
@@ -335,6 +367,29 @@
         .upload-icon {
             font-size: 18px;
         }
+
+        .download-box {
+            height: 48px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .download-box:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            border-color: #f6d58b;
+        }
+
+        .container{
+            max-width: 100%;
+        }
+
     </style>
 
     <div class="container py-4">
@@ -377,9 +432,24 @@
         <!-- LIVE LEAD LIST CARD -->
         <div class="glass-card p-4 p-md-3">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-                <h3 class="gold-title mb-0">📋 Live Lead List</h3>
-                <div class="today-badge">
-                    📅 Today added: <span id="todayCount" class="fw-bold">0</span>
+                <!-- Left Title -->
+                <h3 class="gold-title mb-0">
+                    📋 Live Lead List
+                </h3>
+                <!-- Right Side -->
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <!-- Download Demo -->
+                    <a href="{{ route('download-leads-demo') }}" class="download-box text-decoration-none">
+                        <div class="upload-content">
+                            <i class="fa fa-download upload-icon"></i>
+                            <span>Download Excel File</span>
+                        </div>
+                    </a>
+                    <!-- Today Badge -->
+                    <div class="today-badge">
+                        📅 Today added:
+                        <span id="todayCount" class="fw-bold">0</span>
+                    </div>
                 </div>
             </div>
 
@@ -626,8 +696,8 @@
         function renderTable(data) {
             if (!data.length) {
                 $('#leadTableBody').html(
-                    '<tr><td colspan="6" class="text-center py-5 text-muted">✨ No leads found for this period</td></tr>'
-                    );
+                    '<tr><td colspan="6" class="text-center py-5">✨ No leads found for this period</td></tr>'
+                );
                 return;
             }
             let html = '';
@@ -684,7 +754,7 @@
                     toastr.error('Failed to load leads');
                     $('#leadTableBody').html(
                         '<tr><td colspan="6" class="text-center py-5 text-muted">⚠️ Could not fetch leads</td></tr>'
-                        );
+                    );
                 }
             });
         }
@@ -761,7 +831,7 @@
                     let formattedEnd = formatDateToDMY(end);
                     $('#activeFilterBadge').html(
                         `<div class="filter-active"><i class="fas fa-calendar-alt"></i> ${formattedStart} → ${formattedEnd}</div>`
-                        );
+                    );
                 } else {
                     $('#activeFilterBadge').html('');
                 }
