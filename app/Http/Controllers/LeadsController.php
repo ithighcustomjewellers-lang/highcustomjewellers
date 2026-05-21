@@ -237,13 +237,11 @@ class LeadsController extends Controller
         ]);
 
         try {
-
             // =========================
             // READ EXCEL
             // =========================
 
             $rows = Excel::toArray([], $request->file('excel_file'));
-
             if (empty($rows) || empty($rows[0])) {
 
                 return redirect()->back()->with(
@@ -253,16 +251,12 @@ class LeadsController extends Controller
             }
 
             $dataRows = $rows[0];
-
             // Remove heading row
             unset($dataRows[0]);
-
             $userId = Auth::id();
-
             $inserted = 0;
             $duplicates = 0;
             $invalid = 0;
-
             // =========================
             // DELAY START
             // =========================
@@ -270,16 +264,13 @@ class LeadsController extends Controller
             $delaySeconds = 0;
 
             foreach ($dataRows as $row) {
-
                 // =========================
                 // SKIP EMPTY ROW
                 // =========================
-
                 if (empty($row[0]) && empty($row[1]) && empty($row[2]))
                 {
                     continue;
                 }
-
                 // =========================
                 // NORMALIZE DATA
                 // =========================
@@ -289,7 +280,6 @@ class LeadsController extends Controller
                 $lastname = trim($row[2] ?? '');
                 $company = trim($row[3] ?? '');
                 $type = strtoupper(trim($row[4] ?? 'B2B'));
-
                 // =========================
                 // VALIDATION
                 // =========================
@@ -298,7 +288,6 @@ class LeadsController extends Controller
                     $invalid++;
                     continue;
                 }
-
                 // Validate email
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $invalid++;
@@ -310,7 +299,6 @@ class LeadsController extends Controller
                     $invalid++;
                     continue;
                 }
-
                 // =========================
                 // DUPLICATE CHECK
                 // =========================
@@ -318,12 +306,10 @@ class LeadsController extends Controller
                 $exists = Lead::where('user_id', $userId)
                     ->where('email', $email)
                     ->exists();
-
                 if ($exists) {
                     $duplicates++;
                     continue;
                 }
-
                 // =========================
                 // CREATE LEAD
                 // =========================
@@ -342,13 +328,10 @@ class LeadsController extends Controller
                 // =========================
                 // START CAMPAIGN WITH DELAY
                 // =========================
-
                 StartCampaignJob::dispatch($lead->id)
                     ->delay(now()->addSeconds($delaySeconds));
-
                 // Random delay
                 $delaySeconds += rand(20, 40);
-
                 $inserted++;
             }
 

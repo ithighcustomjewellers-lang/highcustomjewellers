@@ -10,9 +10,9 @@ class CampaignLog extends Model
         'user_id',
         'lead_id',
         'sequence_id',
-        'sent_at',
         'status',
-        'variant'
+        'scheduled_at',
+        'sent_at'
     ];
 
     // 🔗 belongs to contact

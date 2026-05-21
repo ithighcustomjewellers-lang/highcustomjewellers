@@ -111,9 +111,7 @@ class MasterController extends Controller
         Log::info('Store sequence request received', [
             'data' => $request->all()
         ]);
-
         $userId = Auth::id();
-
         // =========================
         // ✅ VALIDATION
         // =========================
@@ -140,7 +138,6 @@ class MasterController extends Controller
             // ✅ NORMALIZE
             // =========================
             $type = strtoupper($request->type);
-
             $variant = $request->variant
                 ? strtoupper($request->variant)
                 : null;
@@ -152,7 +149,6 @@ class MasterController extends Controller
                 ->where('gap_days', $request->gap_days)
                 ->whereRaw('UPPER(type) = ?', [$type])
                 ->where(function ($q) use ($variant) {
-
                     if ($variant) {
                         $q->where('variant', $variant);
                     } else {
@@ -160,7 +156,6 @@ class MasterController extends Controller
                     }
                 })
                 ->exists();
-
             if ($exists) {
                 return response()->json([
                     'errors' => [
@@ -168,7 +163,6 @@ class MasterController extends Controller
                     ]
                 ], 422);
             }
-
             // =========================
             // ✅ COMPANY LOGO
             // =========================
@@ -243,8 +237,43 @@ class MasterController extends Controller
                 ->whereRaw('UPPER(type) = ?', [$type])
                 ->get();
 
-            foreach ($leads as $lead) {
+            // foreach ($leads as $lead) {
+            //     // =========================
+            //     // ❌ PREVENT DUPLICATE
+            //     // =========================
+            //     $alreadyQueued = CampaignLog::where('user_id', $userId)
+            //         ->where('lead_id', $lead->id)
+            //         ->where('sequence_id', $sequence->id)
+            //         ->exists();
+            //     if ($alreadyQueued) {
+            //         continue;
+            //     }
 
+            //     // =========================
+            //     // ✅ SEND DATE
+            //     // =========================
+            //     $delay = now()->addDays((int) $sequence->gap_days);
+            //     // =========================
+            //     // ✅ CREATE LOG
+            //     // =========================
+            //     CampaignLog::create([
+            //         'user_id' => $userId,
+            //         'lead_id' => $lead->id,
+            //         'sequence_id' => $sequence->id,
+            //         'status' => 'pending',
+            //         'scheduled_at' => $delay,
+            //     ]);
+            //     // =========================
+            //     // ✅ DISPATCH JOB
+            //     // =========================
+            //     SendCampaignJob::dispatch(
+            //         $lead->id,
+            //         $sequence->id,
+            //         $userId
+            //     )->delay($delay);
+            // }
+
+            foreach ($leads as $lead) {
                 // =========================
                 // ❌ PREVENT DUPLICATE
                 // =========================
@@ -258,9 +287,22 @@ class MasterController extends Controller
                 }
 
                 // =========================
-                // ✅ SEND DATE
+                // ✅ BASE DELAY (DAYS)
                 // =========================
-                $delay = now()->addDays((int) $sequence->gap_days);
+                $baseDelay = now()->addDays((int) $sequence->gap_days);
+
+                // =========================
+                // ✅ RANDOM STAGGER DELAY
+                // =========================
+                if (!isset($delaySeconds)) {
+                    $delaySeconds = 0;
+                }
+
+                // Add stagger delay
+                $finalDelay = $baseDelay->copy()->addSeconds($delaySeconds);
+
+                // Next lead random delay
+                $delaySeconds += rand(20, 40);
 
                 // =========================
                 // ✅ CREATE LOG
@@ -270,7 +312,7 @@ class MasterController extends Controller
                     'lead_id' => $lead->id,
                     'sequence_id' => $sequence->id,
                     'status' => 'pending',
-                    'scheduled_at' => $delay,
+                    'scheduled_at' => $finalDelay,
                 ]);
 
                 // =========================
@@ -280,7 +322,7 @@ class MasterController extends Controller
                     $lead->id,
                     $sequence->id,
                     $userId
-                )->delay($delay);
+                )->delay($finalDelay);
             }
 
             return response()->json([
@@ -419,6 +461,8 @@ class MasterController extends Controller
 
     public function sequencesListUpdate(Request $request, $id)
     {
+
+        $userId = Auth::id();
         DB::beginTransaction();
         try {
             $sequence = Sequence::where('id', $id)
@@ -488,16 +532,53 @@ class MasterController extends Controller
             }
 
             // Handle attachment upload (replace)
+            // if ($request->hasFile('attachments_image')) {
+            //     $request->validate(['attachments_image' => 'file|max:5120']);
+            //     $file = $request->file('attachments_image');
+            //     $filename = date('Ymd_His') . '_attach_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            //     $destination = public_path('attachments_image');
+            //     if (!file_exists($destination)) mkdir($destination, 0777, true);
+            //     $file->move($destination, $filename);
+            //     $validated['attachments_image'] = 'attachments_image/' . $filename;
+            //     $validated['attachment_name'] = $file->getClientOriginalName();
+            //     $validated['attachment_size'] = $file->getSize();
+            // } else {
+            //     $validated['attachments_image'] = $sequence->attachments_image;
+            //     $validated['attachment_name'] = $sequence->attachment_name;
+            //     $validated['attachment_size'] = $sequence->attachment_size;
+            // }
+
+            // Handle attachment upload (replace)
             if ($request->hasFile('attachments_image')) {
-                $request->validate(['attachments_image' => 'file|max:5120']);
+                $request->validate([ 'attachments_image' => 'file|max:5120']);
                 $file = $request->file('attachments_image');
-                $filename = date('Ymd_His') . '_attach_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                // =========================
+                // ✅ FILE INFO FIRST
+                // =========================
+                $originalName = $file->getClientOriginalName();
+                $fileSize = $file->getSize();
+                $extension = $file->getClientOriginalExtension();
+                // =========================
+                // ✅ FILE NAME
+                // =========================
+                $filename = date('Ymd_His') .'_attach_' . uniqid() .'.' . $extension;
+                // =========================
+                // ✅ DESTINATION
+                // =========================
                 $destination = public_path('attachments_image');
-                if (!file_exists($destination)) mkdir($destination, 0777, true);
+                if (!file_exists($destination)) {
+                    mkdir($destination, 0777, true);
+                }
+                // =========================
+                // ✅ MOVE FILE
+                // =========================
                 $file->move($destination, $filename);
+                // =========================
+                // ✅ SAVE DATA
+                // =========================
                 $validated['attachments_image'] = 'attachments_image/' . $filename;
-                $validated['attachment_name'] = $file->getClientOriginalName();
-                $validated['attachment_size'] = $file->getSize();
+                $validated['attachment_name'] = $originalName;
+                $validated['attachment_size'] = $fileSize;
             } else {
                 $validated['attachments_image'] = $sequence->attachments_image;
                 $validated['attachment_name'] = $sequence->attachment_name;
@@ -529,43 +610,104 @@ class MasterController extends Controller
             // =========================
             // DELETE OLD PENDING LOGS
             // =========================
+            // CampaignLog::where('sequence_id', $sequence->id)
+            //     ->where('status', 'pending')
+            //     ->delete();
+
             CampaignLog::where('sequence_id', $sequence->id)
                 ->where('status', 'pending')
-                ->delete();
+                ->update([
+                    'status' => 'cancelled'
+                ]);
             // =========================
             // GET MATCHING LEADS
             // =========================
             $leads = Lead::where('user_id', Auth::id())
                 ->whereRaw('UPPER(type) = ?', [$sequence->type])
                 ->get();
+
+
             // =========================
             // RECREATE JOBS
             // =========================
+            // foreach ($leads as $lead) {
+            //     // Prevent duplicate
+            //     $alreadyQueued = CampaignLog::where('lead_id', $lead->id)
+            //         ->where('sequence_id', $sequence->id)
+            //         ->where('status', 'pending')
+            //         ->exists();
+            //     if ($alreadyQueued) {
+            //         continue;
+            //     }
+            //     // Delay
+            //     $delay = now()->addDays((int) $sequence->gap_days);
+            //     // Create fresh log
+            //     CampaignLog::create([
+            //         'user_id' => Auth::id(),
+            //         'lead_id' => $lead->id,
+            //         'sequence_id' => $sequence->id,
+            //         'status' => 'pending',
+            //         'scheduled_at' => $delay,
+            //     ]);
+            //     // Dispatch fresh job
+            //     SendCampaignJob::dispatch(
+            //         $lead->id,
+            //         $sequence->id,
+            //         Auth::id()
+            //     )->delay($delay);
+            // }
+
             foreach ($leads as $lead) {
-                // Prevent duplicate
-                $alreadyQueued = CampaignLog::where('lead_id', $lead->id)
+                // =========================
+                // ❌ PREVENT DUPLICATE
+                // =========================
+                $alreadyQueued = CampaignLog::where('user_id', $userId)
+                    ->where('lead_id', $lead->id)
                     ->where('sequence_id', $sequence->id)
-                    ->where('status', 'pending')
                     ->exists();
+
                 if ($alreadyQueued) {
                     continue;
                 }
-                // Delay
-                $delay = now()->addDays((int) $sequence->gap_days);
-                // Create fresh log
+
+                // =========================
+                // ✅ BASE DELAY (DAYS)
+                // =========================
+                $baseDelay = now()->addDays((int) $sequence->gap_days);
+
+                // =========================
+                // ✅ RANDOM STAGGER DELAY
+                // =========================
+                if (!isset($delaySeconds)) {
+                    $delaySeconds = 0;
+                }
+
+                // Add stagger delay
+                $finalDelay = $baseDelay->copy()
+                    ->addSeconds($delaySeconds);
+
+                // Next lead random delay
+                $delaySeconds += rand(20, 40);
+
+                // =========================
+                // ✅ CREATE LOG
+                // =========================
                 CampaignLog::create([
-                    'user_id' => Auth::id(),
+                    'user_id' => $userId,
                     'lead_id' => $lead->id,
                     'sequence_id' => $sequence->id,
                     'status' => 'pending',
-                    'scheduled_at' => $delay,
+                    'scheduled_at' => $finalDelay,
                 ]);
-                // Dispatch fresh job
+
+                // =========================
+                // ✅ DISPATCH JOB
+                // =========================
                 SendCampaignJob::dispatch(
                     $lead->id,
                     $sequence->id,
-                    Auth::id()
-                )->delay($delay);
+                    $userId
+                )->delay($finalDelay);
             }
             DB::commit();
             return response()->json([

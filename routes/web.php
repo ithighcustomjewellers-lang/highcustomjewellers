@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\DashboardController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController as AuthLoginController;
+use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\LeadsController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\privacyPolicyController;
@@ -53,6 +54,10 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::PUT('leads/{id}', [LeadsController::class, 'leadsUpdate'])->name('leads-update');
     Route::post('leads/bulk-upload', [LeadsController::class, 'bulkLeadsUpload'])->name('bulk-leads-upload');
     Route::get('download-leads-excel',[LeadsController::class, 'downloadDemo'])->name('download-leads-demo');
+
+    Route::get('/lead-response/{log}/{status}',[CampaignController::class, 'leadResponse'])->name('lead-response');
+    Route::get('/track-open/{logId}', [CampaignController::class, 'trackOpen'])->name('track-open');
+
 });
 
 // admin info
