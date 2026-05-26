@@ -63,4 +63,16 @@ class User extends Authenticatable
     {
         $this->notify(new CustomResetPassword($token));
     }
+
+
+
+    public function socialLinks()
+    {
+        return $this->hasMany(SocialLink::class);
+    }
+
+    public function settings()
+    {
+        return $this->hasMany(UserSetting::class);
+    }
 }

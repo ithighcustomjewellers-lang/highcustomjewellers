@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Jobs;
+
 use App\Models\User;
 use App\Models\Lead;
 use App\Models\CampaignLog;
@@ -35,7 +36,8 @@ class SendCampaignJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(int $leadId, int $sequenceId, int $userId) {
+    public function __construct(int $leadId, int $sequenceId, int $userId)
+    {
         $this->leadId = $leadId;
         $this->sequenceId = $sequenceId;
         $this->userId = $userId;
@@ -46,15 +48,9 @@ class SendCampaignJob implements ShouldQueue
      */
     public function handle(): void
     {
-        // =========================================
-        // ✅ FETCH DATA
-        // =========================================
         $lead = Lead::find($this->leadId);
         $sequence = Sequence::find($this->sequenceId);
         $user = User::find($this->userId);
-        // =========================================
-        // ❌ MISSING DATA
-        // =========================================
         if (!$lead || !$sequence || !$user) {
             Log::warning('SendCampaignJob missing data', [
                 'lead_id'     => $this->leadId,
@@ -64,27 +60,13 @@ class SendCampaignJob implements ShouldQueue
             return;
         }
 
-        // =========================================
-        // ❌ STOP IF UNSUBSCRIBED
-        // =========================================
         if ($lead->is_unsubscribed) {
             Log::info('Lead unsubscribed. Mail skipped.', [
                 'lead_id' => $lead->id
             ]);
             return;
         }
-        // =========================================
-        // ✅ GET PENDING CAMPAIGN LOG
-        // =========================================
-        $campaignLog = CampaignLog::where('lead_id', $lead->id)
-            ->where('sequence_id', $sequence->id)
-            ->where('status', 'pending')
-            ->latest()
-            ->first();
-
-        // =========================================
-        // ❌ ALREADY PROCESSED
-        // =========================================
+        $campaignLog = CampaignLog::where('lead_id', $lead->id)->where('sequence_id', $sequence->id)->where('status', 'pending')->latest()->first();
         if (!$campaignLog) {
             Log::info('Campaign already processed', [
                 'lead_id'     => $lead->id,
@@ -93,13 +75,8 @@ class SendCampaignJob implements ShouldQueue
             return;
         }
 
-        // =========================================
-        // ✅ REPLACE VARIABLES
-        // =========================================
         $variables = [
-            '[Name]' => $lead->name
-                ?? $lead->fullname
-                ?? '',
+            '[Name]' => $lead->name ?? $lead->fullname ?? '',
             '[Company Name]' => $lead->company_name ?? '',
         ];
 
@@ -116,13 +93,7 @@ class SendCampaignJob implements ShouldQueue
         );
 
         try {
-            // =========================================
-            // ✅ GMAIL API
-            // =========================================
-            if ( $user->gmail_token && $user->gmail_refresh_token) {
-                // =========================================
-                // ✅ RENDER EMAIL HTML
-                // =========================================
+            if ($user->gmail_token && $user->gmail_refresh_token) {
                 $html = view('emails.sequence', [
                     'lead'         => $lead,
                     'sequence'     => $sequence,
@@ -130,22 +101,12 @@ class SendCampaignJob implements ShouldQueue
                     'finalMessage' => $finalMessage,
                     'subjectLine'  => $subject
                 ])->render();
-                // =========================================
-                // ✅ SEND VIA GMAIL API
-                // =========================================
-                $this->sendViaGmailAPI($user, $lead->email, $subject, $html);
+                $this->sendViaGmailAPI($user, $lead->email, $subject, $html, $sequence);
             } else {
-                // =========================================
-                // ✅ SMTP FALLBACK
-                // =========================================
-                Mail::to($lead->email)->send(new SequenceMail($lead,$sequence, $finalMessage, $subject));
+                Mail::to($lead->email)->send(new SequenceMail($lead, $sequence, $finalMessage, $subject, $campaignLog));
             }
-
-            // =========================================
-            // ✅ UPDATE LOG SUCCESS
-            // =========================================
             $campaignLog->update([
-                'status'  => 'sent',
+                'status'  => 'send',
                 'sent_at' => now()
             ]);
 
@@ -155,14 +116,10 @@ class SendCampaignJob implements ShouldQueue
                 'user_id'     => $user->id,
             ]);
         } catch (\Exception $e) {
-            // =========================================
-            // ❌ UPDATE FAILED STATUS
-            // =========================================
             $campaignLog->update([
                 'status' => 'failed'
             ]);
             Log::error("Failed to send campaign", [
-
                 'lead_id'     => $lead->id,
                 'sequence_id' => $sequence->id,
                 'error'       => $e->getMessage(),
@@ -176,11 +133,137 @@ class SendCampaignJob implements ShouldQueue
      * ✅ SEND VIA GMAIL API
      * =========================================
      */
-    private function sendViaGmailAPI($user,string $to,string $subject,string $html): void {
+    // private function sendViaGmailAPI($user,string $to,string $subject,string $html): void {
+    //     $client = new Google_Client();
+    //     $client->setClientId(config('services.google.client_id'));
+    //     $client->setClientSecret(config('services.google.client_secret'));
+    //     // ========================================
+    //     // ✅ ACCESS TOKEN
+    //     // =========================================
+    //     $client->setAccessToken([
+    //         'access_token'  => $user->gmail_token,
+    //         'refresh_token' => $user->gmail_refresh_token,
+    //     ]);
+
+    //     // =========================================
+    //     // ✅ REFRESH TOKEN
+    //     // =========================================
+    //     if ($client->isAccessTokenExpired()) {
+    //         if (!$user->gmail_refresh_token) {
+    //             throw new \Exception(
+    //                 "No refresh token available."
+    //             );
+    //         }
+
+    //         $newToken = $client->fetchAccessTokenWithRefreshToken($user->gmail_refresh_token);
+    //         if (isset($newToken['access_token'])) {
+    //             $user->gmail_token = $newToken['access_token'];
+    //             $user->save();
+    //             $client->setAccessToken($newToken);
+    //         } else {
+    //             throw new \Exception(
+    //                 "Failed to refresh Gmail token."
+    //             );
+    //         }
+    //     }
+
+    //     $service = new Google_Service_Gmail($client);
+    //     // =========================================
+    //     // ✅ MIME BOUNDARY
+    //     // =========================================
+    //     $boundary = uniqid(rand(), true);
+
+
+    //     $rawMessage = "MIME-Version: 1.0\r\n";
+    //     $rawMessage .= "To: {$to}\r\n";
+    //     $rawMessage .= "Subject: {$subject}\r\n";
+    //     $rawMessage .= "Content-Type: multipart/mixed; boundary=\"{$boundary}\"\r\n\r\n";
+
+
+    //     // =========================================
+    //     // HTML BODY
+    //     // =========================================
+    //     $rawMessage .= "--{$boundary}\r\n";
+    //     $rawMessage .= "Content-Type: text/html; charset=UTF-8\r\n";
+    //     $rawMessage .= "Content-Transfer-Encoding: base64\r\n\r\n";
+    //     $rawMessage .= chunk_split(base64_encode($html)) . "\r\n";
+
+
+    //     // =========================================
+    //     // ATTACHMENT
+    //     // =========================================
+    //     if (
+    //         !empty($this->sequence->attachments_image)
+    //         &&
+    //         file_exists(public_path($this->sequence->attachments_image))
+    //     ) {
+
+    //         $filePath = public_path(
+    //             $this->sequence->attachments_image
+    //         );
+
+    //         $fileData = chunk_split(
+    //             base64_encode(file_get_contents($filePath))
+    //         );
+
+    //         $fileName = $this->sequence->attachment_name
+    //             ?? basename($filePath);
+
+    //         $mime = mime_content_type($filePath);
+
+    //         $rawMessage .= "--{$boundary}\r\n";
+
+    //         $rawMessage .= "Content-Type: {$mime}; name=\"{$fileName}\"\r\n";
+
+    //         $rawMessage .= "Content-Disposition: attachment; filename=\"{$fileName}\"\r\n";
+
+    //         $rawMessage .= "Content-Transfer-Encoding: base64\r\n\r\n";
+
+    //         $rawMessage .= $fileData . "\r\n";
+    //     }
+
+
+    //     // =========================================
+    //     // END BOUNDARY
+    //     // =========================================
+    //     $rawMessage .= "--{$boundary}--";
+    //     // =========================================
+    //     // ✅ ENCODE MESSAGE
+    //     // =========================================
+    //     $encodedMessage = rtrim(
+    //         strtr(base64_encode($rawMessage),'+/','-_'),'='
+    //     );
+
+    //     $msg = new Google_Service_Gmail_Message();
+    //     $msg->setRaw($encodedMessage);
+
+    //     // =========================================
+    //     // ✅ SEND EMAIL
+    //     // =========================================
+    //     try {
+    //         $service->users_messages->send('me', $msg);
+    //     } catch (\Exception $e) {
+    //         Log::error("Gmail API send error", ['error' => $e->getMessage()]);
+    //         throw $e;
+    //     }
+    // }
+
+    private function sendViaGmailAPI($user, string $to, string $subject, string $html, $sequence): void {
+
+        // =========================================
+        // ✅ GOOGLE CLIENT
+        // =========================================
         $client = new Google_Client();
-        $client->setClientId(config('services.google.client_id'));
-        $client->setClientSecret(config('services.google.client_secret'));
-        // ========================================
+
+        $client->setClientId(
+            config('services.google.client_id')
+        );
+
+        $client->setClientSecret(
+            config('services.google.client_secret')
+        );
+
+        // =========================================
         // ✅ ACCESS TOKEN
         // =========================================
         $client->setAccessToken([
@@ -192,86 +275,156 @@ class SendCampaignJob implements ShouldQueue
         // ✅ REFRESH TOKEN
         // =========================================
         if ($client->isAccessTokenExpired()) {
+
             if (!$user->gmail_refresh_token) {
+
                 throw new \Exception(
                     "No refresh token available."
                 );
             }
 
-            $newToken = $client->fetchAccessTokenWithRefreshToken($user->gmail_refresh_token);
+            $newToken = $client->fetchAccessTokenWithRefreshToken(
+                $user->gmail_refresh_token
+            );
+
             if (isset($newToken['access_token'])) {
+
                 $user->gmail_token = $newToken['access_token'];
+
                 $user->save();
+
                 $client->setAccessToken($newToken);
             } else {
+
                 throw new \Exception(
                     "Failed to refresh Gmail token."
                 );
             }
         }
 
+        // =========================================
+        // ✅ GMAIL SERVICE
+        // =========================================
         $service = new Google_Service_Gmail($client);
+
         // =========================================
         // ✅ MIME BOUNDARY
         // =========================================
         $boundary = uniqid(rand(), true);
+
         // =========================================
-        // ✅ RAW HTML EMAIL
+        // ✅ EMAIL HEADER
         // =========================================
         $rawMessage = "MIME-Version: 1.0\r\n";
+
         $rawMessage .= "To: {$to}\r\n";
+
         $rawMessage .= "Subject: {$subject}\r\n";
-        $rawMessage .= "Content-Type: multipart/alternative; boundary=\"{$boundary}\"\r\n\r\n";
+
+        $rawMessage .= "Content-Type: multipart/mixed; boundary=\"{$boundary}\"\r\n\r\n";
+
         // =========================================
-        // ✅ HTML PART
+        // ✅ HTML BODY
         // =========================================
         $rawMessage .= "--{$boundary}\r\n";
+
         $rawMessage .= "Content-Type: text/html; charset=UTF-8\r\n";
+
         $rawMessage .= "Content-Transfer-Encoding: base64\r\n\r\n";
-        $rawMessage .= chunk_split(base64_encode($html)) . "\r\n";
+
+        $rawMessage .= chunk_split(
+            base64_encode($html)
+        ) . "\r\n";
+
+        // =========================================
+        // ✅ ATTACHMENT
+        // =========================================
+        if (
+            !empty($sequence->attachments_image)
+            &&
+            file_exists(
+                public_path($sequence->attachments_image)
+            )
+        ) {
+
+            $filePath = public_path(
+                $sequence->attachments_image
+            );
+
+            Log::info('Attachment Found', [
+                'path' => $filePath
+            ]);
+
+            $fileData = chunk_split(
+                base64_encode(
+                    file_get_contents($filePath)
+                )
+            );
+
+            $fileName = $sequence->attachment_name
+                ?? basename($filePath);
+
+            $mime = mime_content_type($filePath);
+
+            $rawMessage .= "--{$boundary}\r\n";
+
+            $rawMessage .= "Content-Type: {$mime}; name=\"{$fileName}\"\r\n";
+
+            $rawMessage .= "Content-Disposition: attachment; filename=\"{$fileName}\"\r\n";
+
+            $rawMessage .= "Content-Transfer-Encoding: base64\r\n\r\n";
+
+            $rawMessage .= $fileData . "\r\n";
+        } else {
+
+            Log::warning('Attachment file missing', [
+                'attachment' => $sequence->attachments_image
+            ]);
+        }
+
         // =========================================
         // ✅ END BOUNDARY
         // =========================================
         $rawMessage .= "--{$boundary}--";
+
         // =========================================
         // ✅ ENCODE MESSAGE
         // =========================================
         $encodedMessage = rtrim(
-            strtr(base64_encode($rawMessage),'+/','-_'),'='
+            strtr(
+                base64_encode($rawMessage),
+                '+/',
+                '-_'
+            ),
+            '='
         );
 
+        // =========================================
+        // ✅ CREATE MESSAGE
+        // =========================================
         $msg = new Google_Service_Gmail_Message();
+
         $msg->setRaw($encodedMessage);
 
         // =========================================
         // ✅ SEND EMAIL
         // =========================================
         try {
-            $service->users_messages->send('me', $msg);
+
+            $service->users_messages->send(
+                'me',
+                $msg
+            );
         } catch (\Exception $e) {
-            Log::error("Gmail API send error", ['error' => $e->getMessage()]);
+
+            Log::error(
+                "Gmail API send error",
+                [
+                    'error' => $e->getMessage()
+                ]
+            );
+
             throw $e;
         }
-    }
-
-    /**
-     * =========================================
-     * ✅ VARIANT LOGIC
-     * =========================================
-     */
-    private function getContactVariant($lead, string $type): ?string {
-        $variants = Sequence::where('type', $type)
-            ->pluck('variant')
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
-        if (empty($variants)) {
-            return null;
-        }
-        $index = abs(
-            crc32($lead->email)
-        ) % count($variants);
-        return $variants[$index];
     }
 }

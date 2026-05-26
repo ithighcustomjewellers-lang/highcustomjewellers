@@ -6,6 +6,50 @@
 
 @section('content')
     <style>
+
+       /* ===== FIXED TOPBAR SPACE ===== */
+
+        .container-fluid{
+            padding-top: 20px !important;
+        }
+
+        /* ===== TABLE SCROLL ===== */
+
+        .table-responsive{
+            max-height: calc(100vh - 220px);
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+
+        /* ===== STICKY TABLE HEADER ===== */
+
+        #usersTable thead th{
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #f8f9fc !important;
+            box-shadow: 0 2px 2px rgba(0,0,0,0.05);
+        }
+
+        /* ===== CARD LOOK ===== */
+
+        .card{
+            border:none;
+            border-radius:16px;
+            overflow:hidden;
+        }
+
+        /* ===== PAGE SCROLL FIX ===== */
+
+        body{
+            overflow-x:hidden;
+        }
+
+        /* ===== BETTER TOP SPACING ===== */
+
+        .main-content{
+            padding-top: 70px;
+        }
         .rights-badge {
             background: #f0f2f5;
             padding: 4px 8px;

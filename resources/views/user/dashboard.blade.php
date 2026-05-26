@@ -113,6 +113,7 @@
          <a href="{{ route('master-data-list') }}">Master</a>
         <a href="{{ route('master-link-document') }}">Link</a>
         <a href="{{ route('leads-index') }}">Leads</a>
+
     </div>
 
     <!-- Navbar -->

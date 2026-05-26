@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class CampaignLog extends Model
 {
     protected $fillable = [
-        'user_id',
-        'lead_id',
-        'sequence_id',
-        'status',
-        'scheduled_at',
-        'sent_at'
+            'user_id',
+            'lead_id',
+            'sequence_id',
+            'status',
+            'scheduled_at',
+            'sent_at'
     ];
 
     // 🔗 belongs to contact

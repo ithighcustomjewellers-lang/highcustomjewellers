@@ -5,6 +5,11 @@
 
     RewriteEngine On
 
+    # Force HTTPS + Remove WWW
+    RewriteCond %{HTTPS} off [OR]
+    RewriteCond %{HTTP_HOST} ^www\.highcustomai\.com [NC]
+    RewriteRule ^(.*)$ https://highcustomai.com/$1 [L,R=301]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

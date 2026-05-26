@@ -509,6 +509,7 @@
                             <th>Last Name</th>
                             <th>Company</th>
                             <th>Type</th>
+                            <th>Tracking</th>
                             <th>Added Date</th>
                         </tr>
                     </thead>
@@ -549,7 +550,7 @@
             $tbody.empty();
             for (let i = 0; i < 5; i++) {
                 $tbody.append(
-                    '<tr class="skeleton-row"><td colspan="6" style="padding:0"><div style="height:68px"></div></tr>');
+                    '<tr class="skeleton-row"><td colspan="7" style="padding:0"><div style="height:68px"></div></tr>');
             }
         }
 
@@ -696,7 +697,7 @@
         function renderTable(data) {
             if (!data.length) {
                 $('#leadTableBody').html(
-                    '<tr><td colspan="6" class="text-center py-5">✨ No leads found for this period</td></tr>'
+                    '<tr><td colspan="7" class="text-center py-5">✨ No leads found for this period</td></tr>'
                 );
                 return;
             }
@@ -709,6 +710,7 @@
                         <td class="editable-cell" data-field="lastname">${escapeHtml(item.lastname)}</td>
                         <td class="editable-cell" data-field="company_name">${escapeHtml(item.company_name)}</td>
                         <td class="editable-cell" data-field="type">${item.type === 'B2B' ? '<span class="badge-b2b">B2B</span>' : '<span class="badge-b2c">B2C</span>'}</td>
+                        <td data-field="tracking">${item.tracking}</td>
                         <td>${formattedDate}</td>
                      </tr>`;
             });
@@ -753,7 +755,7 @@
                 error: function() {
                     toastr.error('Failed to load leads');
                     $('#leadTableBody').html(
-                        '<tr><td colspan="6" class="text-center py-5 text-muted">⚠️ Could not fetch leads</td></tr>'
+                        '<tr><td colspan="7" class="text-center py-5 text-muted">⚠️ Could not fetch leads</td></tr>'
                     );
                 }
             });

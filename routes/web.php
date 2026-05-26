@@ -8,6 +8,10 @@ use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\LeadsController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\privacyPolicyController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QrController;
+use App\Http\Controllers\SocialLinksController;
+use App\Http\Controllers\SocialQrController;
 use App\Http\Controllers\Users\MasterController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +29,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', 'user'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'Dashboard'])->name('dashboard');
+
     // profile page
     Route::get('user-profile', [DashboardController::class, 'UserProfile'])->name('user-profile');
     Route::post('submit-profile-update', [DashboardController::class, 'submitProfileUpdate'])->name('submit-profile-update');
@@ -57,7 +62,6 @@ Route::middleware(['auth', 'user'])->group(function () {
 
     Route::get('/lead-response/{log}/{status}',[CampaignController::class, 'leadResponse'])->name('lead-response');
     Route::get('/track-open/{logId}', [CampaignController::class, 'trackOpen'])->name('track-open');
-
 });
 
 // admin info
@@ -76,7 +80,18 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('users-export', [UserController::class, 'export'])->name('admin-users-export');
     Route::get('users-print', [UserController::class, 'printCard'])->name('admin-users-print');
     Route::get('users', [UserController::class, 'index'])->name('admin-users-index');
+
+    Route::get('/social-links', [SocialLinksController::class, 'index'])->name('social.links');
+    Route::post('/social/links', [SocialLinksController::class, 'store'])->name('social.links.store');
+    Route::post('/social/update/{id}', [SocialLinksController::class, 'update'])->name('social-links-update');
+    // Route::delete('/social/delete/{id}', [SocialLinksController::class, 'destroy'])->name('social-links-destroy');
+    Route::post('/social/quick/update', [SocialLinksController::class, 'updateQuickLink'])->name('social.quick.update');
+    Route::get('/social/profile-url', [SocialLinksController::class, 'getProfileUrlAjax'])->name('social.profile.url');
+    Route::get('/social/print', [SocialLinksController::class, 'printBusinessCard'])->name('social.print');
+
 });
+Route::get('/profile/{slug}', [ProfileController::class, 'show'])->name('profile.show');
+Route::post('/profile/{slug}/track-click', [ProfileController::class, 'trackClick'])->name('profile.track.click');
 
 Route::post('logout', [AuthLoginController::class, 'logout'])
     ->middleware('auth')
@@ -85,6 +100,7 @@ Route::post('logout', [AuthLoginController::class, 'logout'])
 Route::get('privacy-policy', [privacyPolicyController::class, 'privacyPolicy']);
 Route::get('terms', [privacyPolicyController::class, 'terms']);
 Route::get('landing-page', [privacyPolicyController::class, 'landingPage']);
+
 
 
 

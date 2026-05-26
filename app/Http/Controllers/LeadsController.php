@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\CampaignController;
 use App\Jobs\StartCampaignJob;
+use App\Models\CampaignLog;
 use Illuminate\Support\Facades\DB;
 use App\Models\Lead;
 use Illuminate\Support\Facades\Auth;
@@ -39,13 +40,7 @@ class LeadsController extends Controller
         DB::beginTransaction();
         try {
             $userId = Auth::id();
-            // =========================
-            // ❌ DUPLICATE EMAIL CHECK
-            // AUTH WISE
-            // =========================
-            $exists = Lead::where('user_id', $userId)
-                ->where('email', $request->email)
-                ->exists();
+            $exists = Lead::where('user_id', $userId)->where('email', $request->email)->exists();
             if ($exists) {
                 return response()->json([
                     'status' => false,
@@ -55,9 +50,6 @@ class LeadsController extends Controller
                 ], 422);
             }
 
-            // =========================
-            // ✅ CREATE LEAD
-            // =========================
             $lead = Lead::create([
                 'user_id' => $userId,
                 'email' => $request->email,
@@ -67,22 +59,14 @@ class LeadsController extends Controller
                 'type' => strtoupper($request->type),
                 'created_at' => now(),
             ]);
-
-            // =========================
-            // 🚀 START CAMPAIGN
-            // =========================
             app(CampaignController::class)->start($lead->id);
-
             DB::commit();
-
             return response()->json([
                 'status' => true,
                 'message' => 'Contact Added & Campaign Started 🚀'
             ]);
         } catch (\Throwable $e) {
-
             DB::rollBack();
-
             return response()->json([
                 'status' => false,
                 'message' => $e->getMessage()
@@ -93,21 +77,12 @@ class LeadsController extends Controller
     public function leadList(Request $request)
     {
         $userId = Auth::id();
+
         // =========================
         // ✅ AUTH WISE DATA
         // =========================
-        $query = Lead::query()
-            ->where('user_id', $userId)
-            ->select(
-                'id',
-                'user_id',
-                'email',
-                'name',
-                'lastname',
-                'company_name',
-                'type',
-                'created_at'
-            );
+        $query = Lead::query()->where('user_id', $userId)->select('id', 'user_id', 'email', 'name', 'lastname', 'company_name', 'type', 'is_unsubscribed', 'created_at');
+
         // =========================
         // ✅ DATE FILTER
         // =========================
@@ -116,28 +91,82 @@ class LeadsController extends Controller
                 $request->start_date . ' 00:00:00',
                 $request->end_date . ' 23:59:59'
             ]);
-        }
-        // =========================
-        // ✅ TODAY ONLY
-        // =========================
-        elseif ($request->filled('today_only') || !$request->filled('start_date')) {
+        } elseif ($request->filled('today_only') || !$request->filled('start_date')) {
             $today = now()->format('Y-m-d');
             $query->whereDate('created_at', $today);
         }
-        // =========================
-        // ✅ TODAY COUNT AUTH WISE
-        // =========================
-        $todayCount = Lead::where('user_id', $userId)
-            ->whereDate('created_at', now()->format('Y-m-d'))
-            ->count();
 
-        // =========================
-        // ✅ PAGINATION
-        // =========================
+        $todayCount = Lead::where('user_id', $userId)->whereDate('created_at', now()->format('Y-m-d'))->count();
         $leads = $query->latest('created_at')->paginate(10);
+        $leadIds = collect($leads->items())->pluck('id')->toArray();
+        $campaignLogs = CampaignLog::whereIn('lead_id', $leadIds)->latest('id')->get()->groupBy('lead_id');
+        $formattedData = collect($leads->items())->map(function ($lead) use ($campaignLogs) {
+            $tracking = 'pending';
+            // latest log
+            $latestLog = null;
+            if (isset($campaignLogs[$lead->id])) {
+                $latestLog = $campaignLogs[$lead->id]->first();
+            }
+            if ($lead->is_unsubscribed) {
+                $tracking = 'not_interested';
+            } elseif ($latestLog) {
+                switch ($latestLog->status) {
+                    case 'pending':
+                        $tracking = ' <span class="badge bg-warning">
+                            Pending
+                        </span>';
+                        break;
+
+                    case 'send':
+                        $tracking = ' <span class="badge bg-success">
+                            Sent
+                        </span>';
+                        break;
+
+                    case 'seen':
+                        $tracking = ' <span class="badge bg-info">
+                            Seen
+                        </span>';
+                        break;
+
+                    case 'failed':
+                        $tracking = ' <span class="badge bg-secondary">
+                            Failed
+                        </span>';
+                        break;
+
+                    case 'interested':
+                        $tracking = ' <span class="badge bg-primary">
+                            Interested
+                        </span>';
+                        break;
+
+                    case 'not_interested':
+                        $tracking = ' <span class="badge bg-danger">
+                            Not Interested
+                        </span>';
+                        break;
+
+                    default:
+                        $tracking = ucfirst($latestLog->status);
+                        break;
+                }
+            }
+            return [
+                'id' => $lead->id,
+                'user_id' => $lead->user_id,
+                'email' => $lead->email,
+                'name' => $lead->name,
+                'lastname' => $lead->lastname,
+                'company_name' => $lead->company_name,
+                'type' => $lead->type,
+                'tracking' => $tracking,
+                'created_at' => $lead->created_at,
+            ];
+        });
         return response()->json([
             'status' => true,
-            'data' => $leads->items(),
+            'data' => $formattedData->values(),
             'today_count' => $todayCount,
             'pagination' => [
                 'current_page' => $leads->currentPage(),
@@ -164,22 +193,13 @@ class LeadsController extends Controller
             $lead = Lead::findOrFail($id);
             $field = $request->field;
             $value = trim($request->value);
-            // =========================
-            // STORE OLD VALUE
-            // =========================
             $oldValue = $lead->$field;
-            // =========================
-            // EMAIL VALIDATION
-            // =========================
             if ($field === 'email') {
                 $request->validate([
                     'value' => 'required|email|unique:leads,email,' . $id,
                 ]);
                 $value = strtolower($value);
             }
-            // =========================
-            // TYPE VALIDATION
-            // =========================
             if ($field === 'type') {
                 $value = strtoupper($value);
                 if (!in_array($value, ['B2B', 'B2C'])) {
@@ -189,14 +209,8 @@ class LeadsController extends Controller
                     ], 422);
                 }
             }
-            // =========================
-            // UPDATE LEAD
-            // =========================
             $lead->$field = $value;
             $lead->save();
-            // =========================
-            // IMPORTANT FIELDS
-            // =========================
             $restartFields = [
                 'email',
                 'name',
@@ -204,15 +218,15 @@ class LeadsController extends Controller
                 'company_name',
                 'type'
             ];
-            // =========================
-            // RESTART CAMPAIGN
-            // =========================
             if (in_array($field, $restartFields) && $oldValue != $value) {
                 // Delete pending campaign logs
                 DB::table('campaign_logs')
                     ->where('lead_id', $lead->id)
-                    ->where('status', 'pending')
-                    ->delete();
+                    ->update([
+                        'status' => 'pending'
+                    ]);
+                // ->where('status', 'Pending')
+                // ->delete();
                 // Restart campaign
                 app(CampaignController::class)->start($lead->id);
             }
@@ -237,13 +251,8 @@ class LeadsController extends Controller
         ]);
 
         try {
-            // =========================
-            // READ EXCEL
-            // =========================
-
             $rows = Excel::toArray([], $request->file('excel_file'));
             if (empty($rows) || empty($rows[0])) {
-
                 return redirect()->back()->with(
                     'error',
                     'Excel file is empty ❌'
@@ -251,40 +260,24 @@ class LeadsController extends Controller
             }
 
             $dataRows = $rows[0];
-            // Remove heading row
             unset($dataRows[0]);
             $userId = Auth::id();
             $inserted = 0;
             $duplicates = 0;
             $invalid = 0;
-            // =========================
-            // DELAY START
-            // =========================
-
             $delaySeconds = 0;
 
             foreach ($dataRows as $row) {
-                // =========================
-                // SKIP EMPTY ROW
-                // =========================
-                if (empty($row[0]) && empty($row[1]) && empty($row[2]))
-                {
+                if (empty($row[0]) && empty($row[1]) && empty($row[2])) {
                     continue;
                 }
-                // =========================
-                // NORMALIZE DATA
-                // =========================
-
                 $email = strtolower(trim($row[0] ?? ''));
                 $name = trim($row[1] ?? '');
                 $lastname = trim($row[2] ?? '');
                 $company = trim($row[3] ?? '');
                 $type = strtoupper(trim($row[4] ?? 'B2B'));
-                // =========================
-                // VALIDATION
-                // =========================
 
-                if (empty($email) || empty($name) ||empty($lastname) ||empty($company)) {
+                if (empty($email) || empty($name) || empty($lastname) || empty($company)) {
                     $invalid++;
                     continue;
                 }
@@ -328,8 +321,7 @@ class LeadsController extends Controller
                 // =========================
                 // START CAMPAIGN WITH DELAY
                 // =========================
-                StartCampaignJob::dispatch($lead->id)
-                    ->delay(now()->addSeconds($delaySeconds));
+                StartCampaignJob::dispatch($lead->id)->delay(now()->addSeconds($delaySeconds));
                 // Random delay
                 $delaySeconds += rand(20, 40);
                 $inserted++;
