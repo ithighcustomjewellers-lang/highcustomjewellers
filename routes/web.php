@@ -62,6 +62,20 @@ Route::middleware(['auth', 'user'])->group(function () {
 
     Route::get('/lead-response/{log}/{status}',[CampaignController::class, 'leadResponse'])->name('lead-response');
     Route::get('/track-open/{logId}', [CampaignController::class, 'trackOpen'])->name('track-open');
+
+
+    Route::post('/social/links', [SocialLinksController::class, 'store'])->name('user.social.links.store');
+    Route::get('/user-social-links', [SocialLinksController::class, 'index'])->name('user-social-links');
+    Route::post('/social/update/{id}', [SocialLinksController::class, 'update'])->name('user-social-links-update');
+    Route::post('/social/quick/update', [SocialLinksController::class, 'updateQuickLink'])->name('user.social.quick.update');
+    Route::get('/social/print', [SocialLinksController::class, 'printBusinessCard'])->name('user.social.print');
+
+    // Add this route for tracking QR generation
+    Route::post('/save-multiple-qr', [SocialLinksController::class, 'saveMultipleQR'])->name('save.multiple.qr');
+    Route::get('/multi-qr/{user}/{qrId}', [SocialLinksController::class, 'showMultiQR'])->name('show.multi.qr');
+    Route::get('/track-multi-qr-click', [SocialLinksController::class, 'trackMultiQRClick'])->name('track.multi.qr.click');
+    Route::post('/update-multi-qr', [SocialLinksController::class, 'updateMultiQR'])->name('update.multi.qr');
+
 });
 
 // admin info
@@ -84,12 +98,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/social-links', [SocialLinksController::class, 'index'])->name('social.links');
     Route::post('/social/links', [SocialLinksController::class, 'store'])->name('social.links.store');
     Route::post('/social/update/{id}', [SocialLinksController::class, 'update'])->name('social-links-update');
-    // Route::delete('/social/delete/{id}', [SocialLinksController::class, 'destroy'])->name('social-links-destroy');
     Route::post('/social/quick/update', [SocialLinksController::class, 'updateQuickLink'])->name('social.quick.update');
-    Route::get('/social/profile-url', [SocialLinksController::class, 'getProfileUrlAjax'])->name('social.profile.url');
     Route::get('/social/print', [SocialLinksController::class, 'printBusinessCard'])->name('social.print');
 
 });
+
 Route::get('/profile/{slug}', [ProfileController::class, 'show'])->name('profile.show');
 Route::post('/profile/{slug}/track-click', [ProfileController::class, 'trackClick'])->name('profile.track.click');
 

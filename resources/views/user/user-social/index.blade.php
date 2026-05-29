@@ -1,4 +1,4 @@
-@extends('admin.layouts.layout')
+@extends('user.dashboard')
 
 @section('title', 'Social Links Manager')
 @section('content')
@@ -77,7 +77,7 @@
 
         .main-container {
             max-width: 1400px;
-            margin: 75px auto;
+            margin: 0 auto;
             padding: 20px;
         }
 
@@ -353,7 +353,7 @@
 
         .add-platform input {
             flex: 1;
-            padding: 10px 15px;
+            padding: 0px 91px;
             border: 1px solid #e0e0e0;
             border-radius: 10px;
             font-size: 14px;
@@ -428,11 +428,11 @@
         }
 
         /* .share-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-        } */
+                                display: flex;
+                                justify-content: center;
+                                gap: 15px;
+                                margin: 20px 0;
+                            } */
 
         .share-btn {
             width: 45px;
@@ -640,7 +640,7 @@
                                                 <i class="fas fa-copy"></i>
                                             </button>
                                             <button onclick="saveLink(this, {{ $link->id }})" class="save-btn"
-                                                data-url="{{ route('social-links-update', $link->id) }}"
+                                                data-url="{{ route('user-social-links-update', $link->id) }}"
                                                 title="Save Changes">
                                                 <i class="fas fa-save"></i>
                                             </button>
@@ -652,6 +652,14 @@
                     </table>
                 </div>
 
+                <div style="margin-top:20px; text-align:end;">
+                    <button onclick="addMultipleQR()" class="btn-add">
+                        <i class="fas fa-qrcode"></i>
+                        QR Add
+                    </button>
+                </div>
+
+
                 <!-- Editable App Links Section -->
                 <div style="margin-top: 20px;">
                     <div class="section-title">
@@ -659,7 +667,9 @@
                     </div>
 
                     {{-- WhatsApp --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="WhatsApp"
+                            data-input="whatsapp_url">
                         <i class="fab fa-whatsapp" style="color: #25D366;"></i>
                         <strong>WhatsApp:</strong>
                         <input type="url" id="whatsapp_url" placeholder="https://wa.me/yournumber" class="link-input"
@@ -674,11 +684,13 @@
                     </div>
 
                     {{-- Telegram --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Telegram"
+                            data-input="telegram_url">
                         <i class="fab fa-telegram" style="color: #0088cc;"></i>
                         <strong>Telegram:</strong>
                         <input type="url" id="telegram_url" placeholder="https://t.me/username" class="link-input"
-                            value="{{ $quickLinks['telegram_url'] ?? '' }}">
+                            value="{{ $quickLinks['telegram_url'] ?? ($adminQuickLinks['telegram_url'] ?? '') }}">
                         <button onclick="saveQuickLink('telegram_url', 'Telegram')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -689,11 +701,14 @@
                     </div>
 
                     {{-- Facebook --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Facebook"
+                            data-input="facebook_url">
                         <i class="fab fa-facebook" style="color: #1877f2;"></i>
                         <strong>Facebook:</strong>
                         <input type="url" id="facebook_url" placeholder="https://facebook.com/username"
-                            class="link-input" value="{{ $quickLinks['facebook_url'] ?? '' }}">
+                            class="link-input"
+                            value="{{ $quickLinks['facebook_url'] ?? ($adminQuickLinks['facebook_url'] ?? '') }}">
                         <button onclick="saveQuickLink('facebook_url', 'Facebook')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -704,25 +719,32 @@
                     </div>
 
                     {{-- YouTube --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="YouTube"
+                            data-input="youtube_url">
                         <i class="fab fa-youtube" style="color: #ff0000;"></i>
                         <strong>YouTube:</strong>
                         <input type="url" id="youtube_url" placeholder="https://youtube.com/@username"
-                            class="link-input" value="{{ $quickLinks['youtube_url'] ?? '' }}">
+                            class="link-input"
+                            value="{{ $quickLinks['youtube_url'] ?? ($adminQuickLinks['youtube_url'] ?? '') }}">
                         <button onclick="saveQuickLink('youtube_url', 'YouTube')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
-                        <button onclick="copyToClipboard(document.getElementById('youtube_url').value)" class="copy-btn-sm">
+                        <button onclick="copyToClipboard(document.getElementById('youtube_url').value)"
+                            class="copy-btn-sm">
                             <i class="fas fa-copy"></i> Copy
                         </button>
                     </div>
 
                     {{-- LinkedIn --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="LinkedIn"
+                            data-input="linkedin_url">
                         <i class="fab fa-linkedin" style="color: #0077b5;"></i>
                         <strong>LinkedIn:</strong>
                         <input type="url" id="linkedin_url" placeholder="https://linkedin.com/in/username"
-                            class="link-input" value="{{ $quickLinks['linkedin_url'] ?? '' }}">
+                            class="link-input"
+                            value="{{ $quickLinks['linkedin_url'] ?? ($adminQuickLinks['linkedin_url'] ?? '') }}">
                         <button onclick="saveQuickLink('linkedin_url', 'LinkedIn')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -733,11 +755,14 @@
                     </div>
 
                     {{-- Instagram --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Instagram"
+                            data-input="instagram_url">
                         <i class="fab fa-instagram" style="color: #E4405F;"></i>
                         <strong>Instagram:</strong>
                         <input type="url" id="instagram_url" placeholder="https://instagram.com/username"
-                            class="link-input" value="{{ $quickLinks['instagram_url'] ?? '' }}">
+                            class="link-input"
+                            value="{{ $quickLinks['instagram_url'] ?? ($adminQuickLinks['instagram_url'] ?? '') }}">
                         <button onclick="saveQuickLink('instagram_url', 'Instagram')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -748,11 +773,12 @@
                     </div>
 
                     {{-- X --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="X" data-input="x_url">
                         <i class="fab fa-x-twitter" style="color: #000;"></i>
                         <strong>X:</strong>
                         <input type="url" id="x_url" placeholder="https://x.com/username" class="link-input"
-                            value="{{ $quickLinks['x_url'] ?? '' }}">
+                            value="{{ $quickLinks['x_url'] ?? ($adminQuickLinks['x_url'] ?? '') }}">
                         <button onclick="saveQuickLink('x_url', 'X')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -762,11 +788,14 @@
                     </div>
 
                     {{-- Threads --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Threads"
+                            data-input="threads_url">
                         <i class="fab fa-threads" style="color: #000;"></i>
                         <strong>Threads:</strong>
                         <input type="url" id="threads_url" placeholder="https://threads.net/@username"
-                            class="link-input" value="{{ $quickLinks['threads_url'] ?? '' }}">
+                            class="link-input"
+                            value="{{ $quickLinks['threads_url'] ?? ($adminQuickLinks['threads_url'] ?? '') }}">
                         <button onclick="saveQuickLink('threads_url', 'Threads')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -777,11 +806,14 @@
                     </div>
 
                     {{-- Snapchat --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Snapchat"
+                            data-input="snapchat_url">
                         <i class="fab fa-snapchat" style="color: #FFFC00;"></i>
                         <strong>Snapchat:</strong>
                         <input type="url" id="snapchat_url" placeholder="https://snapchat.com/add/username"
-                            class="link-input" value="{{ $quickLinks['snapchat_url'] ?? '' }}">
+                            class="link-input"
+                            value="{{ $quickLinks['snapchat_url'] ?? ($adminQuickLinks['snapchat_url'] ?? '') }}">
                         <button onclick="saveQuickLink('snapchat_url', 'Snapchat')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -792,11 +824,14 @@
                     </div>
 
                     {{-- Reddit --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Reddit"
+                            data-input="reddit_url">
                         <i class="fab fa-reddit" style="color: #FF4500;"></i>
                         <strong>Reddit:</strong>
                         <input type="url" id="reddit_url" placeholder="https://reddit.com/user/username"
-                            class="link-input" value="{{ $quickLinks['reddit_url'] ?? '' }}">
+                            class="link-input"
+                            value="{{ $quickLinks['reddit_url'] ?? ($adminQuickLinks['reddit_url'] ?? '') }}">
                         <button onclick="saveQuickLink('reddit_url', 'Reddit')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -807,11 +842,14 @@
                     </div>
 
                     {{-- Discord --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Discord"
+                            data-input="discord_url">
                         <i class="fab fa-discord" style="color: #5865F2;"></i>
                         <strong>Discord:</strong>
                         <input type="url" id="discord_url" placeholder="https://discord.gg/yourserver"
-                            class="link-input" value="{{ $quickLinks['discord_url'] ?? '' }}">
+                            class="link-input"
+                            value="{{ $quickLinks['discord_url'] ?? ($adminQuickLinks['discord_url'] ?? '') }}">
                         <button onclick="saveQuickLink('discord_url', 'Discord')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -822,11 +860,14 @@
                     </div>
 
                     {{-- Pinterest --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Pinterest"
+                            data-input="pinterest_url">
                         <i class="fab fa-pinterest" style="color: #E60023;"></i>
                         <strong>Pinterest:</strong>
                         <input type="url" id="pinterest_url" placeholder="https://pinterest.com/username"
-                            class="link-input" value="{{ $quickLinks['pinterest_url'] ?? '' }}">
+                            class="link-input"
+                            value="{{ $quickLinks['pinterest_url'] ?? ($adminQuickLinks['pinterest_url'] ?? '') }}">
                         <button onclick="saveQuickLink('pinterest_url', 'Pinterest')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -837,11 +878,14 @@
                     </div>
 
                     {{-- Quora --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Quora"
+                            data-input="quora_url">
                         <i class="fab fa-quora" style="color: #B92B27;"></i>
                         <strong>Quora:</strong>
                         <input type="url" id="quora_url" placeholder="https://quora.com/profile/username"
-                            class="link-input" value="{{ $quickLinks['quora_url'] ?? '' }}">
+                            class="link-input"
+                            value="{{ $quickLinks['quora_url'] ?? ($adminQuickLinks['quora_url'] ?? '') }}">
                         <button onclick="saveQuickLink('quora_url', 'Quora')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -851,11 +895,13 @@
                     </div>
 
                     {{-- Messenger --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Messenger"
+                            data-input="messenger_url">
                         <i class="fab fa-facebook-messenger" style="color: #0084FF;"></i>
                         <strong>Messenger:</strong>
                         <input type="url" id="messenger_url" placeholder="https://m.me/username" class="link-input"
-                            value="{{ $quickLinks['messenger_url'] ?? '' }}">
+                            value="{{ $quickLinks['messenger_url'] ?? ($adminQuickLinks['messenger_url'] ?? '') }}">
                         <button onclick="saveQuickLink('messenger_url', 'Messenger')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -866,11 +912,14 @@
                     </div>
 
                     {{-- Twitch --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Twitch"
+                            data-input="twitch_url">
                         <i class="fab fa-twitch" style="color: #9146FF;"></i>
                         <strong>Twitch:</strong>
                         <input type="url" id="twitch_url" placeholder="https://twitch.tv/username"
-                            class="link-input" value="{{ $quickLinks['twitch_url'] ?? '' }}">
+                            class="link-input"
+                            value="{{ $quickLinks['twitch_url'] ?? ($adminQuickLinks['twitch_url'] ?? '') }}">
                         <button onclick="saveQuickLink('twitch_url', 'Twitch')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -881,11 +930,14 @@
                     </div>
 
                     {{-- Rumble --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Rumble"
+                            data-input="rumble_url">
                         <i class="fas fa-video" style="color: #85C742;"></i>
                         <strong>Rumble:</strong>
                         <input type="url" id="rumble_url" placeholder="https://rumble.com/user/username"
-                            class="link-input" value="{{ $quickLinks['rumble_url'] ?? '' }}">
+                            class="link-input"
+                            value="{{ $quickLinks['rumble_url'] ?? ($adminQuickLinks['rumble_url'] ?? '') }}">
                         <button onclick="saveQuickLink('rumble_url', 'Rumble')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -896,11 +948,14 @@
                     </div>
 
                     {{-- Viber --}}
-                    <div class="app-link">
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Viber"
+                            data-input="viber_url">
                         <i class="fab fa-viber" style="color: #7360F2;"></i>
                         <strong>Viber:</strong>
                         <input type="url" id="viber_url" placeholder="https://invite.viber.com/?g=group"
-                            class="link-input" value="{{ $quickLinks['viber_url'] ?? '' }}">
+                            class="link-input"
+                            value="{{ $quickLinks['viber_url'] ?? ($adminQuickLinks['viber_url'] ?? '') }}">
                         <button onclick="saveQuickLink('viber_url', 'Viber')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -910,9 +965,11 @@
                     </div>
                 </div>
 
+
                 <!-- Bottom Actions -->
                 <div class="bottom-actions">
                     <div class="add-platform">
+                       <input type="checkbox" id="customPlatformCheckbox" class="qr-platform-checkbox" data-platform="" data-input="newPlatformUrl">
                         <input type="text" id="newPlatformName" placeholder="Platform Name (e.g., TikTok)">
                         <input type="url" id="newPlatformUrl" placeholder="Platform URL (https://...)">
                         <button onclick="addCustomPlatform()" class="btn-add">
@@ -942,25 +999,101 @@
                     <div class="qr-title">
                         <i class="fas fa-share-alt"></i> SHARE DIGITALLY
                     </div>
-                    {{-- <div class="share-buttons">
-                        <a href="https://wa.me/?text={{ urlencode($profileUrl) }}" target="_blank"
-                            class="share-btn whatsapp-share">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
-                        <a href="https://t.me/share/url?url={{ urlencode($profileUrl) }}" target="_blank"
-                            class="share-btn telegram-share">
-                            <i class="fab fa-telegram"></i>
-                        </a>
-                        <a href="mailto:?subject=My Digital Business Card&body={{ urlencode($profileUrl) }}"
-                            class="share-btn email-share">
-                            <i class="fas fa-envelope"></i>
-                        </a>
-                    </div> --}}
+                </div>
+
+                <!-- Analytics -->
+                <div class="card">
+                    <div class="qr-title">
+                        <i class="fas fa-chart-line"></i> ANALYTICS
+                    </div>
+                    <div class="stats">
+                        <div class="stat-box">
+                            <div class="stat-number" id="qrScans">{{ $qrScans ?? 0 }}</div>
+                            <div class="stat-label">QR Scans (30 days)</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number" id="btnClicks">{{ $btnClicks ?? 0 }}</div>
+                            <div class="stat-label">Button Clicks</div>
+                        </div>
+                    </div>
+                    <div class="stat-box" style="margin-top: 15px;">
+                        <div class="stat-number" id="totalLinks">{{ $socialLinks->count() }}</div>
+                        <div class="stat-label">Total Platforms</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="qr-title">
+                        <i class="fas fa-layer-group"></i>
+                        MULTIPLE QR CODES
+                    </div>
+                    <div id="multipleQrContainer"></div>
                 </div>
 
             </div>
+
         </div>
+
     </div>
+
+
+<!-- EDIT QR MODAL -->
+<div class="modal fade"
+     id="editQrModal"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+
+            <!-- HEADER -->
+            <div class="modal-header text-white"
+                 style="
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                 ">
+
+                <h5 class="modal-title fw-bold">
+
+                    <i class="fas fa-qrcode me-2"></i>
+
+                    Edit QR Code
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body p-4 bg-light">
+
+                <div id="editQrLinksContainer"></div>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer border-0 bg-white">
+
+                <button onclick="saveEditedQR()"
+                        class="btn btn-primary px-4 py-2 rounded-3">
+
+                    <i class="fas fa-save me-2"></i>
+
+                    Save Changes
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
@@ -1115,6 +1248,7 @@
                 .then(data => {
                     if (data.success) {
                         showToast('Link saved successfully!');
+                        if (data.totalLinks) document.getElementById('totalLinks').innerText = data.totalLinks;
                         if (data.profile_url) {
                             document.getElementById('profileUrl').innerHTML = '<i class="fas fa-link"></i> ' + data
                                 .profile_url;
@@ -1146,7 +1280,7 @@
             let originalHtml = btn.innerHTML;
             btn.innerHTML = '<div class="loading-spinner"></div>';
             btn.disabled = true;
-            fetch('{{ route('social.quick.update') }}', {
+            fetch('{{ route('user.social.quick.update') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1164,6 +1298,7 @@
                     if (data.success) {
                         showToast(platformName + ' link saved successfully!');
                         location.reload();
+                        if (data.totalLinks) document.getElementById('totalLinks').innerText = data.totalLinks;
                         if (data.profile_url) {
                             document.getElementById('profileUrl').innerHTML = '<i class="fas fa-link"></i> ' + data
                                 .profile_url;
@@ -1184,6 +1319,15 @@
                 });
         }
 
+        document.getElementById('newPlatformName').addEventListener('input', function () {
+            let checkbox = document.getElementById('customPlatformCheckbox');
+            checkbox.setAttribute(
+                'data-platform',
+                this.value
+            );
+        });
+
+
         function addCustomPlatform() {
             let platformName = document.getElementById('newPlatformName').value.trim();
             let platformUrl = document.getElementById('newPlatformUrl').value.trim();
@@ -1195,7 +1339,7 @@
             let originalHtml = btn.innerHTML;
             btn.innerHTML = '<div class="loading-spinner"></div>';
             btn.disabled = true;
-            fetch('{{ route('social.links.store') }}', {
+            fetch('{{ route('user.social.links.store') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1214,6 +1358,7 @@
                         document.getElementById('newPlatformName').value = '';
                         document.getElementById('newPlatformUrl').value = '';
                         addLinkRowToTable(data.link);
+                        if (data.totalLinks) document.getElementById('totalLinks').innerText = data.totalLinks;
                         if (data.profile_url) {
                             document.getElementById('profileUrl').innerHTML = '<i class="fas fa-link"></i> ' + data
                                 .profile_url;
@@ -1240,7 +1385,7 @@
             newRow.id = `link-row-${link.id}`;
             newRow.setAttribute('data-icon-type', link.icon_type || 'custom');
             const platformIconHtml = getPlatformIconFromType(link.platform_name, link.icon_type || 'custom', link.id);
-            const updateUrl = `/admin/social/update/${link.id}`;
+            const updateUrl = `/social/update/${link.id}`;
             newRow.innerHTML = `
             <td>
                 <div class="platform-cell">
@@ -1254,22 +1399,18 @@
                 <input type="url" id="url_${link.id}" class="link-url-input" value="${escapeHtml(link.platform_url)}">
             </td>
             <td>
-                <div class="action-buttons">
+            <div class="action-buttons">
                     <button onclick="copyToClipboard(document.getElementById('url_${link.id}').value)" class="copy-btn" title="Copy Link">
                         <i class="fas fa-copy"></i>
                     </button>
-
                     <button onclick="saveLink(this, ${link.id})" class="save-btn" data-url="${updateUrl}" title="Save Changes">
-                       <i class="fas fa-save"></i>
-                   </button>
+                        <i class="fas fa-save"></i>
+                    </button>
                 </div>
-
             </td>
         `;
             tbody.appendChild(newRow);
         }
-
-
 
         function updateShareButtons(profileUrl) {
             const encodedUrl = encodeURIComponent(profileUrl);
@@ -1282,7 +1423,7 @@
         }
 
         function printBusinessCard() {
-            window.open('{{ route('social.print') }}', '_blank');
+            window.open('{{ route('user.social.print') }}', '_blank');
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -1293,8 +1434,349 @@
             if (initialProfileUrl) {
                 generateDynamicQRCode(initialProfileUrl);
             }
+            // LOAD ALL SAVED MULTIPLE QR
+            renderMultipleQRs(@json($multiQrs));
         });
+
+
+        function addMultipleQR() {
+            let checkboxes = document.querySelectorAll('.qr-platform-checkbox');
+            let selectedLinks = [];
+            checkboxes.forEach(function(box) {
+                if (box.checked) {
+                    let platform = box.getAttribute('data-platform');
+                    let inputId = box.getAttribute('data-input');
+                    let url = document.getElementById(inputId).value;
+                    if (url) {
+                        selectedLinks.push({
+                            platform: platform,
+                            url: url
+                        });
+                    }
+                }
+            });
+
+            if (selectedLinks.length === 0) {
+                showToast('Please select platforms', 'error');
+                return;
+            }
+
+            fetch('{{ route('save.multiple.qr') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+
+                    body: JSON.stringify({
+                        links: selectedLinks
+                    })
+
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('QR Added Successfully');
+                        renderMultipleQRs(data.all_qrs);
+                    }
+                });
+        }
+
+        const qrPlatformIcons = {
+            whatsapp: 'fab fa-whatsapp',
+            telegram: 'fab fa-telegram',
+            instagram: 'fab fa-instagram',
+            facebook: 'fab fa-facebook',
+            youtube: 'fab fa-youtube',
+            linkedin: 'fab fa-linkedin',
+            x: 'fab fa-x-twitter',
+            twitter: 'fab fa-twitter',
+            snapchat: 'fab fa-snapchat',
+            reddit: 'fab fa-reddit',
+            discord: 'fab fa-discord',
+            pinterest: 'fab fa-pinterest',
+            quora: 'fab fa-quora',
+            messenger: 'fab fa-facebook-messenger',
+            twitch: 'fab fa-twitch',
+            rumble: 'fas fa-video',
+            viber: 'fab fa-viber',
+            threads: 'fab fa-threads'
+        };
+
+        const customPlatformLogo = '/images/cm_logo.png';
+
+        function renderMultipleQRs(qrs) {
+
+
+            let container = document.getElementById('multipleQrContainer');
+            container.innerHTML = '';
+            qrs.forEach(function(qr) {
+                let platformIconsHtml = '';
+                if (qr.links) {
+                    qr.links.forEach(function(link) {
+                        let platformName = link.platform.toLowerCase();
+                        let iconClass = qrPlatformIcons[platformName];
+                        if (iconClass) {
+                            platformIconsHtml += `
+
+                                <i class="${iconClass}"
+                                title="${link.platform}"
+                                style="
+                                        font-size:22px;
+                                        margin:5px;
+                                        color:#667eea;
+                                ">
+                                </i>
+                            `;
+                        } else {
+                            platformIconsHtml += `
+                                <img src="${customPlatformLogo}"
+                                    title="${link.platform}"
+                                    style="
+                                        width:24px;
+                                        height:24px;
+                                        object-fit:contain;
+                                        margin:5px;
+                                        border-radius:6px;
+                                        vertical-align:middle;
+                                    ">
+                            `;
+                        }
+                    });
+                }
+                let qrBox = document.createElement('div');
+                qrBox.style.marginBottom = '40px';
+                let qrId = 'qr_' + qr.id;
+                qrBox.innerHTML = `<div id="${qrId}"
+                 style="
+                    display:flex;
+                    justify-content:center;
+                    margin-bottom:15px;
+                 ">
+            </div>
+
+            <div style="text-align:center; margin-top:15px;">
+                <button
+                    onclick='openEditQRModal(${JSON.stringify(qr)})'
+                    class="btn-add"
+                    style="
+                        padding:8px 15px;
+                        font-size:13px;
+                    ">
+                    <i class="fas fa-edit"></i>
+                    Edit QR
+                </button>
+            </div>
+
+            <div style="
+                text-align:center;
+                font-size:12px;
+                word-break:break-all;
+                margin-bottom:15px;
+            ">
+            <div style="
+                text-align:center;
+                margin-bottom:15px;
+            ">
+
+                ${platformIconsHtml}
+
+            </div>
+                ${window.location.origin}/multi-qr/{{ Auth::id() }}/${qr.id}
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number">
+                        ${qr.qr_scans ?? 0}
+                    </div>
+                    <div class="stat-label">
+                        QR Scans
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">
+                        ${qr.button_clicks ?? 0}
+                    </div>
+                    <div class="stat-label">
+                        Button Clicks
+                    </div>
+                </div>
+            </div>`;
+                container.appendChild(qrBox);
+                new QRCode(document.getElementById(qrId), {
+                    text: `${window.location.origin}/multi-qr/{{ Auth::id() }}/${qr.id}`,
+                    width: 180,
+                    height: 180
+                });
+            });
+        }
+
+
+        let currentEditingQR = null;
+
+        function openEditQRModal(qr)
+        {
+            currentEditingQR = qr;
+            let container = document.getElementById(
+                'editQrLinksContainer'
+            );
+
+            container.innerHTML = `
+                <div class="table-responsive">
+                    <table class="table align-middle custom-edit-table">
+                        <thead>
+                            <tr>
+                                <th>PLATFORM</th>
+                                <th>ACTIVE LINK</th>
+                                <th style="width:120px;">
+                                    ACTIONS
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="editQrTableBody"></tbody>
+                    </table>
+                </div>
+
+            `;
+
+            let tbody = document.getElementById(
+                'editQrTableBody'
+            );
+
+            qr.links.forEach(function(link, index){
+                let platformIcon = getPlatformIcon(link.platform);
+                tbody.innerHTML += `
+                    <tr class="edit-qr-row">
+                        <td>
+                            <div class="platform-cell">
+                                <div class="platform-icon">
+                                    ${platformIcon}
+                                </div>
+                                <span class="platform-name">
+                                    ${link.platform}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="url" class="link-url-input edit-platform-url" value="${link.url}">
+                            <input type="hidden" class="edit-platform-name" value="${link.platform}">
+                        </td>
+
+                        <td>
+                            <div class="action-buttons">
+                                <button onclick="copyToClipboard('${link.url}')" class="copy-btn" title="Copy Link">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            let modal = new bootstrap.Modal(
+                document.getElementById('editQrModal')
+            );
+            modal.show();
+        }
+
+        function removeEditQRRow(button)
+        {
+            button.closest('tr').remove();
+        }
+
+        function getPlatformIcon(platform)
+        {
+            platform = platform.toLowerCase();
+            const icons = {
+                whatsapp: '<i class="fab fa-whatsapp"></i>',
+                telegram: '<i class="fab fa-telegram"></i>',
+                instagram: '<i class="fab fa-instagram"></i>',
+                facebook: '<i class="fab fa-facebook"></i>',
+                youtube: '<i class="fab fa-youtube"></i>',
+                linkedin: '<i class="fab fa-linkedin"></i>',
+                twitter: '<i class="fab fa-twitter"></i>',
+                x: '<i class="fab fa-x-twitter"></i>',
+                tiktok: '<i class="fab fa-tiktok"></i>',
+                snapchat: '<i class="fab fa-snapchat"></i>',
+                reddit: '<i class="fab fa-reddit"></i>',
+                discord: '<i class="fab fa-discord"></i>',
+                pinterest: '<i class="fab fa-pinterest"></i>',
+                twitch: '<i class="fab fa-twitch"></i>',
+                quora: '<i class="fab fa-quora"></i>',
+                github: '<i class="fab fa-github"></i>',
+                spotify: '<i class="fab fa-spotify"></i>',
+                medium: '<i class="fab fa-medium"></i>',
+                stackoverflow: '<i class="fab fa-stack-overflow"></i>',
+                behance: '<i class="fab fa-behance"></i>',
+                dribbble: '<i class="fab fa-dribbble"></i>',
+                flickr: '<i class="fab fa-flickr"></i>',
+                soundcloud: '<i class="fab fa-soundcloud"></i>',
+                vimeo: '<i class="fab fa-vimeo"></i>',
+                vk: '<i class="fab fa-vk"></i>',
+                weibo: '<i class="fab fa-weibo"></i>',
+                tumblr: '<i class="fab fa-tumblr"></i>',
+                foursquare: '<i class="fab fa-foursquare"></i>',
+                slack: '<i class="fab fa-slack"></i>',
+                skype: '<i class="fab fa-skype"></i>',
+                viber: '<i class="fab fa-viber"></i>',
+                messenger: '<i class="fab fa-facebook-messenger"></i>',
+                threads: '<i class="fab fa-threads"></i>',
+                rumble: '<i class="fas fa-video"></i>'
+            };
+
+            return icons[platform] ?? '<img src="/images/cm_logo.png" style="width:22px;height:22px;">';
+        }
+
+        function saveEditedQR()
+        {
+            let names = document.querySelectorAll(
+                '.edit-platform-name'
+            );
+            let urls = document.querySelectorAll(
+                '.edit-platform-url'
+            );
+            let updatedLinks = [];
+            names.forEach(function(nameInput, index){
+                updatedLinks.push({
+                    platform: nameInput.value,
+                    url: urls[index].value
+                });
+            });
+
+            fetch('{{ route("update.multi.qr") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+
+                body: JSON.stringify({
+                    qr_id: currentEditingQR.id,
+                    links: updatedLinks
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success)
+                {
+                    showToast('QR Updated Successfully');
+                    renderMultipleQRs(data.all_qrs);
+                    bootstrap.Modal
+                        .getInstance(
+                            document.getElementById(
+                                'editQrModal'
+                            )
+                        )
+                    .hide();
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                showToast('Error updating QR', 'error');
+
+            });
+        }
+
     </script>
 @endsection
-
-

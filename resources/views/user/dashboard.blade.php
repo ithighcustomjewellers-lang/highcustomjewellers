@@ -15,6 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         body {
@@ -113,6 +114,7 @@
          <a href="{{ route('master-data-list') }}">Master</a>
         <a href="{{ route('master-link-document') }}">Link</a>
         <a href="{{ route('leads-index') }}">Leads</a>
+        <a href="{{ route('user-social-links') }}">Social Links</a>
 
     </div>
 

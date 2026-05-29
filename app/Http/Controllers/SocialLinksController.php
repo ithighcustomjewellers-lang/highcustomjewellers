@@ -6,11 +6,14 @@ namespace App\Http\Controllers;
 use App\Models\SocialLink;
 use App\Models\UserSetting;
 use App\Models\AnalyticsTracking;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
+use App\Models\MultiQrLink;
 
 class SocialLinksController extends Controller
 {
@@ -19,36 +22,243 @@ class SocialLinksController extends Controller
     {
         $user = Auth::user();
 
-        // Get social links
-        $socialLinks = SocialLink::where('user_id', $user->id)
-            ->orderBy('sort_order')
-            ->get();
+        /*
+        |--------------------------------------------------------------------------
+        | SOCIAL LINKS
+        |--------------------------------------------------------------------------
+        */
 
-        // Get quick links from settings
-        $quickLinks = UserSetting::getValue($user->id, 'quick_links', []);
+        if ($user->is_admin == 1) {
 
-        // Get or generate profile slug
-        $profileSlug = UserSetting::getValue($user->id, 'profile_slug');
-        if (!$profileSlug) {
-            $profileSlug = Str::slug($user->name) . '-' . $user->id;
-            UserSetting::setValue($user->id, 'profile_slug', $profileSlug);
+            /*
+            |--------------------------------------------------------------------------
+            | ADMIN LINKS
+            |--------------------------------------------------------------------------
+            */
+
+            $socialLinks = SocialLink::where('user_id', $user->id)
+                ->orderBy('sort_order')
+                ->get();
+        } else {
+
+            /*
+            |--------------------------------------------------------------------------
+            | ADMIN FIND
+            |--------------------------------------------------------------------------
+            */
+
+            $admin = User::where('is_admin', 1)->first();
+
+            $adminLinks = collect();
+
+            if ($admin) {
+
+                $adminLinks = SocialLink::where('user_id', $admin->id)
+                    ->whereRaw('LOWER(platform_name) != ?', ['whatsapp'])
+                    ->orderBy('sort_order')
+                    ->get();
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | USER LINKS
+            |--------------------------------------------------------------------------
+            */
+
+            $userLinks = SocialLink::where('user_id', $user->id)
+                ->orderBy('sort_order')
+                ->get();
+
+            /*
+            |--------------------------------------------------------------------------
+            | MERGE ADMIN + USER LINKS
+            |--------------------------------------------------------------------------
+            */
+
+            $socialLinks = $adminLinks->map(function ($adminLink) use ($userLinks) {
+
+                // FIND SAME PLATFORM USER LINK
+                $userLink = $userLinks->first(function ($item) use ($adminLink) {
+
+                    return strtolower(trim($item->platform_name))
+                        == strtolower(trim($adminLink->platform_name));
+                });
+
+                // USER LINK EXISTS
+                if ($userLink) {
+                    return $userLink;
+                }
+
+                // OTHERWISE ADMIN LINK
+                return $adminLink;
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | USER EXTRA CUSTOM LINKS
+            |--------------------------------------------------------------------------
+            */
+
+            $adminPlatformNames = $adminLinks->map(function ($item) {
+
+                return strtolower(trim($item->platform_name));
+            })->toArray();
+
+            $extraUserLinks = $userLinks->filter(function ($link) use ($adminPlatformNames) {
+
+                return !in_array(
+                    strtolower(trim($link->platform_name)),
+                    $adminPlatformNames
+                );
+            });
+
+            $socialLinks = $socialLinks->merge($extraUserLinks);
         }
 
-        // IMPORTANT: Use the public profile URL, not admin URL
+        /*
+            |--------------------------------------------------------------------------
+            | QUICK LINKS
+            |--------------------------------------------------------------------------
+            */
+
+        if ($user->is_admin == 1) {
+
+            $quickLinks = UserSetting::getValue(
+                $user->id,
+                'quick_links',
+                []
+            );
+        } else {
+
+            /*
+            |--------------------------------------------------------------------------
+            | ADMIN QUICK LINKS
+            |--------------------------------------------------------------------------
+            */
+
+            $admin = User::where('is_admin', 1)->first();
+
+            $adminQuickLinks = [];
+
+            if ($admin) {
+
+                $adminQuickLinks = UserSetting::getValue(
+                    $admin->id,
+                    'quick_links',
+                    []
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | USER QUICK LINKS
+            |--------------------------------------------------------------------------
+            */
+
+            $userQuickLinks = UserSetting::getValue(
+                $user->id,
+                'quick_links',
+                []
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | MERGE QUICK LINKS
+            |--------------------------------------------------------------------------
+            */
+            unset($adminQuickLinks['whatsapp_url']);
+            $quickLinks = array_merge(
+                $adminQuickLinks,
+                $userQuickLinks
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE SLUG
+        |--------------------------------------------------------------------------
+        */
+
+        $profileSlug = UserSetting::getValue(
+            $user->id,
+            'profile_slug'
+        );
+
+        if (!$profileSlug) {
+
+            $profileSlug = Str::slug($user->name) . '-' . $user->id;
+
+            UserSetting::setValue(
+                $user->id,
+                'profile_slug',
+                $profileSlug
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE URL
+        |--------------------------------------------------------------------------
+        */
+
         $profileUrl = url('/profile/' . $profileSlug);
 
-        // Get analytics
-        $qrScans = AnalyticsTracking::getQRScansCount($profileSlug);
-        $btnClicks = AnalyticsTracking::getButtonClicksCount($profileSlug);
+        $multiQrs = UserSetting::getValue(
+            $user->id,
+            'multi_qr_codes',
+            []
+        );
 
-        return view('admin.social.index', compact(
-            'socialLinks',
-            'quickLinks',
-            'profileUrl',
-            'qrScans',
-            'btnClicks',
-            'profileSlug'
-        ));
+        foreach ($multiQrs as &$qr) {
+            $trackingSlug = $qr['tracking_slug'] ?? $qr['id'];
+            $qr['qr_scans'] = AnalyticsTracking::getQRWiseScans(
+                $trackingSlug
+            );
+            $qr['button_clicks'] = AnalyticsTracking::getQRWiseClicks(
+                $trackingSlug
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | ANALYTICS
+        |--------------------------------------------------------------------------
+        */
+
+        $qrScans = AnalyticsTracking::getQRScansCount(
+            $profileSlug
+        );
+
+        $btnClicks = AnalyticsTracking::getButtonClicksCount(
+            $profileSlug
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | VIEW
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->is_admin == 1) {
+            return view('admin.social.index', compact(
+                'socialLinks',
+                'quickLinks',
+                'profileUrl',
+                'qrScans',
+                'btnClicks',
+                'profileSlug'
+            ));
+        } else {
+            return view('user.user-social.index', compact(
+                'socialLinks',
+                'quickLinks',
+                'profileUrl',
+                'qrScans',
+                'btnClicks',
+                'profileSlug',
+                'multiQrs'
+            ));
+        }
     }
 
     public function store(Request $request)
@@ -91,7 +301,8 @@ class SocialLinksController extends Controller
             'platform_url' => $request->platform_url,
             'icon_type' => $iconType,
             'sort_order' => SocialLink::where('user_id', $user->id)->count(),
-            'is_active' => true
+            'is_active' => true,
+            'is_default' => $user->is_admin == 1 ? 1 : 0
         ]);
 
         $totalLinks = SocialLink::where('user_id', $user->id)->count();
@@ -143,48 +354,6 @@ class SocialLinksController extends Controller
         ]);
     }
 
-    // public function destroy($id)
-    // {
-    //     $socialLink = SocialLink::where('user_id', Auth::id())->findOrFail($id);
-    //     $socialLink->delete();
-
-    //     Cache::flush();
-
-    //     $user = Auth::user();
-    //     $totalLinks = SocialLink::where('user_id', $user->id)->count();
-
-    //     $profileSlug = UserSetting::getValue($user->id, 'profile_slug');
-    //     if (!$profileSlug) {
-    //         $profileSlug = Str::slug($user->name) . '-' . $user->id;
-    //         UserSetting::setValue($user->id, 'profile_slug', $profileSlug);
-    //     }
-
-    //     $profileUrl = url('/profile/' . $profileSlug);
-
-    //     // IMPORTANT: Clear cache for this profile
-    //     $this->clearProfileCache($profileSlug);
-
-    //     // Also clear QR code cache if exists
-    //     Cache::forget('qr_code_' . $profileSlug);
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Link deleted successfully',
-    //         'totalLinks' => $totalLinks,
-    //         'profile_url' => $profileUrl
-    //     ]);
-    // }
-
-    // // Add this helper method to clear cache
-    // private function clearProfileCache($profileSlug)
-    // {
-    //     // Clear Laravel cache
-    //     Cache::forget('profile_data_' . $profileSlug);
-    //     Cache::forget('user_links_' . Auth::id());
-
-    //     // Clear view cache if using
-    //     View::flushFinderCache();
-    // }
 
     public function updateQuickLink(Request $request)
     {
@@ -268,6 +437,141 @@ class SocialLinksController extends Controller
 
         $profileUrl = url('/profile/' . $profileSlug);
 
-        return view('admin.social.print', compact('user', 'socialLinks', 'quickLinks', 'profileUrl'));
+
+        if ($user->is_admin == 1) {
+            return view('admin.social.print', compact('user', 'socialLinks', 'quickLinks', 'profileUrl'));
+        } else {
+            return view('user.user-social.print', compact('user', 'socialLinks', 'quickLinks', 'profileUrl'));
+        }
+    }
+
+    public function saveMultipleQR(Request $request)
+    {
+        $user = Auth::user();
+
+        $links = $request->links;
+        if (!$links || count($links) == 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No links selected'
+            ]);
+        }
+
+        $savedQrs = UserSetting::getValue(
+            $user->id,
+            'multi_qr_codes',
+            []
+        );
+
+        $qrId = 'qr_' . time();
+
+        // $savedQrs[] = [
+        //     'id' => $qrId,
+        //     'links' => $links
+        // ];
+
+        $savedQrs[] = [
+            'id' => $qrId,
+            'tracking_slug' => $qrId,
+            'links' => $links,
+            'created_at' => now()->toDateTimeString()
+        ];
+
+        UserSetting::setValue(
+            $user->id,
+            'multi_qr_codes',
+            $savedQrs
+        );
+
+        return response()->json([
+            'success' => true,
+            'qr_id' => $qrId,
+            'url' => url('/multi-qr/' . $user->id . '/' . $qrId),
+            'all_qrs' => $savedQrs
+        ]);
+    }
+
+    public function showMultiQR($userId, $qrId)
+    {
+        $qrs = UserSetting::getValue(
+            $userId,
+            'multi_qr_codes',
+            []
+        );
+
+        $selectedQr = collect($qrs)->firstWhere('id', $qrId);
+
+        if (!$selectedQr) {
+            abort(404);
+        }
+
+        $links = $selectedQr['links'];
+        AnalyticsTracking::create([
+            'profile_slug' => $selectedQr['tracking_slug'] ?? $selectedQr['id'],
+            'event_type' => 'qr_scan',
+            'platform' => 'multi_qr',
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent()
+        ]);
+        return view('profile.multi-qr-links', compact('links', 'selectedQr'));
+    }
+
+    public function trackMultiQRClick(Request $request)
+    {
+        AnalyticsTracking::create([
+            'profile_slug' => $request->slug,
+            'event_type' => 'button_click',
+            'platform' => $request->platform,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
+        return redirect($request->url);
+    }
+
+
+    public function updateMultiQR(Request $request)
+    {
+        $request->validate([
+            'qr_id' => 'required',
+            'links' => 'required|array'
+        ]);
+
+        $user = Auth::user();
+        $qrs = UserSetting::getValue(
+            $user->id,
+            'multi_qr_codes',
+            []
+        );
+
+        foreach ($qrs as &$qr) {
+            if ($qr['id'] == $request->qr_id) {
+                $updatedLinks = [];
+                foreach ($request->links as $link) {
+                    if (!empty($link['platform']) && !empty($link['url'])) {
+                        $updatedLinks[] = [
+                            'platform' => $link['platform'],
+                            'url' => $link['url']
+                        ];
+                    }
+                }
+                $qr['links'] = $updatedLinks;
+                $qr['updated_at'] = now()->toDateTimeString();
+            }
+        }
+
+        UserSetting::setValue(
+            $user->id, 'multi_qr_codes', $qrs
+        );
+
+        foreach ($qrs as &$qr) {
+            $trackingSlug = $qr['tracking_slug'] ?? $qr['id'];
+            $qr['qr_scans'] = AnalyticsTracking::getQRWiseScans($trackingSlug);
+            $qr['button_clicks'] = AnalyticsTracking::getQRWiseClicks($trackingSlug);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'QR updated successfully',
+            'all_qrs' => $qrs
+        ]);
     }
 }

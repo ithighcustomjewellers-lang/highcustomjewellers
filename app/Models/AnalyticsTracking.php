@@ -45,4 +45,18 @@ class AnalyticsTracking extends Model
             ->where('created_at', '>=', now()->subDays($days))
             ->count();
     }
+
+    public static function getQRWiseScans($trackingSlug)
+    {
+        return self::where('profile_slug', $trackingSlug)
+            ->where('event_type', 'qr_scan')
+            ->count();
+    }
+
+    public static function getQRWiseClicks($trackingSlug)
+    {
+        return self::where('profile_slug', $trackingSlug)
+            ->where('event_type', 'button_click')
+            ->count();
+    }
 }

@@ -18,4 +18,6 @@ class Attachment extends Model
     {
         return $this->belongsTo(Sequence::class);
     }
+
+
 }
