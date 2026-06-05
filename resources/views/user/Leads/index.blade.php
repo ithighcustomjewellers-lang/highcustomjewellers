@@ -267,6 +267,39 @@
             animation: shimmer 1.5s infinite;
         }
 
+        .btn-delete {
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 10px;
+            background: #fff1f2;
+            color: #dc3545;
+            cursor: pointer;
+            transition: all .3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-delete:hover {
+            background: #dc3545;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220,53,69,.25);
+        }
+
+        .btn-delete:active {
+            transform: scale(.95);
+        }
+
+        .btn-delete i {
+            font-size: 14px;
+        }
+
+        .delete-popup {
+            border-radius: 18px !important;
+        }
+
         @keyframes shimmer {
             0% {
                 background-position: 200% 0;
@@ -390,6 +423,10 @@
             max-width: 100%;
         }
 
+        .btn-delete {
+            background: white;
+        }
+
     </style>
 
     <div class="container py-4">
@@ -511,6 +548,8 @@
                             <th>Type</th>
                             <th>Tracking</th>
                             <th>Added Date</th>
+                            <th>Delete</th>
+
                         </tr>
                     </thead>
                     <tbody id="leadTableBody">
@@ -550,7 +589,7 @@
             $tbody.empty();
             for (let i = 0; i < 5; i++) {
                 $tbody.append(
-                    '<tr class="skeleton-row"><td colspan="7" style="padding:0"><div style="height:68px"></div></tr>');
+                    '<tr class="skeleton-row"><td colspan="8" style="padding:0"><div style="height:68px"></div></tr>');
             }
         }
 
@@ -697,7 +736,7 @@
         function renderTable(data) {
             if (!data.length) {
                 $('#leadTableBody').html(
-                    '<tr><td colspan="7" class="text-center py-5">✨ No leads found for this period</td></tr>'
+                    '<tr><td colspan="8" class="text-center py-5">✨ No leads found for this period</td></tr>'
                 );
                 return;
             }
@@ -712,17 +751,20 @@
                         <td class="editable-cell" data-field="type">${item.type === 'B2B' ? '<span class="badge-b2b">B2B</span>' : '<span class="badge-b2c">B2C</span>'}</td>
                         <td data-field="tracking">${item.tracking}</td>
                         <td>${formattedDate}</td>
-                     </tr>`;
+                        <td>
+                            <button class="btn-delete" onclick="deleteLead(${item.id})" title="Delete Lead">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>`;
             });
             $('#leadTableBody').html(html);
         }
 
-        // The rest of your functions (loadLeads, renderPagination, applyDateFilter, resetToToday, updateFilterBadge, escapeHtml) remain exactly as before.
-        // Only loadLeads stays the same (it calls renderTable which now adds editable cells).
+
 
         function loadLeads(page = 1, forceToday = false) {
             currentPage = page;
-            showSkeleton();
 
             let params = {
                 page: page
@@ -755,7 +797,7 @@
                 error: function() {
                     toastr.error('Failed to load leads');
                     $('#leadTableBody').html(
-                        '<tr><td colspan="7" class="text-center py-5 text-muted">⚠️ Could not fetch leads</td></tr>'
+                        '<tr><td colspan="8" class="text-center py-5 text-muted">⚠️ Could not fetch leads</td></tr>'
                     );
                 }
             });
@@ -850,10 +892,84 @@
             });
         }
 
+        $(document).ready(function () {
+            loadLeads();
+            setInterval(function () {
+                loadLeads();
+            }, 3000);
+        });
+
         $(document).ready(function() {
             let today = new Date().toISOString().split('T')[0];
             $('#startDate, #endDate').val(today);
             loadLeads(1, true);
         });
+
+
+        function deleteLead(id) {
+            Swal.fire({
+                title: 'Delete Lead?',
+                text: "This action cannot be undone.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-trash"></i> Yes, Delete',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'delete-popup'
+                }
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    $.ajax({
+                        url: '{{ route('leads-destroy', ':id') }}'.replace(':id', id),
+                        type: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+
+                        success: function(response) {
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: response.message || 'Lead deleted successfully.',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+
+                            $(`tr[data-id="${id}"]`).fadeOut(300, function() {
+                                $(this).remove();
+
+                                if ($('#leadTableBody tr').length === 0) {
+                                    $('#leadTableBody').html(`
+                                        <tr>
+                                            <td colspan="8" class="text-center py-5">
+                                                ✨ No leads found
+                                            </td>
+                                        </tr>
+                                    `);
+                                }
+                            });
+                        },
+
+                        error: function(xhr) {
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: xhr.responseJSON?.message || 'Failed to delete lead'
+                            });
+                        }
+                    });
+
+                }
+
+            });
+        }
+
     </script>
 @endsection

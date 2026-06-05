@@ -80,17 +80,25 @@ class SendCampaignJob implements ShouldQueue
             '[Company Name]' => $lead->company_name ?? '',
         ];
 
-        $finalMessage = str_replace(
+
+
+       $finalMessage = str_replace(
             array_keys($variables),
             array_values($variables),
             $sequence->message
         );
+
+          Log::info('FIRST MESSAGE', [
+            'html' => $finalMessage
+        ]);
 
         $subject = str_replace(
             array_keys($variables),
             array_values($variables),
             $sequence->subject
         );
+
+
 
         try {
             if ($user->gmail_token && $user->gmail_refresh_token) {

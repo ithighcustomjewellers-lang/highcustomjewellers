@@ -9,10 +9,19 @@
 <body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
 
 
-{{-- OPEN TRACKING PIXEL --}}
-@if(isset($campaignLog) && $campaignLog)
-<img src="{{ route('track-open', ['logId' => $campaignLog->id,'t' => time()]) }}" width="1" height="1" alt="" border="0" style="width:1px;height:1px;border:0;">
-@endif
+    {{-- OPEN TRACKING PIXEL --}}
+    @if(isset($campaignLog))
+    <img
+        src="{{ route('track-open', [
+            'logId' => $campaignLog->id,
+            'token' => $campaignLog->tracking_token
+        ]) }}"
+        width="1"
+        height="1"
+        style="display:block;width:1px;height:1px;border:0;"
+        alt=""
+    >
+    @endif
 @php
     $yesUrl = '#';
     $noUrl = '#';
@@ -42,23 +51,36 @@
                 {{-- ========================================= --}}
                 {{-- COMPANY LOGO --}}
                 {{-- ========================================= --}}
-                @if (!empty($sequence->existing_company_logo))
+
+                 @if(!empty($sequence->existing_company_logo))
+
                     <tr>
                         <td align="{{ $sequence->logo_position ?? 'center' }}"
                             style="padding:20px;">
-
-                            <img src="{{ url($sequence->existing_company_logo) }}"
+                            <img
+                                src="{{ url($sequence->existing_company_logo) }}"
                                 alt="Company Logo"
-                                style="max-width:180px;height:auto;display:block;">
+                                style="
+                                    @if(($sequence->image_type ?? '') === 'logo')
+                                        max-width:140px;
+                                        border-radius:12px;
+                                    @else
+                                        width:100%;
+                                        border-radius:16px;
+                                        margin-bottom:20px;
+                                    @endif
 
+                                    height:auto;
+                                    display:block;
+                                "
+                            >
                         </td>
                     </tr>
                 @endif
-
-
                 {{-- ========================================= --}}
                 {{-- HERO IMAGE --}}
                 {{-- ========================================= --}}
+
                 @if (!empty($sequence->hero_image))
                     <tr>
                         <td>
@@ -71,70 +93,17 @@
                         </td>
                     </tr>
                 @endif
-
-
                 {{-- ========================================= --}}
                 {{-- CONTENT --}}
                 {{-- ========================================= --}}
+
                 <tr>
                     <td style="padding:20px;">
-
-                        <h3 style="margin-top:0;color:#111;">
-                            Hello {{ $lead->name ?? 'User' }}
-                        </h3>
-
-                        <hr style="border:none;border-top:1px solid #ddd;">
-
                         <div style="font-size:15px;line-height:1.8;color:#333;">
-
                             {!! $finalMessage !!}
-
                         </div>
-
                     </td>
                 </tr>
-
-
-                {{-- ========================================= --}}
-                {{-- ATTACHMENT --}}
-                {{-- ========================================= --}}
-                @if (!empty($sequence->attachments_image))
-                    <tr>
-                        <td style="padding:20px;">
-
-                            <table width="100%"
-                                cellpadding="0"
-                                cellspacing="0"
-                                border="0"
-                                style="background:#f0f0f0;border-radius:6px;">
-
-                                <tr>
-                                    <td align="center"
-                                        style="padding:15px;">
-
-                                        <strong>
-                                            📎 {{ $sequence->attachment_name ?? 'Attachment' }}
-                                        </strong>
-
-                                        <br><br>
-
-                                        <a href="{{ url($sequence->attachments_image) }}"
-                                            target="_blank"
-                                            style="color:#007bff;text-decoration:none;">
-
-                                            ⬇️ View Attachment
-
-                                        </a>
-
-                                    </td>
-                                </tr>
-
-                            </table>
-
-                        </td>
-                    </tr>
-                @endif
-
 
                 {{-- ========================================= --}}
                 {{-- SOCIAL BUTTONS --}}

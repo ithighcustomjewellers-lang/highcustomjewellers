@@ -22,6 +22,27 @@ class SocialLinksController extends Controller
     {
         $user = Auth::user();
 
+        $quickLinkPlatforms = [
+            'whatsapp',
+            'telegram',
+            'facebook',
+            'youtube',
+            'linkedin',
+            'instagram',
+            'x',
+            'threads',
+            'snapchat',
+            'reddit',
+            'discord',
+            'pinterest',
+            'quora',
+            'messenger',
+            'twitch',
+            'rumble',
+            'viber'
+        ];
+
+
         /*
         |--------------------------------------------------------------------------
         | SOCIAL LINKS
@@ -36,7 +57,12 @@ class SocialLinksController extends Controller
             |--------------------------------------------------------------------------
             */
 
+            // $socialLinks = SocialLink::where('user_id', $user->id)
+            //     ->orderBy('sort_order')
+            //     ->get();
+
             $socialLinks = SocialLink::where('user_id', $user->id)
+                ->whereNotIn(DB::raw('LOWER(platform_name)'), $quickLinkPlatforms)
                 ->orderBy('sort_order')
                 ->get();
         } else {
@@ -76,21 +102,10 @@ class SocialLinksController extends Controller
             */
 
             $socialLinks = $adminLinks->map(function ($adminLink) use ($userLinks) {
-
-                // FIND SAME PLATFORM USER LINK
                 $userLink = $userLinks->first(function ($item) use ($adminLink) {
-
-                    return strtolower(trim($item->platform_name))
-                        == strtolower(trim($adminLink->platform_name));
+                    return strtolower(trim($item->platform_name)) == strtolower(trim($adminLink->platform_name));
                 });
-
-                // USER LINK EXISTS
-                if ($userLink) {
-                    return $userLink;
-                }
-
-                // OTHERWISE ADMIN LINK
-                return $adminLink;
+                return $userLink ? $userLink : $adminLink;
             });
 
             /*
@@ -100,19 +115,25 @@ class SocialLinksController extends Controller
             */
 
             $adminPlatformNames = $adminLinks->map(function ($item) {
-
                 return strtolower(trim($item->platform_name));
             })->toArray();
 
-            $extraUserLinks = $userLinks->filter(function ($link) use ($adminPlatformNames) {
-
-                return !in_array(
-                    strtolower(trim($link->platform_name)),
-                    $adminPlatformNames
-                );
+            $extraUserLinks = $userLinks->filter(function ($link) use ($adminPlatformNames, $quickLinkPlatforms) {
+                // Skip if platform is in quick links
+                if (in_array(strtolower(trim($link->platform_name)), $quickLinkPlatforms)) {
+                    return false;
+                }
+                return !in_array(strtolower(trim($link->platform_name)), $adminPlatformNames);
             });
 
             $socialLinks = $socialLinks->merge($extraUserLinks);
+
+
+            $socialLinks = $socialLinks->unique(function ($item) {
+                return strtolower(trim($item->platform_name));
+            })->filter(function ($link) use ($quickLinkPlatforms) {
+                return !in_array(strtolower(trim($link->platform_name)), $quickLinkPlatforms);
+            });
         }
 
         /*
@@ -465,13 +486,9 @@ class SocialLinksController extends Controller
 
         $qrId = 'qr_' . time();
 
-        // $savedQrs[] = [
-        //     'id' => $qrId,
-        //     'links' => $links
-        // ];
-
         $savedQrs[] = [
             'id' => $qrId,
+            'title' => $request->title ?? 'Untitled QR',
             'tracking_slug' => $qrId,
             'links' => $links,
             'created_at' => now()->toDateTimeString()
@@ -545,6 +562,7 @@ class SocialLinksController extends Controller
 
         foreach ($qrs as &$qr) {
             if ($qr['id'] == $request->qr_id) {
+                $qr['title'] = $request->title ?? $qr['title'] ?? '';
                 $updatedLinks = [];
                 foreach ($request->links as $link) {
                     if (!empty($link['platform']) && !empty($link['url'])) {
@@ -560,7 +578,9 @@ class SocialLinksController extends Controller
         }
 
         UserSetting::setValue(
-            $user->id, 'multi_qr_codes', $qrs
+            $user->id,
+            'multi_qr_codes',
+            $qrs
         );
 
         foreach ($qrs as &$qr) {
@@ -574,4 +594,55 @@ class SocialLinksController extends Controller
             'all_qrs' => $qrs
         ]);
     }
+
+    public function updateMultiQRTitle(Request $request)
+    {
+        $user = Auth::user();
+
+        $qrs = UserSetting::getValue(
+            $user->id,
+            'multi_qr_codes',
+            []
+        );
+
+        foreach ($qrs as &$qr) {
+            if ($qr['id'] == $request->qr_id) {
+                $qr['title'] = $request->title;
+                $qr['updated_at'] = now()->toDateTimeString();
+                break;
+            }
+        }
+
+        UserSetting::setValue(
+            $user->id,
+            'multi_qr_codes',
+            $qrs
+        );
+
+        return response()->json([
+            'success' => true
+        ]);
+    }
+
+
+    // public function destroy($id)
+    // {
+    //     $user = Auth::user();
+    //     $socialLink = SocialLink::where('user_id', $user->id)->findOrFail($id);
+    //     $socialLink->delete();
+    //     $totalLinks = SocialLink::where('user_id', $user->id)->count();
+    //     $profileSlug = UserSetting::getValue($user->id, 'profile_slug');
+    //     if (!$profileSlug) {
+    //         $profileSlug = Str::slug($user->name) . '-' . $user->id;
+    //         UserSetting::setValue($user->id,'profile_slug',$profileSlug);
+    //     }
+
+    //     $profileUrl = url( '/profile/' . $profileSlug);
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Link deleted successfully',
+    //         'totalLinks' => $totalLinks,
+    //         'profile_url' => $profileUrl
+    //     ]);
+    // }
 }

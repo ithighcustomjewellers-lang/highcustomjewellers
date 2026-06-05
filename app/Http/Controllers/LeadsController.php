@@ -108,7 +108,7 @@ class LeadsController extends Controller
                 $latestLog = $campaignLogs[$lead->id]->first();
             }
             if ($lead->is_unsubscribed) {
-                $tracking = 'not_interested';
+                $tracking = 'Not Interested';
             } elseif ($latestLog) {
                 switch ($latestLog->status) {
                     case 'pending':
@@ -141,7 +141,7 @@ class LeadsController extends Controller
                         </span>';
                         break;
 
-                    case 'not_interested':
+                    case 'Not Interested':
                         $tracking = ' <span class="badge bg-danger">
                             Not Interested
                         </span>';
@@ -350,5 +350,28 @@ class LeadsController extends Controller
         return response()->download($path, 'bulk-lead.xlsx', [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $lead = Lead::findOrFail($id);
+            if ($lead->user_id != Auth::id()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+            $lead->delete();
+            return response()->json([
+                'status' => true,
+                'message' => 'Lead deleted successfully'
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }

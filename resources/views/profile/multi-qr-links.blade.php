@@ -18,7 +18,7 @@
 
             'name' => $link['platform'],
 
-            'url' => route('track.multi.qr.click') .
+            'url' => route('track-multi-qr-click') .
                 '?url=' . urlencode($link['url']) .
                 '&slug=' . ($selectedQr['tracking_slug'] ?? $selectedQr['id']) .
                 '&platform=' . urlencode($link['platform']),

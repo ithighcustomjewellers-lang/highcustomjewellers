@@ -7,6 +7,7 @@ use App\Models\CampaignLog;
 use App\Jobs\SendCampaignJob;
 use App\Models\Lead;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CampaignController extends Controller
 {
@@ -33,6 +34,7 @@ class CampaignController extends Controller
                 'user_id' => $lead->user_id,
                 'lead_id' => $lead->id,
                 'sequence_id' => $sequence->id,
+                'tracking_token' => Str::uuid(),
                 'status' => 'pending',
                 'scheduled_at' => $delay,
             ]);
@@ -66,7 +68,7 @@ class CampaignController extends Controller
             // DELETE FUTURE PENDING MAILS
             CampaignLog::where('lead_id', $lead->id)
             ->update([
-                'status' => 'not_interested'
+                'status' => 'Not Interested'
             ]);
         }
         return view('emails.response',compact('status'));
@@ -75,29 +77,28 @@ class CampaignController extends Controller
 
     public function trackOpen($logId)
     {
-        Log::info('CampaignLog', [
-            'campaign_log_id' => $logId
-         ]);
         $log = CampaignLog::find($logId);
-        log::info('CampaignLog found', [
-            'campaign_log_id' => $logId,
-            'exists' => (bool) $log
-        ]);
-        if ($log) {
-            // only first open
-            if (!$log->seen_at) {
-                $log->seen_at = now();
-                // status change only if sent
-                if ($log->status == 'send') {
-                    $log->status = 'seen';
-                }
-                $log->save();
-            }
+        if ($log && !$log->seen_at) {
+            $log->update([
+                'seen_at' => now(),
+                'status'  => 'seen'
+            ]);
+            Log::info('Email Opened', [
+                'log_id' => $log->id,
+                'opened_at' => now(),
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ]);
         }
-        // 1x1 transparent pixel
+
         $pixel = base64_decode(
             'R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
         );
-        return response($pixel)->header('Content-Type', 'image/gif');
-    }
+
+        return response($pixel)
+            ->header('Content-Type', 'image/gif')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
+}
 }

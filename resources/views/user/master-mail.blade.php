@@ -14,9 +14,9 @@
                     <form id="emailForm" method="POST" enctype="multipart/form-data">
                         @csrf
                         <!-- Basic Info Row -->
-                        <div class="row g-3 mb-4">
+                        <div class="row g-4 mb-4">
                             <div class="col-md-3">
-                                <label class="form-label fw-semibold small text-uppercase text-muted">Step Order</label>
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Step</label>
                                 <input type="number" name="step" id="step" class="form-control form-control-lg rounded-3" min="0" placeholder="e.g., 1">
                             </div>
                             <div class="col-md-3">
@@ -24,11 +24,11 @@
                                 <input type="number" name="gap_days" id="gapDays" class="form-control form-control-lg rounded-3" placeholder="Day" min="0">
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label fw-semibold small text-uppercase text-muted">Variant (A/B/C)</label>
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Variant</label>
                                 <input type="text" name="variant" id="variant" class="form-control form-control-lg rounded-3 text-uppercase" placeholder="A" maxlength="1">
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label fw-semibold small text-uppercase text-muted">Business Type</label>
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Type</label>
                                 <select name="type" id="typeSelect" class="form-select form-control rounded-3 form-control-lg" >
                                     <option value="B2B">B2B</option>
                                     <option value="B2C">B2C</option>
@@ -40,6 +40,36 @@
                             <label class="form-label fw-semibold small text-uppercase text-muted">Email Subject</label>
                             <input type="text" name="subject" id="subject" class="form-control form-control-lg rounded-3" placeholder="✉️ Write an engaging subject line...">
                         </div>
+
+                        <!-- Branding Section (Logo/Banner) -->
+                        <!--<div class="card bg-light border-0 rounded-4 mb-4 overflow-hidden">-->
+                        <!--    <div class="card-body p-4">-->
+                        <!--        <div class="d-flex align-items-center gap-2 mb-3">-->
+                        <!--            <i class="bi bi-building fs-5"></i>-->
+                        <!--            <h5 class="mb-0 fw-bold">Brand Identity</h5>-->
+                        <!--        </div>-->
+                        <!--        <div class="row g-3 align-items-end">-->
+                        <!--            <div class="col-md-7">-->
+                        <!--                <label class="form-label fw-semibold">Company Logo / Banner</label>-->
+                        <!--                <input type="file" name="company_logo" id="companyLogoInput" class="form-control" accept="image/*">-->
+                        <!--                <input type="hidden" name="existing_company_logo" id="existingCompanyLogo">-->
+                        <!--                <input type="hidden" name="image_type" id="imageType" value="logo">-->
+                        <!--            </div>-->
+                        <!--            <div class="col-md-5">-->
+                        <!--                <div id="companyLogoPreview" class="mt-2" style="display:none;">-->
+                        <!--                    <img id="companyLogoPreviewImg" class="img-fluid rounded-3 border" style="max-height: 60px">-->
+                        <!--                </div>-->
+                        <!--                <label class="form-label fw-semibold">Logo Position</label>-->
+                        <!--                <select name="logo_position" id="logoPosition" class="form-select">-->
+                        <!--                    <option value="left">Left</option>-->
+                        <!--                    <option value="center" selected>Center</option>-->
+                        <!--                    <option value="right">Right</option>-->
+                        <!--                </select>-->
+                        <!--            </div>-->
+                        <!--        </div>-->
+                        <!--    </div>-->
+                        <!--</div>-->
+
 
                         <!-- Branding Section (Logo/Banner) -->
                         <div class="card bg-light border-0 rounded-4 mb-4 overflow-hidden">
@@ -57,7 +87,12 @@
                                     </div>
                                     <div class="col-md-5">
                                         <div id="companyLogoPreview" class="mt-2" style="display:none;">
-                                            <img id="companyLogoPreviewImg" class="img-fluid rounded-3 border" style="max-height: 60px">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img id="companyLogoPreviewImg" class="img-fluid rounded-3 border" style="max-height: 30px">
+                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="removeCompanyLogo()">
+                                                    <i class="bi bi-trash"></i> Remove
+                                                </button>
+                                            </div>
                                         </div>
                                         <label class="form-label fw-semibold">Logo Position</label>
                                         <select name="logo_position" id="logoPosition" class="form-select">
@@ -114,10 +149,10 @@
                                 <option value="#0000FF">Blue</option>
                                 <option value="#FFA500">Orange</option>
                             </select>
-                            <div class="btn-group btn-group-sm">
+                            {{-- <div class="btn-group btn-group-sm">
                                 <button type="button" onclick="formatText('insertUnorderedList')" class="btn btn-outline-secondary">• List</button>
                                 <button type="button" onclick="formatText('insertOrderedList')" class="btn btn-outline-secondary">1. List</button>
-                            </div>
+                            </div> --}}
                             <div class="btn-group btn-group-sm">
                                 <button type="button" onclick="formatText('justifyLeft')" class="btn btn-outline-secondary">⍇</button>
                                 <button type="button" onclick="formatText('justifyCenter')" class="btn btn-outline-secondary">⍌</button>
@@ -166,12 +201,10 @@
                             </div>
                         </div>
 
-                        <div class="d-flex gap-3 mt-4 flex-wrap">
+                        <div class="d-flex gap-3 mt-4">
                             <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">💾 Save Sequence</button>
-                        <a href="{{ route('master-data-list') }}" class="btn btn-light btn-lg px-5 rounded-pill shadow-sm back-btn">
-                            <i class="fa fa-arrow-left me-2"></i> Back </a>
+                            <a href="{{ route('master-view-page') }}" class="btn btn-outline-secondary btn-lg px-4 rounded-pill">← Back</a>
                         </div>
-
                     </form>
                 </div>
             </div>
@@ -205,6 +238,7 @@
                                 </div>
                                 <div id="mobilePreviewContent"></div>
                             </div>
+
                         </div>
 
                         <!-- Desktop Frame -->
@@ -279,8 +313,67 @@
         box-shadow: 0 0 0 3px rgba(13,110,253,0.25);
         outline: none;
     }
+
+    #emailEditor {
+        line-height: 1.4;
+    }
+
+    #emailEditor p,
+    #emailEditor div {
+        margin: 0;
+    }
+
+
+    #mobilePreviewContent {
+        line-height: 1.4;
+    }
+
+    #mobilePreviewContent p,
+    #mobilePreviewContent div {
+        margin: 0;
+    }
+
+
+    #mobilePreviewContent {
+        line-height: 1.4;
+    }
+
+    #mobilePreviewContent p,
+    #mobilePreviewContent div {
+        margin: 0;
+    }
+
+
+    #desktopPreviewContent {
+        line-height: 1.4;
+    }
+
+    #desktopPreviewContent p,
+    #desktopPreviewContent div {
+        margin: 0;
+    }
+
+    #mobilePreviewContent,
+    #desktopPreviewContent{
+        height:500px;
+        overflow-y:auto;
+        overflow-x:hidden;
+        padding: 20px;
+    }
+
+    #mobilePreviewContent::-webkit-scrollbar,
+    #desktopPreviewContent::-webkit-scrollbar{
+        width:8px;
+    }
+
+    #mobilePreviewContent::-webkit-scrollbar-thumb,
+    #desktopPreviewContent::-webkit-scrollbar-thumb{
+        background:#c1c1c1;
+        border-radius:10px;
+    }
 </style>
 
+<script src="{{ asset('js/jquery.min.js') }}"></script>
 <script>
     // DOM Elements
     let currentEditor = document.getElementById('emailEditor');
@@ -383,6 +476,29 @@
         updatePreview();
     }
 
+    // ========== Remove Company Logo ==========
+    function removeCompanyLogo() {
+        currentCompanyLogo = null;
+        currentCompanyLogoFile = null;
+        currentImageType = 'logo';
+
+        // Clear file input
+        document.getElementById('companyLogoInput').value = '';
+
+        // Clear hidden fields
+        document.getElementById('existingCompanyLogo').value = '';
+        document.getElementById('imageType').value = 'logo';
+
+        // Hide preview
+        document.getElementById('companyLogoPreview').style.display = 'none';
+        document.getElementById('companyLogoPreviewImg').src = '';
+
+        // Update preview
+        updatePreview();
+
+        toastr.info('Company logo/banner removed');
+    }
+
     // Attachment handlers
     function previewAttachment(input) {
         if (input.files && input.files[0]) {
@@ -443,7 +559,12 @@
         const fullHtml = generatePreviewHtml();
         document.getElementById('mobilePreviewContent').innerHTML = fullHtml;
         document.getElementById('desktopPreviewContent').innerHTML = fullHtml;
-        document.getElementById('message').value = currentEditor.innerHTML;
+        // document.getElementById('message').value = currentEditor.innerHTML;
+
+        // let html = currentEditor.innerHTML;
+        // html = html.replace(/<p><br><\/p>/gi, '<br><br>');
+        // html = html.replace(/<p>&nbsp;<\/p>/gi, '<br><br>');
+        // document.getElementById('message').value = html;
     }
 
     // Event Listeners for live sync
@@ -487,7 +608,44 @@
     $(document).ready(function() {
         $('#emailForm').submit(function(e) {
             e.preventDefault();
-            $('#message').val(currentEditor.innerHTML);
+            // $('#message').val(currentEditor.innerHTML);
+
+        // let html = currentEditor.innerHTML;
+
+        // // completely empty paragraphs remove
+        // html = html.replace(
+        //     /<p[^>]*>\s*<\/p>/gi,
+        //     ''
+        // );
+
+        // // 4+ empty line ko max 2 empty line tak limit
+        // html = html.replace(
+        //     /(<p[^>]*>\s*(?:&nbsp;|<br\s*\/?>)?\s*<\/p>\s*){4,}/gi,
+        //     '<p><br></p><p><br></p>'
+        // );
+
+        // $('#message').val(html);
+
+        let html = currentEditor.innerHTML;
+        // tags ke beech extra newlines remove
+        html = html.replace(/>\s+\</g, '><');
+        // empty paragraph normalize
+        html = html.replace(
+            /<p>(?:\s|&nbsp;|<br>)*<\/p>/gi,
+            '<p>&nbsp;</p>'
+        );
+        // last ke blank paragraphs remove
+        html = html.replace(
+            /(?:<p>&nbsp;<\/p>\s*)+$/i,
+            ''
+        );
+        // max 2 blank lines
+        html = html.replace(
+            /(<p>&nbsp;<\/p>\s*){3,}/gi,
+            '<p>&nbsp;</p><p>&nbsp;</p>'
+        );
+
+        document.getElementById('message').value = html;
 
             if (!$('#step').val()) { toastr.error('Step is required'); return; }
             if (!$('#subject').val()) { toastr.error('Subject is required'); return; }
