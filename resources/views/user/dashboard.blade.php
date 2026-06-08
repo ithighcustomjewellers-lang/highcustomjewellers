@@ -25,7 +25,7 @@
         }
 
         .sidebar{
-            height:100vh;
+            height:130vh;
             width:250px;
             position:fixed;
             top:0;
@@ -116,7 +116,6 @@
         <a href="{{ route('master-link-document') }}">Link</a>
         <a href="{{ route('leads-index') }}">Leads</a>
         <a href="{{ route('user-social-links') }}">Social Links</a>
-
     </div>
 
     <!-- Navbar -->

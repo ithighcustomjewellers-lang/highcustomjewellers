@@ -282,8 +282,82 @@ class SocialLinksController extends Controller
         }
     }
 
+    // public function index()
+    // {
+    //     $user = Auth::user();
+    //     if ($user->is_admin == 1) {
+    //         $socialLinks = SocialLink::where('user_id', $user->id)->orderBy('sort_order')->get();
+    //     } else {
+    //         $admin = User::where('is_admin', 1)->first();
+    //         $adminLinks = collect();
+    //         if ($admin) {
+    //             $adminLinks = SocialLink::where('user_id', $admin->id)->whereRaw('LOWER(platform_name) != ?', ['whatsapp'])->orderBy('sort_order')->get();
+    //         }
+    //         $userLinks = SocialLink::where('user_id', $user->id)->orderBy('sort_order')->get();
+    //         $socialLinks = $adminLinks->map(function ($adminLink) use ($userLinks) {
+    //             $userLink = $userLinks->first(function ($item) use ($adminLink) {
+    //                 return strtolower(trim($item->platform_name))
+    //                     == strtolower(trim($adminLink->platform_name));
+    //             });
+    //             if ($userLink) {
+    //                 return $userLink;
+    //             }
+    //             return $adminLink;
+    //         });
+    //         $adminPlatformNames = $adminLinks->map(function ($item) {
+    //             return strtolower(trim($item->platform_name));
+    //         })->toArray();
+    //         $extraUserLinks = $userLinks->filter(function ($link) use ($adminPlatformNames) {
+    //             return !in_array(
+    //                 strtolower(trim($link->platform_name)),
+    //                 $adminPlatformNames
+    //             );
+    //         });
+    //         $socialLinks = $socialLinks->merge($extraUserLinks);
+    //     }
+    //     if ($user->is_admin == 1) {
+    //         $quickLinks = UserSetting::getValue($user->id,'quick_links',[]);
+    //     } else {
+    //         $admin = User::where('is_admin', 1)->first();
+    //         $adminQuickLinks = [];
+    //         if ($admin) {
+    //             $adminQuickLinks = UserSetting::getValue($admin->id,'quick_links',[]);
+    //         }
+    //         $userQuickLinks = UserSetting::getValue($user->id, 'quick_links',[]);
+    //         unset($adminQuickLinks['whatsapp_url']);
+    //         $quickLinks = array_merge(
+    //             $adminQuickLinks,
+    //             $userQuickLinks
+    //         );
+    //     }
+    //     $profileSlug = UserSetting::getValue($user->id,'profile_slug');
+    //     if (!$profileSlug) {
+    //         $profileSlug = Str::slug($user->name) . '-' . $user->id;
+    //         UserSetting::setValue($user->id, 'profile_slug', $profileSlug);
+    //     }
+
+    //     $profileUrl = url('/profile/' . $profileSlug);
+    //     $multiQrs = UserSetting::getValue($user->id, 'multi_qr_codes',[]);
+    //     foreach ($multiQrs as &$qr) {
+    //         $trackingSlug = $qr['tracking_slug'] ?? $qr['id'];
+    //         $qr['qr_scans'] = AnalyticsTracking::getQRWiseScans($trackingSlug);
+    //         $qr['button_clicks'] = AnalyticsTracking::getQRWiseClicks($trackingSlug);
+    //     }
+    //     $qrScans = AnalyticsTracking::getQRScansCount($profileSlug);
+    //     $btnClicks = AnalyticsTracking::getButtonClicksCount($profileSlug);
+
+    //     if ($user->is_admin == 1) {
+    //         return view('admin.social.index', compact('socialLinks','quickLinks','profileUrl','qrScans','btnClicks','profileSlug'));
+    //     } else {
+    //         return view('user.user-social.index', compact('socialLinks','quickLinks','profileUrl','qrScans','btnClicks','profileSlug','multiQrs'));
+    //     }
+    // }
+
     public function store(Request $request)
     {
+
+
+
         $request->validate([
             'platform_name' => 'required|string|max:255',
             'platform_url' => 'required|url|max:500'
@@ -488,7 +562,7 @@ class SocialLinksController extends Controller
 
         $savedQrs[] = [
             'id' => $qrId,
-            'title' => $request->title ?? 'Untitled QR',
+            'title' => $request->title ?? '',
             'tracking_slug' => $qrId,
             'links' => $links,
             'created_at' => now()->toDateTimeString()
@@ -624,25 +698,70 @@ class SocialLinksController extends Controller
         ]);
     }
 
+    public function multiQrDestroy($id)
+    {
+        $user = auth::user();
 
-    // public function destroy($id)
-    // {
-    //     $user = Auth::user();
-    //     $socialLink = SocialLink::where('user_id', $user->id)->findOrFail($id);
-    //     $socialLink->delete();
-    //     $totalLinks = SocialLink::where('user_id', $user->id)->count();
-    //     $profileSlug = UserSetting::getValue($user->id, 'profile_slug');
-    //     if (!$profileSlug) {
-    //         $profileSlug = Str::slug($user->name) . '-' . $user->id;
-    //         UserSetting::setValue($user->id,'profile_slug',$profileSlug);
-    //     }
+        $multiQrCodes = UserSetting::getValue(
+            $user->id,
+            'multi_qr_codes',
+            []
+        );
 
-    //     $profileUrl = url( '/profile/' . $profileSlug);
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Link deleted successfully',
-    //         'totalLinks' => $totalLinks,
-    //         'profile_url' => $profileUrl
-    //     ]);
-    // }
+        $multiQrCodes = collect($multiQrCodes)
+            ->reject(function ($qr) use ($id) {
+                return isset($qr['id']) && $qr['id'] === $id;
+            })
+            ->values()
+            ->toArray();
+
+            UserSetting::setValue($user->id,'multi_qr_codes', $multiQrCodes);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'QR deleted successfully'
+        ]);
+    }
+
+    public function getMultiQrCodes()
+    {
+        $user = auth::user();
+        $qrs = UserSetting::getValue(
+            $user->id,
+            'multi_qr_codes',
+            []
+        );
+
+        return response()->json([
+            'success' => true,
+            'qrs' => $qrs
+        ]);
+    }
+
+    public function userSocialLinksDestroy($id)
+    {
+        $user = Auth::user();
+        $socialLink = SocialLink::where('user_id', $user->id)->findOrFail($id);
+        $socialLink->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Link deleted successfully'
+        ]);
+    }
+
+    public function updateSecondary(Request $request)
+    {
+        $link = SocialLink::findOrFail($request->id);
+
+        $link->update([
+            'platform_name' => $request->platform_name,
+            'platform_url'  => $request->platform_url,
+        ]);
+
+        return response()->json([
+            'success' => true
+        ]);
+
+    }
 }

@@ -65,28 +65,27 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::post('social/links', [SocialLinksController::class, 'store'])->name('user.social.links.store');
     Route::get('user-social-links', [SocialLinksController::class, 'index'])->name('user-social-links');
 
-
-    Route::post('social/update/{id}', [SocialLinksController::class, 'update'])->name('user.social.update');
     Route::post('social/quick/update', [SocialLinksController::class, 'updateQuickLink'])->name('user.social.quick.update');
-
-
-
     Route::get('social/print', [SocialLinksController::class, 'printBusinessCard'])->name('user.social.print');
-    // Route::delete('/social/destroy/{id}',[SocialLinksController::class, 'destroy'])->name('user-social-links-destroy');
-
-
-    Route::post('/social/update/{id}', [SocialLinksController::class, 'update'])->name('user.social.update');
-    Route::delete('/social/delete/{id}', [SocialLinksController::class, 'destroy'])->name('user.social.delete');
-
+    Route::delete('social/delete/{id}', [SocialLinksController::class, 'destroy'])->name('user.social.delete');
+    Route::post('social/update/{id}', [SocialLinksController::class, 'update'])->name('user-social-links-update');
+    Route::post('social/update-secondary', [SocialLinksController::class, 'updateSecondary'])->name('user-social-links-update-secondary');
 
     //tracking QR generation
     Route::post('save-multiple-qr', [SocialLinksController::class, 'saveMultipleQR'])->name('save.multiple.qr');
     Route::post('update-multi-qr', [SocialLinksController::class, 'updateMultiQR'])->name('update-multi-qr');
     Route::post('multi-qr/update-title', [SocialLinksController::class, 'updateMultiQRTitle'])->name('update-multi-qr-title');
+
+    Route::delete('multi-qr/{id}', [SocialLinksController::class, 'multiQrDestroy'])->name('multi-qr-destroy');
+    Route::get('/multi-qr/list', [SocialLinksController::class, 'getMultiQrCodes'])->name('get-multi-qr-codes');
+
+    Route::delete('user-social-links-destroy/{id}', [SocialLinksController::class, 'userSocialLinksDestroy'])->name('user-social-links-destroy');
+
 });
 
-    Route::get('multi-qr/{user}/{qrId}', [SocialLinksController::class, 'showMultiQR'])->name('show.multi.qr');
-    Route::get('track-multi-qr-click', [SocialLinksController::class, 'trackMultiQRClick'])->name('track-multi-qr-click');
+Route::get('multi-qr/{user}/{qrId}', [SocialLinksController::class, 'showMultiQR'])->name('show-multi-qr');
+Route::get('track-multi-qr-click', [SocialLinksController::class, 'trackMultiQRClick'])->name('track-multi-qr-click');
+
 // admin info
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('dashboard', [AdminDashboardController::class, 'AdminDashboard'])->name('admin-dashboard');

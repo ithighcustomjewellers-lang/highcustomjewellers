@@ -240,7 +240,7 @@
             gap: 8px;
         }
 
-        .delete-btn,
+
         .copy-btn,
         .save-btn {
             background: none;
@@ -266,14 +266,6 @@
 
         .save-btn:hover {
             background: #28a74510;
-        }
-
-        .delete-btn {
-            color: #dc3545;
-        }
-
-        .delete-btn:hover {
-            background: #dc354510;
         }
 
         /* App Link Styles - Editable */
@@ -335,6 +327,7 @@
             cursor: pointer;
             font-size: 12px;
             transition: all 0.3s;
+            margin-right: 5px;
         }
 
         .app-link .save-btn-sm:hover {
@@ -361,7 +354,7 @@
 
         .qr-platform-checkbox {
             width: 20px;
-            height: 20px;
+            height: 15px;
             min-width: 20px;
             cursor: pointer;
             margin: 0;
@@ -373,9 +366,8 @@
             height: 40px;
             padding: 0 15px;
             box-sizing: border-box;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
         }
+
 
         .btn-add {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -406,6 +398,10 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
 
+        .qr-card {
+            text-align: center;
+        }
+
         .qr-title {
             font-size: 14px;
             font-weight: 600;
@@ -434,6 +430,35 @@
             padding: 10px;
             background: #f8f9fa;
             border-radius: 10px;
+        }
+
+        .share-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            font-size: 20px;
+            transition: transform 0.2s;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .whatsapp-share {
+            background: #25D366;
+        }
+
+        .telegram-share {
+            background: #0088cc;
+        }
+
+        .email-share {
+            background: #ea4335;
         }
 
         .stats {
@@ -504,6 +529,112 @@
             outline: none;
             background: #fff;
             box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
+        }
+
+        .btn-add-platform {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.45rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-add-platform:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        /* Modal Styles */
+        .platform-row {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            border: 1px solid #e0e0e0;
+        }
+
+        .platform-row:hover {
+            background: #f8f9fa;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .modal-content {
+            border-radius: 20px;
+            background: white;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .add-platform-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn-action{
+            width:100%;
+            height:42px;
+            border:none;
+            border-radius:10px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            transition:all .3s ease;
+            font-size:14px;
+        }
+
+        .btn-remove{
+            background:#fee2e2;
+            color:#dc2626;
+        }
+
+        .btn-remove:hover{
+            background:#dc2626;
+            color:#fff;
+        }
+
+        .btn-copy{
+            background:#e0e7ff;
+            color:#4f46e5;
+        }
+
+        .btn-copy:hover{
+            background:#4f46e5;
+            color:#fff;
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.25 !important;
         }
 
         @keyframes spin {
@@ -667,8 +798,7 @@
                         <button onclick="saveQuickLink('youtube_url', 'YouTube')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
-                        <button onclick="copyToClipboard(document.getElementById('youtube_url').value)"
-                            class="copy-btn-sm">
+                        <button onclick="copyToClipboard(document.getElementById('youtube_url').value)" class="copy-btn-sm">
                             <i class="fas fa-copy"></i> Copy
                         </button>
                     </div>
@@ -761,7 +891,7 @@
                     </div>
 
                     {{-- Reddit --}}
-                    <div class="app-link quick-link-item">
+                    {{-- <div class="app-link quick-link-item">
                         <input type="checkbox" class="qr-platform-checkbox" data-platform="Reddit"
                             data-input="reddit_url">
                         <i class="fab fa-reddit" style="color: #FF4500;"></i>
@@ -776,10 +906,10 @@
                             class="copy-btn-sm">
                             <i class="fas fa-copy"></i> Copy
                         </button>
-                    </div>
+                    </div> --}}
 
                     {{-- Discord --}}
-                    <div class="app-link quick-link-item">
+                    {{-- <div class="app-link quick-link-item">
                         <input type="checkbox" class="qr-platform-checkbox" data-platform="Discord"
                             data-input="discord_url">
                         <i class="fab fa-discord" style="color: #5865F2;"></i>
@@ -794,10 +924,10 @@
                             class="copy-btn-sm">
                             <i class="fas fa-copy"></i> Copy
                         </button>
-                    </div>
+                    </div> --}}
 
                     {{-- Pinterest --}}
-                    <div class="app-link quick-link-item">
+                    {{-- <div class="app-link quick-link-item">
                         <input type="checkbox" class="qr-platform-checkbox" data-platform="Pinterest"
                             data-input="pinterest_url">
                         <i class="fab fa-pinterest" style="color: #E60023;"></i>
@@ -812,10 +942,10 @@
                             class="copy-btn-sm">
                             <i class="fas fa-copy"></i> Copy
                         </button>
-                    </div>
+                    </div> --}}
 
                     {{-- Quora --}}
-                    <div class="app-link quick-link-item">
+                    {{-- <div class="app-link quick-link-item">
                         <input type="checkbox" class="qr-platform-checkbox" data-platform="Quora"
                             data-input="quora_url">
                         <i class="fab fa-quora" style="color: #B92B27;"></i>
@@ -829,7 +959,7 @@
                         <button onclick="copyToClipboard(document.getElementById('quora_url').value)" class="copy-btn-sm">
                             <i class="fas fa-copy"></i> Copy
                         </button>
-                    </div>
+                    </div> --}}
 
                     {{-- Messenger --}}
                     <div class="app-link quick-link-item">
@@ -849,7 +979,7 @@
                     </div>
 
                     {{-- Twitch --}}
-                    <div class="app-link quick-link-item">
+                    {{-- <div class="app-link quick-link-item">
                         <input type="checkbox" class="qr-platform-checkbox" data-platform="Twitch"
                             data-input="twitch_url">
                         <i class="fab fa-twitch" style="color: #9146FF;"></i>
@@ -864,10 +994,10 @@
                             class="copy-btn-sm">
                             <i class="fas fa-copy"></i> Copy
                         </button>
-                    </div>
+                    </div> --}}
 
                     {{-- Rumble --}}
-                    <div class="app-link quick-link-item">
+                    {{-- <div class="app-link quick-link-item">
                         <input type="checkbox" class="qr-platform-checkbox" data-platform="Rumble"
                             data-input="rumble_url">
                         <i class="fas fa-video" style="color: #85C742;"></i>
@@ -882,10 +1012,10 @@
                             class="copy-btn-sm">
                             <i class="fas fa-copy"></i> Copy
                         </button>
-                    </div>
+                    </div> --}}
 
                     {{-- Viber --}}
-                    <div class="app-link quick-link-item">
+                    {{-- <div class="app-link quick-link-item">
                         <input type="checkbox" class="qr-platform-checkbox" data-platform="Viber"
                             data-input="viber_url">
                         <i class="fab fa-viber" style="color: #7360F2;"></i>
@@ -899,30 +1029,35 @@
                         <button onclick="copyToClipboard(document.getElementById('viber_url').value)" class="copy-btn-sm">
                             <i class="fas fa-copy"></i> Copy
                         </button>
-                    </div>
+                    </div> --}}
                 </div>
 
                 <!-- Custom Social Links Section - Dynamic Links -->
                 <div style="margin-top: 20px;">
                     <div id="customLinksContainer">
                         @foreach ($socialLinks as $link)
-                        <div class="app-link quick-link-item" id="link-row-{{ $link->id }}" data-icon-type="{{ $link->icon_type }}">
-                            <input type="checkbox" class="qr-platform-checkbox"
-                                data-platform="{{ $link->platform_name }}"
-                                data-input="url_{{ $link->id }}">
-                            <div class="platform-icon">
-                                {!! getPlatformIconHtml($link) !!}
+                            <div class="app-link quick-link-item" id="link-row-{{ $link->id }}"
+                                data-icon-type="{{ $link->icon_type }}">
+                                <input type="checkbox" class="qr-platform-checkbox"
+                                    data-platform="{{ $link->platform_name }}" data-input="url_{{ $link->id }}">
+                                <div class="platform-icon">
+                                    {!! getPlatformIconHtml($link) !!}
+                                </div>
+                                <strong>{{ $link->platform_name }}:</strong>
+                                <input type="url" id="url_{{ $link->id }}" class="link-input" value="{{ $link->platform_url }}" placeholder="https://...">
+                                <button onclick="saveCustomLink({{ $link->id }}, '{{ $link->platform_name }}')" class="save-btn-sm">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button
+                                    onclick="copyToClipboard(document.getElementById('url_{{ $link->id }}').value)"
+                                    class="copy-btn-sm">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button onclick="deleteCustomLink({{ $link->id }})" class="save-btn-sm"
+                                    style="background:#dc3545;">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
                             </div>
-                            <strong>{{ $link->platform_name }}:</strong>
-                            <input type="url" id="url_{{ $link->id }}" class="link-input"
-                                value="{{ $link->platform_url }}" placeholder="https://...">
-                            <button onclick="saveCustomLink({{ $link->id }}, '{{ $link->platform_name }}')" class="save-btn-sm">
-                                <i class="fas fa-save"></i> Save
-                            </button>
-                            <button onclick="copyToClipboard(document.getElementById('url_{{ $link->id }}').value)" class="copy-btn-sm">
-                                <i class="fas fa-copy"></i> Copy
-                            </button>
-                        </div>
                         @endforeach
                     </div>
                 </div>
@@ -945,7 +1080,6 @@
 
             <!-- Right Panel -->
             <div class="right-panel">
-                <!-- MULTIPLE QR CODES Section -->
                 <div class="card">
                     <div class="qr-title">
                         <i class="fas fa-layer-group"></i>
@@ -953,37 +1087,73 @@
                     </div>
                     <div id="multipleQrContainer"></div>
                 </div>
-
             </div>
-
         </div>
-
     </div>
 
-    <!-- EDIT QR MODAL -->
-    <div class="modal fade" id="editQrModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                <!-- HEADER -->
-                <div class="modal-header text-white"
-                    style="background: linear-gradient(135deg, #667eea, #764ba2);">
+    <!-- Edit QR Modal -->
+    <div class="modal fade" id="editQrModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-fullscreen-sm-down">
+            <div class="modal-content">
+                <div class="modal-header">
                     <h5 class="modal-title fw-bold">
                         <i class="fas fa-qrcode me-2"></i>
-                        Edit QR Code
+                        Edit QR Code Links
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <!-- BODY -->
-                <div class="modal-body p-4 bg-light">
-                    <div id="editQrLinksContainer"></div>
+                <div class="main-container">
+                    <!-- Add New Platform Section -->
+                    <div class="add-platform-section">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Platform Dropdown</label>
+                                <select class="form-select" id="platformDropdown">
+                                    <option value="">-- Select Platform --</option>
+                                    <option class="form-select" value="WhatsApp">🟢 WhatsApp</option>
+                                    <option class="form-select" value="Instagram">📸 Instagram</option>
+                                    <option class="form-select" value="Facebook">🔵 Facebook</option>
+                                    <option class="form-select" value="Telegram">✈️ Telegram</option>
+                                    <option class="form-select" value="LinkedIn">💼 LinkedIn</option>
+                                    <option class="form-select" value="YouTube">▶️ YouTube</option>
+                                    <option class="form-select" value="Website">🌐 Website</option>
+                                    <option class="form-select" value="Twitter/X">𝕏 Twitter/X</option>
+                                    <option class="form-select" value="Pinterest">📌 Pinterest</option>
+                                    <option class="form-select" value="Snapchat">👻 Snapchat</option>
+                                    <option class="form-select" value="Messenger">💬 Messenger</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Custom Platform Name</label>
+                                <input type="text" class="form-control" id="customPlatformName"
+                                    placeholder="Custom Platform Name">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Platform URL *</label>
+                                <input type="url" class="form-control" id="platformUrl"
+                                    placeholder="https://example.com">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-semibold">&nbsp;</label>
+                                <button type="button" class="btn-add-platform w-100" onclick="addNewPlatformRow()">
+                                    <i class="fas fa-plus me-2"></i> Add Link
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="editQrLinksContainer" class="qr-links-list">
+                        <!-- Dynamic rows will appear here -->
+                    </div>
                 </div>
 
-                <!-- FOOTER -->
-                <div class="modal-footer border-0 bg-white">
-                    <button onclick="saveEditedQR()" class="btn btn-primary px-4 py-2 rounded-3">
-                        <i class="fas fa-save me-2"></i>
-                        Save Changes
+                <div class="modal-footer">
+                    {{-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i> Cancel
+                    </button> --}}
+                    <button type="button" class="btn-save" onclick="saveEditedQR()">
+                        <i class="fas fa-save me-2"></i> Save Changes
                     </button>
                 </div>
             </div>
@@ -995,228 +1165,189 @@
 
     <!-- QR Code Library -->
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <!-- SweetAlert2 for delete confirmation -->
+
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+        let currentEditingQR = null;
 
-    function showToast(message, type = 'success') {
-        let toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.style.backgroundColor = type === 'success' ? '#28a745' : '#dc3545';
-        toast.style.display = 'block';
-        setTimeout(() => {
-            toast.style.display = 'none';
-        }, 3000);
-    }
-
-    function copyToClipboard(text) {
-        if (!text) {
-            showToast('Nothing to copy!', 'error');
-            return;
-        }
-        navigator.clipboard.writeText(text).then(function() {
-            showToast('Link copied to clipboard!');
-        });
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
-    function getPlatformIconFromType(platformName, iconType, platformId = null) {
-        const iconMap = {
-            'whatsapp': 'fab fa-whatsapp',
-            'telegram': 'fab fa-telegram',
-            'instagram': 'fab fa-instagram',
-            'facebook': 'fab fa-facebook',
-            'youtube': 'fab fa-youtube',
-            'linkedin': 'fab fa-linkedin',
-            'twitter': 'fab fa-twitter',
-            'x': 'fab fa-x-twitter',
-            'tiktok': 'fab fa-tiktok',
-            'snapchat': 'fab fa-snapchat',
-            'reddit': 'fab fa-reddit',
-            'discord': 'fab fa-discord',
-            'pinterest': 'fab fa-pinterest',
-            'twitch': 'fab fa-twitch',
-            'quora': 'fab fa-quora',
-            'github': 'fab fa-github',
-            'spotify': 'fab fa-spotify',
-            'medium': 'fab fa-medium',
-            'viber': 'fab fa-viber',
-            'messenger': 'fab fa-facebook-messenger',
-            'threads': 'fab fa-threads',
-            'rumble': 'fas fa-video'
-        };
-
-        const platformLower = platformName.toLowerCase();
-
-        if (iconType === 'custom') {
-            return `<img src="/images/cm_logo.png" alt="${escapeHtml(platformName)}" style="width: 24px; height: 24px; object-fit: contain;">`;
+        function showToast(message, type = 'success') {
+            let toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.backgroundColor = type === 'success' ? '#28a745' : '#dc3545';
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
         }
 
-        if (iconMap[platformLower]) {
-            return `<i class="${iconMap[platformLower]}"></i>`;
-        }
-
-        return `<img src="/images/cm_logo.png" alt="${escapeHtml(platformName)}" style="width: 24px; height: 24px; object-fit: contain;">`;
-    }
-
-    function saveQuickLink(platformKey, platformName) {
-        let urlInput = document.getElementById(platformKey);
-        let platformUrl = urlInput.value;
-        if (!platformUrl) {
-            showToast('Please enter a valid URL for ' + platformName, 'error');
-            return;
-        }
-        let btn = event.target.closest('button');
-        let originalHtml = btn.innerHTML;
-        btn.innerHTML = '<div class="loading-spinner"></div>';
-        btn.disabled = true;
-
-        fetch('{{ route('user.social.quick.update') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    platform_name: platformName,
-                    platform_url: platformUrl,
-                    platform_key: platformKey
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast(platformName + ' link saved successfully!');
-                } else {
-                    showToast(data.message || 'Error saving link', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('Error saving link', 'error');
-            })
-            .finally(() => {
-                btn.innerHTML = originalHtml;
-                btn.disabled = false;
-            });
-    }
-
-    function saveCustomLink(id, platformName) {
-    let urlInput = document.getElementById('url_' + id);
-    let platformUrl = urlInput.value;
-
-    if (!platformUrl) {
-        showToast('Please enter a valid URL for ' + platformName, 'error');
-        return;
-    }
-
-    let btn = event.target.closest('button');
-    let originalHtml = btn.innerHTML;
-    btn.innerHTML = '<div class="loading-spinner"></div>';
-    btn.disabled = true;
-
-    // FIXED: Direct URL with ID, not using route helper
-    fetch(`/social/update/${id}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken,
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-            platform_url: platformUrl
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showToast(platformName + ' link saved successfully!');
-        } else {
-            showToast(data.message || 'Error saving link', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('Error saving link', 'error');
-    })
-    .finally(() => {
-        btn.innerHTML = originalHtml;
-        btn.disabled = false;
-    });
-}
-
-    function addCustomPlatform() {
-        let platformName = document.getElementById('newPlatformName').value.trim();
-        let platformUrl = document.getElementById('newPlatformUrl').value.trim();
-
-        if (!platformName || !platformUrl) {
-            showToast('Please fill both fields!', 'error');
-            return;
-        }
-
-        let btn = event.target;
-        let originalHtml = btn.innerHTML;
-        btn.innerHTML = '<div class="loading-spinner"></div>';
-        btn.disabled = true;
-
-        fetch('{{ route('user.social.links.store') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                platform_name: platformName,
-                platform_url: platformUrl
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast('Platform added successfully!');
-                document.getElementById('newPlatformName').value = '';
-                document.getElementById('newPlatformUrl').value = '';
-                addNewLinkToContainer(data.link);
-            } else {
-                showToast(data.message || 'Error adding platform', 'error');
+        function copyToClipboard(text) {
+            if (!text) {
+                showToast('Nothing to copy!', 'error');
+                return;
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('Error adding platform', 'error');
-        })
-        .finally(() => {
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
-        });
-    }
+            navigator.clipboard.writeText(text).then(function() {
+                showToast('Link copied to clipboard!');
+            });
+        }
 
-    function addNewLinkToContainer(link) {
-        const container = document.getElementById('customLinksContainer');
-        if (!container) return;
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
-        let platformIconHtml = getPlatformIconFromType(link.platform_name, link.icon_type, link.id);
+        function getPlatformIcon(platform) {
+            platform = platform.toLowerCase();
+            const icons = {
+                whatsapp: '<i class="fab fa-whatsapp"></i>',
+                telegram: '<i class="fab fa-telegram"></i>',
+                instagram: '<i class="fab fa-instagram"></i>',
+                facebook: '<i class="fab fa-facebook"></i>',
+                youtube: '<i class="fab fa-youtube"></i>',
+                linkedin: '<i class="fab fa-linkedin"></i>',
+                twitter: '<i class="fab fa-twitter"></i>',
+                x: '<i class="fab fa-x-twitter"></i>',
+                tiktok: '<i class="fab fa-tiktok"></i>',
+                snapchat: '<i class="fab fa-snapchat"></i>',
+                reddit: '<i class="fab fa-reddit"></i>',
+                discord: '<i class="fab fa-discord"></i>',
+                pinterest: '<i class="fab fa-pinterest"></i>',
+                twitch: '<i class="fab fa-twitch"></i>',
+                quora: '<i class="fab fa-quora"></i>',
+                github: '<i class="fab fa-github"></i>',
+                spotify: '<i class="fab fa-spotify"></i>',
+                medium: '<i class="fab fa-medium"></i>',
+                stackoverflow: '<i class="fab fa-stack-overflow"></i>',
+                behance: '<i class="fab fa-behance"></i>',
+                dribbble: '<i class="fab fa-dribbble"></i>',
+                flickr: '<i class="fab fa-flickr"></i>',
+                soundcloud: '<i class="fab fa-soundcloud"></i>',
+                vimeo: '<i class="fab fa-vimeo"></i>',
+                vk: '<i class="fab fa-vk"></i>',
+                weibo: '<i class="fab fa-weibo"></i>',
+                tumblr: '<i class="fab fa-tumblr"></i>',
+                foursquare: '<i class="fab fa-foursquare"></i>',
+                slack: '<i class="fab fa-slack"></i>',
+                skype: '<i class="fab fa-skype"></i>',
+                viber: '<i class="fab fa-viber"></i>',
+                messenger: '<i class="fab fa-facebook-messenger"></i>',
+                threads: '<i class="fab fa-threads"></i>',
+                rumble: '<i class="fas fa-video"></i>'
+            };
+            return icons[platform] || '<img src="/images/cm_logo.png" style="width:22px;height:22px;">';
+        }
 
-        const newLinkHtml = `
-            <div class="app-link quick-link-item" id="link-row-${link.id}" data-icon-type="${link.icon_type || 'custom'}">
+        function saveQuickLink(platformKey, platformName) {
+            let urlInput = document.getElementById(platformKey);
+            let platformUrl = urlInput.value;
+            if (!platformUrl) {
+                showToast('Please enter a valid URL for ' + platformName, 'error');
+                return;
+            }
+            let btn = event.target.closest('button');
+            let originalHtml = btn.innerHTML;
+            btn.innerHTML = '<div class="loading-spinner"></div>';
+            btn.disabled = true;
+
+            fetch('{{ route('user.social.quick.update') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        platform_name: platformName,
+                        platform_url: platformUrl,
+                        platform_key: platformKey
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(platformName + ' link saved successfully!');
+                    } else {
+                        showToast(data.message || 'Error saving link', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error saving link', 'error');
+                })
+                .finally(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
+        }
+
+        function addCustomPlatform() {
+            let platformName = document.getElementById('newPlatformName').value.trim();
+            let platformUrl = document.getElementById('newPlatformUrl').value.trim();
+
+            if (!platformName || !platformUrl) {
+                showToast('Please fill both fields!', 'error');
+                return;
+            }
+
+            let btn = event.target;
+            let originalHtml = btn.innerHTML;
+            btn.innerHTML = '<div class="loading-spinner"></div>';
+            btn.disabled = true;
+
+            fetch('{{ route('user.social.links.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        platform_name: platformName,
+                        platform_url: platformUrl
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Platform added successfully!');
+                        document.getElementById('newPlatformName').value = '';
+                        document.getElementById('newPlatformUrl').value = '';
+                        addNewLinkToContainer(data.link);
+                    } else {
+                        showToast(data.message || 'Error adding platform', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error adding platform', 'error');
+                })
+                .finally(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
+        }
+
+        function addNewLinkToContainer(link) {
+            const container = document.getElementById('customLinksContainer');
+            if (!container) return;
+
+            const newLinkHtml = `
+            <div class="app-link quick-link-item" id="link-row-${link.id}">
                 <input type="checkbox" class="qr-platform-checkbox"
                        data-platform="${escapeHtml(link.platform_name)}"
                        data-input="url_${link.id}">
                 <div class="platform-icon">
-                    ${platformIconHtml}
+                    ${getPlatformIcon(link.platform_name)}
                 </div>
                 <strong>${escapeHtml(link.platform_name)}:</strong>
                 <input type="url" id="url_${link.id}" class="link-input"
@@ -1227,240 +1358,515 @@
                 <button onclick="copyToClipboard(document.getElementById('url_${link.id}').value)" class="copy-btn-sm">
                     <i class="fas fa-copy"></i> Copy
                 </button>
-            </div>
-        `;
+                <button onclick="deleteCustomLink(${link.id})" class="save-btn-sm" style="background:#dc3545;">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>`;
 
-        container.insertAdjacentHTML('beforeend', newLinkHtml);
-    }
+            container.insertAdjacentHTML('beforeend', newLinkHtml);
+        }
 
-    function printBusinessCard() {
-        window.open('{{ route('user.social.print') }}', '_blank');
-    }
+        function printBusinessCard() {
+            window.open('{{ route('user.social.print') }}', '_blank');
+        }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        renderMultipleQRs(@json($multiQrs));
-    });
-
-    function addMultipleQR() {
-        let checkboxes = document.querySelectorAll('.qr-platform-checkbox');
-        let selectedLinks = [];
-        checkboxes.forEach(function(box) {
-            if (box.checked) {
-                let platform = box.getAttribute('data-platform');
-                let inputId = box.getAttribute('data-input');
-                let url = document.getElementById(inputId).value;
-                if (url) {
-                    selectedLinks.push({
-                        platform: platform,
-                        url: url
-                    });
-                }
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            renderMultipleQRs(@json($multiQrs));
         });
 
-        if (selectedLinks.length === 0) {
-            showToast('Please select at least one platform', 'error');
-            return;
-        }
-
-        fetch('{{ route('save.multiple.qr') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    links: selectedLinks
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('QR Code Generated Successfully!');
-                    renderMultipleQRs(data.all_qrs);
-                    checkboxes.forEach(function(box) {
-                        box.checked = false;
-                    });
-                } else {
-                    showToast(data.message || 'Error generating QR', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('Error generating QR', 'error');
-            });
-    }
-
-    const qrPlatformIcons = {
-        whatsapp: 'fab fa-whatsapp',
-        telegram: 'fab fa-telegram',
-        instagram: 'fab fa-instagram',
-        facebook: 'fab fa-facebook',
-        youtube: 'fab fa-youtube',
-        linkedin: 'fab fa-linkedin',
-        x: 'fab fa-x-twitter',
-        snapchat: 'fab fa-snapchat',
-        reddit: 'fab fa-reddit',
-        discord: 'fab fa-discord',
-        pinterest: 'fab fa-pinterest',
-        quora: 'fab fa-quora',
-        messenger: 'fab fa-facebook-messenger',
-        twitch: 'fab fa-twitch',
-        rumble: 'fas fa-video',
-        viber: 'fab fa-viber',
-        threads: 'fab fa-threads'
-    };
-
-    const customPlatformLogo = '/images/cm_logo.png';
-
-    function renderMultipleQRs(qrs) {
-        let container = document.getElementById('multipleQrContainer');
-        if (!container) return;
-        container.innerHTML = '';
-
-        if (!qrs || qrs.length === 0) {
-            container.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">No QR codes generated yet. Select platforms and click "Generate QR Code" to create one.</div>';
-            return;
-        }
-
-        qrs.forEach(function(qr) {
-            let platformIconsHtml = '';
-            if (qr.links) {
-                qr.links.forEach(function(link) {
-                    let platformName = link.platform.toLowerCase();
-                    let iconClass = qrPlatformIcons[platformName];
-                    if (iconClass) {
-                        platformIconsHtml += `<i class="${iconClass}" title="${link.platform}" style="font-size:22px; margin:5px; color:#667eea;"></i>`;
-                    } else {
-                        platformIconsHtml += `<img src="${customPlatformLogo}" title="${link.platform}" style="width:24px; height:24px; object-fit:contain; margin:5px;">`;
+        function addMultipleQR() {
+            let checkboxes = document.querySelectorAll('.qr-platform-checkbox');
+            let selectedLinks = [];
+            checkboxes.forEach(function(box) {
+                if (box.checked) {
+                    let platform = box.getAttribute('data-platform');
+                    let inputId = box.getAttribute('data-input');
+                    let url = document.getElementById(inputId).value;
+                    if (url) {
+                        selectedLinks.push({
+                            platform: platform,
+                            url: url
+                        });
                     }
+                }
+            });
+
+            if (selectedLinks.length === 0) {
+                showToast('Please select at least one platform', 'error');
+                return;
+            }
+
+            let btn = event.target;
+            let originalHtml = btn.innerHTML;
+            btn.innerHTML = '<div class="loading-spinner"></div>';
+            btn.disabled = true;
+
+            fetch('{{ route('save.multiple.qr') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        links: selectedLinks
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('QR Code Generated Successfully!');
+                        renderMultipleQRs(data.all_qrs);
+                        checkboxes.forEach(function(box) {
+                            box.checked = false;
+                        });
+                    } else {
+                        showToast(data.message || 'Error generating QR', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error generating QR', 'error');
+                })
+                .finally(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
+        }
+
+        const qrPlatformIcons = {
+            whatsapp: 'fab fa-whatsapp',
+            telegram: 'fab fa-telegram',
+            instagram: 'fab fa-instagram',
+            facebook: 'fab fa-facebook',
+            youtube: 'fab fa-youtube',
+            linkedin: 'fab fa-linkedin',
+            x: 'fab fa-x-twitter',
+            twitter: 'fab fa-twitter',
+            snapchat: 'fab fa-snapchat',
+            reddit: 'fab fa-reddit',
+            discord: 'fab fa-discord',
+            pinterest: 'fab fa-pinterest',
+            quora: 'fab fa-quora',
+            messenger: 'fab fa-facebook-messenger',
+            twitch: 'fab fa-twitch',
+            rumble: 'fas fa-video',
+            viber: 'fab fa-viber',
+            threads: 'fab fa-threads'
+        };
+        const customPlatformLogo = '/images/cm_logo.png';
+
+        function renderMultipleQRs(qrs) {
+            let container = document.getElementById('multipleQrContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            if (!qrs || qrs.length === 0) {
+                container.innerHTML = `
+                <div style="text-align:center; color:#999; padding:20px;">
+                    No QR codes generated yet. Select platforms and click "Generate QR Code" to create one.
+                </div>
+                `;
+                return;
+            }
+
+            qrs.forEach(function(qr) {
+                let platformIconsHtml = '';
+                if (qr.links) {
+                    qr.links.forEach(function(link) {
+                        let platformName = link.platform.toLowerCase();
+                        let iconClass = qrPlatformIcons[platformName];
+                        if (iconClass) {
+                            platformIconsHtml += `
+                            <i class="${iconClass}"
+                            title="${link.platform}"
+                            style="font-size:22px; margin:5px; color:#667eea;">
+                            </i>
+                            `;
+                        } else {
+                            platformIconsHtml += `
+                                <img src="${customPlatformLogo}"
+                                    title="${link.platform}"
+                                    style="width:24px;height:24px;object-fit:contain;margin:5px;">
+                            `;
+                        }
+                    });
+                }
+
+                let qrBox = document.createElement('div');
+                qrBox.style.marginBottom = '40px';
+                qrBox.style.borderBottom = '1px solid #f0f0f0';
+                qrBox.style.paddingBottom = '20px';
+
+                let qrId = 'qr_' + qr.id;
+
+                qrBox.innerHTML = `
+                    <div style="text-align:center; margin-bottom:10px;">
+                        <input type="text" class="QR_name"
+                               value="${qr.title ?? ''}"
+                               placeholder="QR Name"
+                               onblur="updateQRTitle('${qr.id}', this.value)">
+                    </div>
+                    <div id="${qrId}" style="display:flex; justify-content:center; margin-bottom:15px;"></div>
+                    <div style="text-align:center; margin-top:15px;">
+                        <button onclick='openEditQRModal(${JSON.stringify(qr)})'
+                                class="btn-add"
+                                style="padding:8px 15px; font-size:13px; margin-right:8px;">
+                            <i class="fas fa-edit"></i> Edit QR
+                        </button>
+                        <button onclick="deleteQR('${qr.id}')"
+                                style="padding:8px 15px; font-size:13px; background:#dc3545; color:#fff; border:none; border-radius:5px; cursor:pointer;">
+                            <i class="fas fa-trash"></i> Delete QR
+                        </button>
+                    </div>
+                    <div style="text-align:center; margin-bottom:15px;">
+                        ${platformIconsHtml}
+                    </div>
+                    <div onclick="copyQrLink(this)" data-link="${window.location.origin}/multi-qr/{{ Auth::id() }}/${qr.id}"
+                        style="text-align:center; font-size:12px; word-break:break-all; margin-bottom:15px; background:#f8f9fa; padding:10px; border-radius:8px; cursor:pointer;">
+                        <i class="fas fa-link"></i>
+                        ${window.location.origin}/multi-qr/{{ Auth::id() }}/${qr.id}
+                    </div>
+                    <div class="stats">
+                        <div class="stat-box">
+                            <div class="stat-number">${qr.qr_scans ?? 0}</div>
+                            <div class="stat-label">QR Scans</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">${qr.button_clicks ?? 0}</div>
+                            <div class="stat-label">Button Clicks</div>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(qrBox);
+
+                new QRCode(document.getElementById(qrId), {
+                    text: `${window.location.origin}/multi-qr/{{ Auth::id() }}/${qr.id}`,
+                    width: 180,
+                    height: 180
+                });
+            });
+        }
+
+        function openEditQRModal(qr) {
+            currentEditingQR = qr;
+            let container = document.getElementById('editQrLinksContainer');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            if (qr.links && qr.links.length > 0) {
+                qr.links.forEach(function(link) {
+                    addEditableRow(link.platform, link.url);
                 });
             }
 
-            let qrBox = document.createElement('div');
-            qrBox.style.marginBottom = '40px';
-            qrBox.style.borderBottom = '1px solid #f0f0f0';
-            qrBox.style.paddingBottom = '20px';
+            let modal = new bootstrap.Modal(document.getElementById('editQrModal'));
+            modal.show();
+        }
 
-            let qrId = 'qr_' + qr.id;
+        function addEditableRow(platform = '', url = '') {
+            let container = document.getElementById('editQrLinksContainer');
+            if (!container) return;
 
-            qrBox.innerHTML = `
-                <div style="text-align:center; margin-bottom:10px;">
-                    <input type="text" class="QR_name" value="${qr.title ?? ''}" placeholder="QR Name" onblur="updateQRTitle('${qr.id}', this.value)">
+            let platformIcon = getPlatformIcon(platform);
+
+            let rowDiv = document.createElement('div');
+            rowDiv.className = 'row g-2 mb-3 platform-row align-items-center';
+
+            rowDiv.innerHTML = `
+                <div class="col-md-4">
+                    <div class="platform-cell">
+                        <div class="platform-icon">
+                            ${platformIcon}
+                        </div>
+                        <input type="text"
+                               class="form-control edit-platform-name"
+                               value="${escapeHtml(platform)}"
+                               placeholder="Platform Name"
+                               style="margin-left: 10px;">
+                    </div>
                 </div>
-                <div id="${qrId}" style="display:flex; justify-content:center; margin-bottom:15px;"></div>
-                <div style="text-align:center; margin-top:15px;">
-                    <button onclick='openEditQRModal(${JSON.stringify(qr)})' class="btn-add" style="padding:8px 15px; font-size:13px;">
-                        <i class="fas fa-edit"></i> Edit QR
+                <div class="col-md-6">
+                    <input type="url"
+                        class="form-control edit-platform-url"
+                        value="${escapeHtml(url)}"
+                        placeholder="https://example.com">
+                </div>
+
+                <div class="col-md-1 col-6">
+                    <button type="button"
+                            class="btn-action btn-remove"
+                            onclick="removePlatformRow(this)">
+                        <i class="fas fa-trash me-1"></i>
                     </button>
                 </div>
-                <div style="text-align:center; margin-bottom:15px;">${platformIconsHtml}</div>
-                <div style="text-align:center; font-size:12px; word-break:break-all; margin-bottom:15px; background:#f8f9fa; padding:10px; border-radius:8px;">
-                    <i class="fas fa-link"></i> ${window.location.origin}/multi-qr/{{ Auth::id() }}/${qr.id}
-                </div>
-                <div class="stats">
-                    <div class="stat-box">
-                        <div class="stat-number">${qr.qr_scans ?? 0}</div>
-                        <div class="stat-label">QR Scans</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-number">${qr.button_clicks ?? 0}</div>
-                        <div class="stat-label">Button Clicks</div>
-                    </div>
+
+                <div class="col-md-1 col-6">
+                    <button type="button"
+                            class="btn-action btn-copy"
+                            onclick="copyPlatformRow(this)">
+                        <i class="fas fa-copy me-1"></i>
+                    </button>
                 </div>
             `;
-            container.appendChild(qrBox);
-            new QRCode(document.getElementById(qrId), {
-                text: `${window.location.origin}/multi-qr/{{ Auth::id() }}/${qr.id}`,
-                width: 180,
-                height: 180
-            });
-        });
-    }
 
-    let currentEditingQR = null;
+            container.appendChild(rowDiv);
+        }
 
-    function openEditQRModal(qr) {
-        currentEditingQR = qr;
-        let container = document.getElementById('editQrLinksContainer');
-        container.innerHTML = `
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead>
-                        <tr><th>PLATFORM</th><th>ACTIVE LINK</th><th>ACTIONS</th></tr>
-                    </thead>
-                    <tbody id="editQrTableBody"></tbody>
-                </table>
-            </div>
-        `;
+        function addNewPlatformRow() {
+            let dropdown = document.getElementById('platformDropdown').value;
+            let customName = document.getElementById('customPlatformName').value.trim();
+            let url = document.getElementById('platformUrl').value.trim();
 
-        let tbody = document.getElementById('editQrTableBody');
-        qr.links.forEach(function(link) {
-            tbody.innerHTML += `
-                <tr>
-                    <td><div class="platform-cell"><div class="platform-icon">${getPlatformIcon(link.platform)}</div><span class="platform-name">${link.platform}</span></div></td>
-                    <td><input type="url" class="link-url-input edit-platform-url" value="${link.url}"><input type="hidden" class="edit-platform-name" value="${link.platform}"></td>
-                    <td><button onclick="copyToClipboard('${link.url}')" class="copy-btn"><i class="fas fa-copy"></i></button></td>
-                </tr>
-            `;
-        });
-        new bootstrap.Modal(document.getElementById('editQrModal')).show();
-    }
+            let platform = dropdown || customName;
 
-    function getPlatformIcon(platform) {
-        const icons = {
-            whatsapp: '<i class="fab fa-whatsapp"></i>',
-            telegram: '<i class="fab fa-telegram"></i>',
-            instagram: '<i class="fab fa-instagram"></i>',
-            facebook: '<i class="fab fa-facebook"></i>',
-            youtube: '<i class="fab fa-youtube"></i>',
-            linkedin: '<i class="fab fa-linkedin"></i>',
-            x: '<i class="fab fa-x-twitter"></i>',
-            snapchat: '<i class="fab fa-snapchat"></i>',
-            reddit: '<i class="fab fa-reddit"></i>',
-            discord: '<i class="fab fa-discord"></i>',
-            pinterest: '<i class="fab fa-pinterest"></i>',
-            quora: '<i class="fab fa-quora"></i>',
-            messenger: '<i class="fab fa-facebook-messenger"></i>',
-            twitch: '<i class="fab fa-twitch"></i>',
-            rumble: '<i class="fas fa-video"></i>',
-            viber: '<i class="fab fa-viber"></i>',
-            threads: '<i class="fab fa-threads"></i>'
-        };
-        return icons[platform.toLowerCase()] || '<img src="/images/cm_logo.png" style="width:22px;height:22px;">';
-    }
+            if (!platform) {
+                showToast('Please select or enter a platform name', 'error');
+                return;
+            }
 
-    function saveEditedQR() {
-        let urls = document.querySelectorAll('.edit-platform-url');
-        let names = document.querySelectorAll('.edit-platform-name');
-        let updatedLinks = [];
-        names.forEach((nameInput, index) => {
-            updatedLinks.push({ platform: nameInput.value, url: urls[index].value });
-        });
+            if (!url) {
+                showToast('Please enter a platform URL', 'error');
+                return;
+            }
 
-        fetch('{{ route('update-multi-qr') }}', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body: JSON.stringify({ qr_id: currentEditingQR.id, links: updatedLinks })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('QR Updated Successfully');
-                    renderMultipleQRs(data.all_qrs);
-                    bootstrap.Modal.getInstance(document.getElementById('editQrModal')).hide();
+            addEditableRow(platform, url);
+
+            document.getElementById('platformDropdown').value = '';
+            document.getElementById('customPlatformName').value = '';
+            document.getElementById('platformUrl').value = '';
+
+            showToast('Platform added to edit list', 'success');
+        }
+
+        function removePlatformRow(button) {
+            if (button && button.closest) {
+                let row = button.closest('.platform-row');
+                if (row) {
+                    row.remove();
+                    showToast('Platform removed', 'success');
                 }
-            })
-            .catch(error => showToast('Error updating QR', 'error'));
-    }
+            }
+        }
 
-    function updateQRTitle(qrId, title) {
-        fetch('{{ route('update-multi-qr-title') }}', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-            body: JSON.stringify({ qr_id: qrId, title: title })
-        }).catch(error => console.error(error));
-    }
-</script>
+        function copyPlatformRow(button) {
+            if (button && button.closest) {
+                let row = button.closest('.platform-row');
+                if (row) {
+                    let urlInput = row.querySelector('.edit-platform-url');
+                    if (urlInput && urlInput.value) {
+                        navigator.clipboard.writeText(urlInput.value)
+                            .then(() => {
+                                showToast('URL copied to clipboard!');
+                            })
+                            .catch(() => {
+                                showToast('Failed to copy URL', 'error');
+                            });
+                    } else {
+                        showToast('No URL to copy', 'error');
+                    }
+                }
+            }
+        }
+
+        function saveEditedQR() {
+            let platformNames = document.querySelectorAll('.edit-platform-name');
+            let urls = document.querySelectorAll('.edit-platform-url');
+            let updatedLinks = [];
+
+            for (let i = 0; i < platformNames.length; i++) {
+                let platform = platformNames[i].value.trim();
+                let url = urls[i].value.trim();
+
+                if (platform && url) {
+                    updatedLinks.push({
+                        platform: platform,
+                        url: url
+                    });
+                } else if (platform && !url) {
+                    showToast(`Please enter URL for ${platform}`, 'error');
+                    return;
+                }
+            }
+
+            if (updatedLinks.length === 0) {
+                showToast('Please add at least one valid link', 'error');
+                return;
+            }
+
+            let saveBtn = document.querySelector('#editQrModal .btn-save');
+            let originalHtml = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<div class="loading-spinner"></div> Saving...';
+            saveBtn.disabled = true;
+
+            fetch('{{ route('update-multi-qr') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        qr_id: currentEditingQR.id,
+                        links: updatedLinks
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('QR Updated Successfully!');
+                        renderMultipleQRs(data.all_qrs);
+                        let modal = bootstrap.Modal.getInstance(document.getElementById('editQrModal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+                    } else {
+                        showToast(data.message || 'Error updating QR', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error updating QR code', 'error');
+                })
+                .finally(() => {
+                    saveBtn.innerHTML = originalHtml;
+                    saveBtn.disabled = false;
+                });
+        }
+
+        function copyQrLink(element) {
+            const link = element.dataset.link;
+            navigator.clipboard.writeText(link)
+                .then(() => {
+                    showToast('Link copied successfully');
+                    const original = element.innerHTML;
+                    element.innerHTML = '<i class="fas fa-check text-success"></i> Copied!';
+                    setTimeout(() => {
+                        element.innerHTML = original;
+                    }, 2000);
+                })
+                .catch(() => {
+                    showToast('Failed to copy link', 'error');
+                });
+        }
+
+        function updateQRTitle(qrId, title) {
+            fetch('{{ route('update-multi-qr-title') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        qr_id: qrId,
+                        title: title
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('QR Title Saved');
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+
+        function deleteQR(qrId) {
+            Swal.fire({
+                title: 'Delete QR Code?',
+                text: "This QR code will be permanently deleted.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('multi-qr-destroy', ':id') }}".replace(':id', qrId),
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: 'QR Code deleted successfully.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                            loadUserQRs();
+                        },
+                        error: function(xhr) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Unable to delete QR code.'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function loadUserQRs() {
+            $.ajax({
+                url: "{{ route('get-multi-qr-codes') }}",
+                type: "GET",
+                success: function(response) {
+                    if (response.success) {
+                        renderMultipleQRs(response.qrs);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Failed to load QRs', xhr);
+                }
+            });
+        }
+
+        function deleteCustomLink(linkId) {
+            Swal.fire({
+                title: 'Delete Link?',
+                text: "This link will be permanently deleted.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('user-social-links-destroy', ':id') }}".replace(':id', linkId),
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: 'Link deleted successfully.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                            document.getElementById(`link-row-${linkId}`).remove();
+                        },
+                        error: function(xhr) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Unable to delete link.'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    </script>
 @endsection

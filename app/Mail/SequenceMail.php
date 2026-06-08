@@ -42,9 +42,7 @@ class SequenceMail extends Mailable
         // =========================================
 
         if (!empty($this->sequence->attachments_image) && file_exists(public_path($this->sequence->attachments_image)))
-
-            {
-
+        {
             Log::info(public_path($this->sequence->attachments_image));
             $filePath = public_path(
                 $this->sequence->attachments_image
