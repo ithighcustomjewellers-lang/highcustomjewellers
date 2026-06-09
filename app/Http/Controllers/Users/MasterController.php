@@ -12,6 +12,7 @@ use App\Models\Sequence;
 use App\Models\CampaignLog;
 use App\Jobs\SendCampaignJob;
 use App\Models\Lead;
+use App\Models\SocialLink;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 
@@ -26,17 +27,21 @@ class MasterController extends Controller
     public function masterLinkDocument()
     {
         $userId = Auth::id();
+        $sociallinks = SocialLink::where('user_id', $userId)
+            ->where('platform_name', '!=', 'WhatsApp')
+            ->select('id', 'platform_name', 'platform_url')
+            ->get();
+
         $business = BusinessLink::where('user_id', $userId)->first();
-        return view('user.link-document', compact('business'));
+        return view('user.link-document', compact('business', 'sociallinks'));
     }
+
 
     public function submitBusinessLinks(Request $request)
     {
         // VALIDATION
         $validator = Validator::make($request->all(), [
             'whatsapp_link' => 'required|url|max:255',
-            'telegram_link' => 'required|url|max:255',
-            'business_link' => 'required|url|max:255',
             'company_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
         // VALIDATION ERROR
@@ -57,8 +62,18 @@ class MasterController extends Controller
         }
         // UPDATE DATA
         $business->whatsapp_link = $request->whatsapp_link;
-        $business->telegram_link = $request->telegram_link;
-        $business->business_link = $request->business_link;
+
+        $selectedLinks = [];
+
+        if ($request->filled('social_link_ids')) {
+            $selectedLinks = SocialLink::where('user_id', $userId)
+                ->whereIn('id', $request->social_link_ids)
+                ->select('id', 'platform_name', 'platform_url')
+                ->get()
+                ->toArray();
+        }
+        $business->action_links = $selectedLinks;
+
         // IMAGE UPLOAD
         if ($request->hasFile('company_logo')) {
             $companyPath = public_path('uploads/company_logo');
@@ -82,32 +97,68 @@ class MasterController extends Controller
         ], 200);
     }
 
+    // public function getBusinessLinks()
+    // {
+    //     $userId = Auth::id();
+    //     $businessLinks = DB::table('business_links')->where('user_id', $userId)->first();
+    //     if (!$businessLinks) {
+    //         return response()->json([
+    //             'image_type' => 'logo'
+    //         ]);
+    //     }
+    //     if (!empty($businessLinks->company_logo)) {
+    //         $imagePath = public_path($businessLinks->company_logo);
+    //         if (file_exists($imagePath)) {
+    //             list($width, $height) = getimagesize($imagePath);
+    //             $isBanner = ($width > 400) || (($width / $height) > 2);
+    //             $businessLinks->image_type = $isBanner ? 'banner' : 'logo';
+    //         } else {
+    //             $businessLinks->image_type = 'logo';
+    //         }
+    //     } else {
+    //         $businessLinks->image_type = 'logo';
+    //     }
+    //     return response()->json($businessLinks);
+    // }
+
+
+
     public function getBusinessLinks()
     {
         $userId = Auth::id();
-        $businessLinks = DB::table('business_links')->where('user_id', $userId)->first();
+        $businessLinks = DB::table('business_links')
+            ->where('user_id', $userId)
+            ->first();
+
         if (!$businessLinks) {
             return response()->json([
-                'image_type' => 'logo'
+                'image_type' => 'logo',
+                'action_links' => []
             ]);
         }
+
         if (!empty($businessLinks->company_logo)) {
             $imagePath = public_path($businessLinks->company_logo);
             if (file_exists($imagePath)) {
                 list($width, $height) = getimagesize($imagePath);
-                $isBanner = ($width > 400) || (($width / $height) > 2);
-                $businessLinks->image_type = $isBanner ? 'banner' : 'logo';
+                $businessLinks->image_type =
+                    ($width > 400 || ($width / $height) > 2)
+                    ? 'banner'
+                    : 'logo';
             } else {
                 $businessLinks->image_type = 'logo';
             }
         } else {
             $businessLinks->image_type = 'logo';
         }
+        $businessLinks->action_links = json_decode($businessLinks->action_links, true) ?? [];
         return response()->json($businessLinks);
     }
 
     public function sequencesStore(Request $request)
     {
+        // dd($request);
+        // die();
         Log::info('Store sequence request received', [
             'data' => $request->all()
         ]);
@@ -128,8 +179,10 @@ class MasterController extends Controller
             'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'attachments_image' => 'nullable|file|max:5120',
             'whatsapp_link' => 'nullable|url',
-            'telegram_link' => 'nullable|url',
-            'business_link' => 'nullable|url',
+            'action_links' => 'nullable|array',
+            'action_links.*.platform_name' => 'required|string',
+            'action_links.*.platform_url' => 'required|string',
+            'action_links.*.id' => 'nullable',
             'company_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
@@ -163,6 +216,13 @@ class MasterController extends Controller
                     ]
                 ], 422);
             }
+
+            if ($request->filled('action_links')) {
+                $data['action_links'] = json_encode($request->action_links);
+            } else {
+                $data['action_links'] = json_encode([]);
+            }
+
             // =========================
             // ✅ COMPANY LOGO
             // =========================
@@ -236,42 +296,6 @@ class MasterController extends Controller
             $leads = Lead::where('user_id', $userId)
                 ->whereRaw('UPPER(type) = ?', [$type])
                 ->get();
-
-            // foreach ($leads as $lead) {
-            //     // =========================
-            //     // ❌ PREVENT DUPLICATE
-            //     // =========================
-            //     $alreadyQueued = CampaignLog::where('user_id', $userId)
-            //         ->where('lead_id', $lead->id)
-            //         ->where('sequence_id', $sequence->id)
-            //         ->exists();
-            //     if ($alreadyQueued) {
-            //         continue;
-            //     }
-
-            //     // =========================
-            //     // ✅ SEND DATE
-            //     // =========================
-            //     $delay = now()->addDays((int) $sequence->gap_days);
-            //     // =========================
-            //     // ✅ CREATE LOG
-            //     // =========================
-            //     CampaignLog::create([
-            //         'user_id' => $userId,
-            //         'lead_id' => $lead->id,
-            //         'sequence_id' => $sequence->id,
-            //         'status' => 'pending',
-            //         'scheduled_at' => $delay,
-            //     ]);
-            //     // =========================
-            //     // ✅ DISPATCH JOB
-            //     // =========================
-            //     SendCampaignJob::dispatch(
-            //         $lead->id,
-            //         $sequence->id,
-            //         $userId
-            //     )->delay($delay);
-            // }
 
             foreach ($leads as $lead) {
                 // =========================

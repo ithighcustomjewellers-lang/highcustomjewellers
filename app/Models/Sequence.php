@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sequence extends Model
 {
+
+
     protected $fillable = [
         'user_id',
         'step',
@@ -22,8 +24,11 @@ class Sequence extends Model
         'attachment_name',
         'attachment_size',
         'whatsapp_link',
-        'telegram_link',
-        'business_link',
+        'action_links',
+    ];
+
+    protected $casts = [
+        'action_links' => 'array',
     ];
 
     // 🔗 relation with attachments

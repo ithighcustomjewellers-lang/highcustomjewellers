@@ -169,6 +169,77 @@
             }
 
         }
+
+        .custom-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.dropdown-header {
+    height: 60px;
+    border: 1px solid #dbe3ef;
+    border-radius: 18px;
+    background: #fff;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.dropdown-content {
+    display: none;
+    /* position: absolute; */
+    top: 68px;
+    left: 0;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 18px;
+    border: 1px solid #dbe3ef;
+    box-shadow: 0 15px 35px rgba(0,0,0,.08);
+    z-index: 999;
+    padding: 10px;
+}
+
+.dropdown-content.active {
+    display: block;
+}
+
+.dropdown-item-custom {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.dropdown-item-custom:hover {
+    background: #f8fafc;
+}
+
+.dropdown-item-custom input {
+    margin-top: 5px;
+}
+
+.link-info {
+    flex: 1;
+}
+
+.platform-name {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.platform-url {
+    font-size: 12px;
+    color: #64748b;
+    word-break: break-all;
+}
     </style>
 
 
@@ -205,6 +276,17 @@
                         <small class="text-danger company_logo_error"></small>
                     </div>
                 </div>
+                @php
+                    $user = Auth::user();
+
+                    $message = "Hi {$user->name},\n"
+                        . "I received your email and I'm interested in your jewelry collection. "
+                        . "I'm reaching out through WhatsApp to learn more about your products and pricing. "
+                        . "Could you please share more details?\n"
+                        . "Thank you.";
+
+                    $defaultWhatsappUrl = 'https://wa.me/' . preg_replace('/\D/', '', $user->mobile) . '?text=' . urlencode($message);
+                @endphp
 
                 <!-- WHATSAPP -->
                 <div class="mb-4">
@@ -213,37 +295,41 @@
                     </label>
                     <div class="input-wrapper">
                         <i class="bi bi-whatsapp input-icon text-success"></i>
-                        <input type="text" name="whatsapp_link" class="form-control custom-input"
-                            value="{{ $business->whatsapp_link ?? '' }}" placeholder="https://wa.me/919999999999">
+                        <input type="text" name="whatsapp_link"  class="form-control custom-input" value="{{ $defaultWhatsappUrl }}" placeholder="https://wa.me/919999999999">
                     </div>
                     <small class="text-danger whatsapp_link_error"></small>
                 </div>
 
-                <!-- TELEGRAM -->
                 <div class="mb-4">
-                    <label class="upload-label">
-                        Telegram Link
-                    </label>
+                    <label class="upload-label">Select Action Links</label>
 
-                    <div class="input-wrapper">
-                        <i class="bi bi-telegram input-icon text-info"></i>
-                        <input type="text" name="telegram_link" class="form-control custom-input"
-                            value="{{ $business->telegram_link ?? '' }}" placeholder="https://t.me/username">
-                    </div>
-                    <small class="text-danger telegram_link_error"></small>
-                </div>
+                    <div class="custom-dropdown">
+                        <div class="dropdown-header" id="dropdownHeader">
+                            <span id="selectedCount">Select Links</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
 
-                <!-- WEBSITE -->
-                <div class="mb-4">
-                    <label class="upload-label">
-                        Business Website
-                    </label>
-                    <div class="input-wrapper">
-                        <i class="bi bi-globe input-icon text-primary"></i>
-                        <input type="text" name="business_link" class="form-control custom-input"
-                            value="{{ $business->business_link ?? '' }}" placeholder="https://yourbusiness.com">
+                        <div class="dropdown-content" id="dropdownContent">
+                            @foreach($sociallinks as $link)
+                                <label class="dropdown-item-custom">
+                                    <input type="checkbox"
+                                        name="social_link_ids[]"
+                                        value="{{ $link->id }}"
+                                        class="action-link-checkbox">
+
+                                    <div class="link-info">
+                                        <div class="platform-name">
+                                            {{ $link->platform_name }}
+                                        </div>
+
+                                        <div class="platform-url">
+                                            {{ Str::limit($link->platform_url, 50) }}
+                                        </div>
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
                     </div>
-                    <small class="text-danger business_link_error"></small>
                 </div>
 
                 <!-- BUTTON -->
@@ -302,5 +388,31 @@
                 }
             });
         });
+
+        $(document).ready(function () {
+            // Open / Close Dropdown
+            $('#dropdownHeader').on('click', function () {
+                $('#dropdownContent').toggleClass('active');
+            });
+
+            // Close dropdown when click outside
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.custom-dropdown').length) {
+                    $('#dropdownContent').removeClass('active');
+                }
+            });
+
+            // Update selected count
+            $(document).on('change', '.action-link-checkbox', function () {
+                let count = $('.action-link-checkbox:checked').length;
+                if (count > 0) {
+                    $('#selectedCount').text(count + ' Link(s) Selected');
+                } else {
+                    $('#selectedCount').text('Select Links');
+                }
+            });
+        });
     </script>
+
+
 @endsection

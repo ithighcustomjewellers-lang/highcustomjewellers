@@ -735,13 +735,11 @@
                     </div>
 
                     {{-- WhatsApp --}}
-                    <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="WhatsApp"
-                            data-input="whatsapp_url">
+                    {{-- <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="WhatsApp" data-input="whatsapp_url">
                         <i class="fab fa-whatsapp" style="color: #25D366;"></i>
                         <strong>WhatsApp:</strong>
-                        <input type="url" id="whatsapp_url" placeholder="https://wa.me/yournumber" class="link-input"
-                            value="{{ $quickLinks['whatsapp_url'] ?? '' }}">
+                        <input type="url" id="whatsapp_url" placeholder="https://wa.me/yournumber" class="link-input"value="{{ $quickLinks['whatsapp_url'] ?? '' }}">
                         <button onclick="saveQuickLink('whatsapp_url', 'WhatsApp')" class="save-btn-sm">
                             <i class="fas fa-save"></i> Save
                         </button>
@@ -749,7 +747,33 @@
                             class="copy-btn-sm">
                             <i class="fas fa-copy"></i> Copy
                         </button>
+                    </div> --}}
+
+                    @php
+                        $user = Auth::user();
+                        $message = "Hi {$user->name},\n"
+                            . "I came across your jewelry collection and I'm interested in learning more about it. "
+                            . "Could you please share some details about your products and offerings?\n"
+                            . "Thank you.";
+                        $defaultWhatsappUrl = 'https://wa.me/' . preg_replace('/\D/', '', $user->mobile). '?text=' . urlencode($message);
+                    @endphp
+
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="WhatsApp" data-input="whatsapp_url">
+                        <i class="fab fa-whatsapp" style="color: #25D366;"></i>
+                        <strong>WhatsApp:</strong>
+                        <input type="url" id="whatsapp_url" placeholder="https://wa.me/yournumber"  class="link-input" value="{{ $quickLinks['whatsapp_url'] ?? $defaultWhatsappUrl }}">
+
+                        <button onclick="saveQuickLink('whatsapp_url', 'WhatsApp')" class="save-btn-sm">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+
+                        <button onclick="copyToClipboard(document.getElementById('whatsapp_url').value)"
+                            class="copy-btn-sm">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
                     </div>
+
 
                     {{-- Telegram --}}
                     <div class="app-link quick-link-item">
@@ -890,76 +914,6 @@
                         </button>
                     </div>
 
-                    {{-- Reddit --}}
-                    {{-- <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Reddit"
-                            data-input="reddit_url">
-                        <i class="fab fa-reddit" style="color: #FF4500;"></i>
-                        <strong>Reddit:</strong>
-                        <input type="url" id="reddit_url" placeholder="https://reddit.com/user/username"
-                            class="link-input"
-                            value="{{ $quickLinks['reddit_url'] ?? ($adminQuickLinks['reddit_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('reddit_url', 'Reddit')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('reddit_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div> --}}
-
-                    {{-- Discord --}}
-                    {{-- <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Discord"
-                            data-input="discord_url">
-                        <i class="fab fa-discord" style="color: #5865F2;"></i>
-                        <strong>Discord:</strong>
-                        <input type="url" id="discord_url" placeholder="https://discord.gg/yourserver"
-                            class="link-input"
-                            value="{{ $quickLinks['discord_url'] ?? ($adminQuickLinks['discord_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('discord_url', 'Discord')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('discord_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div> --}}
-
-                    {{-- Pinterest --}}
-                    {{-- <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Pinterest"
-                            data-input="pinterest_url">
-                        <i class="fab fa-pinterest" style="color: #E60023;"></i>
-                        <strong>Pinterest:</strong>
-                        <input type="url" id="pinterest_url" placeholder="https://pinterest.com/username"
-                            class="link-input"
-                            value="{{ $quickLinks['pinterest_url'] ?? ($adminQuickLinks['pinterest_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('pinterest_url', 'Pinterest')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('pinterest_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div> --}}
-
-                    {{-- Quora --}}
-                    {{-- <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Quora"
-                            data-input="quora_url">
-                        <i class="fab fa-quora" style="color: #B92B27;"></i>
-                        <strong>Quora:</strong>
-                        <input type="url" id="quora_url" placeholder="https://quora.com/profile/username"
-                            class="link-input"
-                            value="{{ $quickLinks['quora_url'] ?? ($adminQuickLinks['quora_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('quora_url', 'Quora')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('quora_url').value)" class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div> --}}
 
                     {{-- Messenger --}}
                     <div class="app-link quick-link-item">
@@ -978,87 +932,59 @@
                         </button>
                     </div>
 
-                    {{-- Twitch --}}
-                    {{-- <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Twitch"
-                            data-input="twitch_url">
-                        <i class="fab fa-twitch" style="color: #9146FF;"></i>
-                        <strong>Twitch:</strong>
-                        <input type="url" id="twitch_url" placeholder="https://twitch.tv/username"
-                            class="link-input"
-                            value="{{ $quickLinks['twitch_url'] ?? ($adminQuickLinks['twitch_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('twitch_url', 'Twitch')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('twitch_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div> --}}
 
-                    {{-- Rumble --}}
-                    {{-- <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Rumble"
-                            data-input="rumble_url">
-                        <i class="fas fa-video" style="color: #85C742;"></i>
-                        <strong>Rumble:</strong>
-                        <input type="url" id="rumble_url" placeholder="https://rumble.com/user/username"
-                            class="link-input"
-                            value="{{ $quickLinks['rumble_url'] ?? ($adminQuickLinks['rumble_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('rumble_url', 'Rumble')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('rumble_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div> --}}
-
-                    {{-- Viber --}}
-                    {{-- <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Viber"
-                            data-input="viber_url">
-                        <i class="fab fa-viber" style="color: #7360F2;"></i>
-                        <strong>Viber:</strong>
-                        <input type="url" id="viber_url" placeholder="https://invite.viber.com/?g=group"
-                            class="link-input"
-                            value="{{ $quickLinks['viber_url'] ?? ($adminQuickLinks['viber_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('viber_url', 'Viber')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('viber_url').value)" class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div> --}}
                 </div>
 
                 <!-- Custom Social Links Section - Dynamic Links -->
                 <div style="margin-top: 20px;">
                     <div id="customLinksContainer">
-                        @foreach ($socialLinks as $link)
-                            <div class="app-link quick-link-item" id="link-row-{{ $link->id }}"
+                       @foreach ($socialLinks as $link)
+                            <div class="app-link quick-link-item"
+                                id="link-row-{{ $link->id }}"
                                 data-icon-type="{{ $link->icon_type }}">
-                                <input type="checkbox" class="qr-platform-checkbox"
-                                    data-platform="{{ $link->platform_name }}" data-input="url_{{ $link->id }}">
+
+                                <input type="checkbox"
+                                    class="qr-platform-checkbox"
+                                    data-platform="{{ $link->platform_name }}"
+                                    data-input="url_{{ $link->id }}">
+
                                 <div class="platform-icon">
                                     {!! getPlatformIconHtml($link) !!}
                                 </div>
-                                <strong>{{ $link->platform_name }}:</strong>
-                                <input type="url" id="url_{{ $link->id }}" class="link-input" value="{{ $link->platform_url }}" placeholder="https://...">
-                                <button onclick="saveCustomLink({{ $link->id }}, '{{ $link->platform_name }}')" class="save-btn-sm">
+
+                                {{-- Platform Name Editable --}}
+                                <input type="text"
+                                    id="platform_name_{{ $link->id }}"
+                                    class="link-input platform-name-input"
+                                    value="{{ $link->platform_name }}"
+                                    placeholder="Platform Name"
+                                    style="max-width:180px;">
+
+                                {{-- URL Editable --}}
+                                <input type="url"
+                                    id="url_{{ $link->id }}"
+                                    class="link-input"
+                                    value="{{ $link->platform_url }}"
+                                    placeholder="https://...">
+
+                                <button onclick="saveCustomLink({{ $link->id }})"
+                                        class="save-btn-sm">
                                     <i class="fas fa-save"></i> Save
                                 </button>
-                                <button
-                                    onclick="copyToClipboard(document.getElementById('url_{{ $link->id }}').value)"
-                                    class="copy-btn-sm">
+
+                                <button onclick="copyToClipboard(document.getElementById('url_{{ $link->id }}').value)"
+                                        class="copy-btn-sm">
                                     <i class="fas fa-copy"></i> Copy
                                 </button>
-                                <button onclick="deleteCustomLink({{ $link->id }})" class="save-btn-sm"
-                                    style="background:#dc3545;">
+
+                                <button onclick="deleteCustomLink({{ $link->id }})"
+                                        class="save-btn-sm"
+                                        style="background:#dc3545;">
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
+
                             </div>
-                        @endforeach
+                            @endforeach
                     </div>
                 </div>
 
@@ -1337,33 +1263,54 @@
                 });
         }
 
+
+
         function addNewLinkToContainer(link) {
             const container = document.getElementById('customLinksContainer');
-            if (!container) return;
+            const html = `
+                <div class="app-link quick-link-item"
+                    id="link-row-${link.id}">
 
-            const newLinkHtml = `
-            <div class="app-link quick-link-item" id="link-row-${link.id}">
-                <input type="checkbox" class="qr-platform-checkbox"
-                       data-platform="${escapeHtml(link.platform_name)}"
-                       data-input="url_${link.id}">
-                <div class="platform-icon">
-                    ${getPlatformIcon(link.platform_name)}
+                    <input type="checkbox"
+                        class="qr-platform-checkbox"
+                        data-platform="${link.platform_name}"
+                        data-input="url_${link.id}">
+
+                    <div class="platform-icon">
+                        <img src="/images/cm_logo.png"
+                            style="width:24px;height:24px;">
+                    </div>
+
+                    <input type="text"
+                        id="platform_${link.id}"
+                        class="link-input"
+                        value="${link.platform_name}">
+
+                    <input type="url"
+                        id="url_${link.id}"
+                        class="link-input"
+                        value="${link.platform_url}">
+
+                    <button onclick="saveCustomLink(${link.id})"
+                            class="save-btn-sm">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+
+                    <button onclick="copyToClipboard(document.getElementById('url_${link.id}').value)"
+                            class="copy-btn-sm">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+
+                    <button onclick="deleteCustomLink(${link.id})"
+                            class="save-btn-sm"
+                            style="background:#dc3545;">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+
                 </div>
-                <strong>${escapeHtml(link.platform_name)}:</strong>
-                <input type="url" id="url_${link.id}" class="link-input"
-                       value="${escapeHtml(link.platform_url)}" placeholder="https://...">
-                <button onclick="saveCustomLink(${link.id}, '${escapeHtml(link.platform_name)}')" class="save-btn-sm">
-                    <i class="fas fa-save"></i> Save
-                </button>
-                <button onclick="copyToClipboard(document.getElementById('url_${link.id}').value)" class="copy-btn-sm">
-                    <i class="fas fa-copy"></i> Copy
-                </button>
-                <button onclick="deleteCustomLink(${link.id})" class="save-btn-sm" style="background:#dc3545;">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </div>`;
+            `;
 
-            container.insertAdjacentHTML('beforeend', newLinkHtml);
+            container.insertAdjacentHTML('beforeend', html);
         }
 
         function printBusinessCard() {
@@ -1867,6 +1814,32 @@
                     });
                 }
             });
+        }
+
+        function saveCustomLink(linkId)
+        {
+                let platformName =
+                    document.getElementById('platform_' + linkId).value;
+
+                let platformUrl =
+                    document.getElementById('url_' + linkId).value;
+
+                fetch('{{ route('user-social-links-update-secondary') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        id: linkId,
+                        platform_name: platformName,
+                        platform_url: platformUrl
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    showToast('Updated Successfully');
+                });
         }
     </script>
 @endsection
