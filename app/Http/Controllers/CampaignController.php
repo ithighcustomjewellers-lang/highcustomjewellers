@@ -49,9 +49,34 @@ class CampaignController extends Controller
         return true;
     }
 
+    // public function leadResponse($logId, $status)
+    // {
+    //     if (!in_array($status, ['interested','not_interested'])) {
+    //         abort(404);
+    //     }
+    //     $log = CampaignLog::find($logId);
+    //     if (!$log) {
+    //         abort(404);
+    //     }
+    //     $log->status = $status;
+    //     $log->save();
+    //     $lead = Lead::find($log->lead_id);
+    //     if ( $lead && $status == 'not_interested'){
+    //         // GLOBAL UNSUBSCRIBE
+    //         $lead->is_unsubscribed = true;
+    //         $lead->save();
+    //         // DELETE FUTURE PENDING MAILS
+    //         CampaignLog::where('lead_id', $lead->id)
+    //         ->update([
+    //             'status' => 'Not Interested'
+    //         ]);
+    //     }
+    //     return view('emails.response',compact('status'));
+    // }
+
     public function leadResponse($logId, $status)
     {
-        if (!in_array($status, ['interested','not_interested'])) {
+        if (!in_array($status, ['interested', 'not_interested'])) {
             abort(404);
         }
         $log = CampaignLog::find($logId);
@@ -61,17 +86,24 @@ class CampaignController extends Controller
         $log->status = $status;
         $log->save();
         $lead = Lead::find($log->lead_id);
-        if ( $lead && $status == 'not_interested'){
-            // GLOBAL UNSUBSCRIBE
-            $lead->is_unsubscribed = true;
-            $lead->save();
-            // DELETE FUTURE PENDING MAILS
-            CampaignLog::where('lead_id', $lead->id)
-            ->update([
-                'status' => 'Not Interested'
-            ]);
+        if ($lead) {
+            if ($status == 'not_interested') {
+                // Unsubscribe
+                $lead->is_unsubscribed = 1;
+                $lead->save();
+                CampaignLog::where('lead_id', $lead->id)
+                    ->where('status', 'pending')
+                    ->update([
+                        'status' => 'Not Interested'
+                    ]);
+            } elseif ($status == 'interested') {
+
+                // Subscribe again
+                $lead->is_unsubscribed = 0;
+                $lead->save();
+            }
         }
-        return view('emails.response',compact('status'));
+        return view('emails.response', compact('status'));
     }
 
 

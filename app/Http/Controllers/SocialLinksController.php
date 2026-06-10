@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 use App\Models\MultiQrLink;
+use App\Models\Sequence;
 
 class SocialLinksController extends Controller
 {
@@ -764,4 +765,6 @@ class SocialLinksController extends Controller
         ]);
 
     }
+
+
 }

@@ -98,7 +98,9 @@ class SendCampaignJob implements ShouldQueue
             $sequence->subject
         );
 
-
+                Log::info("sequence data", [
+                    'sequence_data' => $sequence,
+                ]);
 
         try {
             if ($user->gmail_token && $user->gmail_refresh_token) {
@@ -283,9 +285,7 @@ class SendCampaignJob implements ShouldQueue
         // ✅ REFRESH TOKEN
         // =========================================
         if ($client->isAccessTokenExpired()) {
-
             if (!$user->gmail_refresh_token) {
-
                 throw new \Exception(
                     "No refresh token available."
                 );
@@ -296,14 +296,10 @@ class SendCampaignJob implements ShouldQueue
             );
 
             if (isset($newToken['access_token'])) {
-
                 $user->gmail_token = $newToken['access_token'];
-
                 $user->save();
-
                 $client->setAccessToken($newToken);
             } else {
-
                 throw new \Exception(
                     "Failed to refresh Gmail token."
                 );

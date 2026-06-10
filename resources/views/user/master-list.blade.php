@@ -37,12 +37,11 @@
                         <th>Variant</th>
                         <th>Message</th>
                         <th>Subject</th>
-                        <th>Business Type</th>
+                        <th>Type</th>
                         <th>Whatsapp</th>
-                        <th>Telegram</th>
-                        <th>Business</th>
                         <th>Created</th>
                         <th>Updated</th>
+                        <th>Delete</th>
                     </tr>
                 </thead>
             </table>
@@ -423,16 +422,6 @@ $(document).ready(function() {
             },
 
             {
-                data:'telegram_link',
-                name:'telegram_link'
-            },
-
-            {
-                data:'business_link',
-                name:'business_link'
-            },
-
-            {
                 data:'created_at',
                 name:'created_at'
             },
@@ -440,6 +429,12 @@ $(document).ready(function() {
             {
                 data:'updated_at',
                 name:'updated_at'
+            },
+
+            {
+                data:'delete',
+                orderable:false,
+                searchable:false
             }
 
         ],
@@ -552,5 +547,64 @@ $(document).ready(function() {
     });
 
 });
+
+function deleteList(id)
+{
+    Swal.fire({
+        title: 'Delete Sequence?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes Delete'
+    }).then((result) => {
+
+        if(result.isConfirmed)
+        {
+            $.ajax({
+                url: "{{ route('sequence-delete') }}",
+                type: "POST",
+                data: {
+                    id: id,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response)
+                {
+                    if(response.success)
+                    {
+                        Swal.fire(
+                            'Deleted!',
+                            response.message,
+                            'success'
+                        );
+
+                        $('#sequencesTable')
+                            .DataTable()
+                            .ajax
+                            .reload(null,false);
+                    }
+                    else
+                    {
+                        Swal.fire(
+                            'Error',
+                            response.message,
+                            'error'
+                        );
+                    }
+                },
+                error: function()
+                {
+                    Swal.fire(
+                        'Error',
+                        'Something went wrong',
+                        'error'
+                    );
+                }
+            });
+        }
+
+    });
+}
 
 </script>

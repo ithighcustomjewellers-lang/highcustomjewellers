@@ -52,6 +52,9 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::post('BusinessLinks', [MasterController::class, 'submitBusinessLinks'])->name('submit-business-links');
     Route::get('admin/business-links', [MasterController::class, 'getBusinessLinks'])->name('user-business-links');
     Route::post('sequences/store', [MasterController::class, 'sequencesStore'])->name('user-sequences-store');
+        Route::post('/sequence/delete', [MasterController::class, 'deleteSequence'])
+    ->name('sequence-delete');
+
 
     Route::get('Leads', [LeadsController::class, 'index'])->name('leads-index');
     Route::post('leads/store', [LeadsController::class, 'leadStore'])->name('lead-store');
@@ -80,6 +83,7 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/multi-qr/list', [SocialLinksController::class, 'getMultiQrCodes'])->name('get-multi-qr-codes');
 
     Route::delete('user-social-links-destroy/{id}', [SocialLinksController::class, 'userSocialLinksDestroy'])->name('user-social-links-destroy');
+
 
 });
 

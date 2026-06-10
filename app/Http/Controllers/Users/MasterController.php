@@ -41,7 +41,7 @@ class MasterController extends Controller
     {
         // VALIDATION
         $validator = Validator::make($request->all(), [
-            'whatsapp_link' => 'required|url|max:255',
+            'whatsapp_link' => 'required|url|max:1000',
             'company_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
         // VALIDATION ERROR
@@ -406,14 +406,12 @@ class MasterController extends Controller
             1 => 'step',
             2 => 'gap_days',
             3 => 'variant',
-            4 => 'type',
+            4 => 'message',
             5 => 'subject',
-            6 => 'message',
+            6 => 'type',
             7 => 'whatsapp_link',
-            8 => 'telegram_link',
-            9 => 'business_link',
-            10 => 'created_at',
-            11 => 'updated_at'
+            8 => 'created_at',
+            9 => 'updated_at',
         ];
 
         // ✅ Base query with user_id filter
@@ -459,10 +457,14 @@ class MasterController extends Controller
                 'subject' => $seq->subject,
                 'type' => $seq->type,
                 'whatsapp_link' => $seq->whatsapp_link ? '<a href="' . $seq->whatsapp_link . '" target="_blank">Link</a>' : '-',
-                'telegram_link' => $seq->telegram_link ? '<a href="' . $seq->telegram_link . '" target="_blank">Link</a>' : '-',
-                'business_link' => $seq->business_link ? '<a href="' . $seq->business_link . '" target="_blank">Link</a>' : '-',
                 'created_at' => date('Y-m-d', strtotime($seq->created_at)),
-                'updated_at' => date('Y-m-d', strtotime($seq->updated_at))
+                'updated_at' => date('Y-m-d', strtotime($seq->updated_at)),
+                'delete' => '
+                <button type="button"
+                    onclick="deleteList('.$seq->id.')"
+                    class="btn btn-sm btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </button>',
             ];
         }
 
@@ -749,4 +751,6 @@ class MasterController extends Controller
             ], 500);
         }
     }
+
+
 }

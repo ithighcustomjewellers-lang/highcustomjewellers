@@ -533,10 +533,8 @@
                                 </div>
                             `;
                         });
-
-                        $('#dynamicActionLinks').html(html);
-
                     $('#dynamicActionLinks').html(html);
+
                     document.getElementById('logoPosition').value = data.logo_position || 'center';
                     updatePreview();
                 })
@@ -695,20 +693,10 @@
             }
 
 
-            let linksHtml = `
-            <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
-            `;
-
+            let linksHtml = `<div class="d-flex flex-wrap gap-3 justify-content-center mt-4">`;
             const whatsapp = document.getElementById('whatsappLink').value;
-
             if (whatsapp) {
-                linksHtml += `
-                    <a href="${whatsapp}"
-                    class="action-btn whatsapp"
-                    target="_blank">
-                        WhatsApp
-                    </a>
-                `;
+                linksHtml += `<a href="${whatsapp}" class="action-btn whatsapp" target="_blank"> WhatsApp </a>`;
             }
 
             if (window.selectedActionLinks) {
