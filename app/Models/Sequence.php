@@ -43,4 +43,9 @@ class Sequence extends Model
         return $this->hasMany(CampaignLog::class);
     }
 
+    public function campaignLogs()
+    {
+        return $this->hasMany(CampaignLog::class);
+    }
+
 }

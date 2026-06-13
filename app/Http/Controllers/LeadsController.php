@@ -28,7 +28,6 @@ class LeadsController extends Controller
             'email' => 'required|email',
             'name' => 'required|string',
             'lastname' => 'required|string',
-            'company_name' => 'required|string',
             'type' => 'required|in:B2B,B2C',
         ]);
         if ($validator->fails()) {
@@ -99,56 +98,55 @@ class LeadsController extends Controller
         $todayCount = Lead::where('user_id', $userId)->whereDate('created_at', now()->format('Y-m-d'))->count();
         $leads = $query->latest('created_at')->paginate(10);
         $leadIds = collect($leads->items())->pluck('id')->toArray();
-        $campaignLogs = CampaignLog::whereIn('lead_id', $leadIds)->latest('id')->get()->groupBy('lead_id');
+
+        $campaignLogs = CampaignLog::whereIn('lead_id', $leadIds)->orderBy('id', 'asc')->get()->groupBy('lead_id');
+
+    //  $campaignLogs = CampaignLog::whereIn('lead_id', $leadIds)->latest('id')->get()->groupBy('lead_id');
+
         $formattedData = collect($leads->items())->map(function ($lead) use ($campaignLogs) {
             $tracking = 'pending';
             // latest log
-            $latestLog = null;
+            $firstLog = null;
             if (isset($campaignLogs[$lead->id])) {
-                $latestLog = $campaignLogs[$lead->id]->first();
+                //  $firstLog = $campaignLogs[$lead->id]->first();
+                $firstLog = $campaignLogs[$lead->id]->first() ?? null;
             }
             if ($lead->is_unsubscribed) {
                 $tracking = 'Not Interested';
-            } elseif ($latestLog) {
-                switch ($latestLog->status) {
+            } elseif ($firstLog) {
+                switch ($firstLog->status) {
                     case 'pending':
                         $tracking = ' <span class="badge bg-warning">
-                            Pending
+                         Pending
                         </span>';
                         break;
-
                     case 'send':
                         $tracking = ' <span class="badge bg-success">
                             Sent
                         </span>';
                         break;
-
                     case 'seen':
                         $tracking = ' <span class="badge bg-info">
                             Seen
                         </span>';
                         break;
-
                     case 'failed':
                         $tracking = ' <span class="badge bg-secondary">
                             Failed
                         </span>';
                         break;
-
                     case 'interested':
                         $tracking = ' <span class="badge bg-primary">
                             Interested
                         </span>';
                         break;
-
                     case 'Not Interested':
                         $tracking = ' <span class="badge bg-danger">
                             Not Interested
                         </span>';
                         break;
-
                     default:
-                        $tracking = ucfirst($latestLog->status);
+                        $tracking = ucfirst($firstLog->status);
                         break;
                 }
             }

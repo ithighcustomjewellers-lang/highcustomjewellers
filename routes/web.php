@@ -15,6 +15,11 @@ use App\Http\Controllers\SocialQrController;
 use App\Http\Controllers\Users\MasterController;
 use Illuminate\Support\Facades\Route;
 
+
+
+use App\Http\Controllers\TrackingController;
+use App\Http\Controllers\ReportController;
+
 // user info
 Route::middleware('guest')->group(function () {
     Route::get('register', [AuthLoginController::class, 'Register'])->name('register-data');
@@ -85,10 +90,48 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::delete('user-social-links-destroy/{id}', [SocialLinksController::class, 'userSocialLinksDestroy'])->name('user-social-links-destroy');
 
 
+
+
+
+
+
+
+//     Route::get('/track/open/{token}', [TrackingController::class, 'trackOpen'])->name('track.open');
+// Route::get('/track/click/{token}', [TrackingController::class, 'trackClick'])->name('track.click');
+// Route::get('/response/{campaignLog}/interested', [TrackingController::class, 'interested'])->name('response.interested');
+// Route::get('/response/{campaignLog}/not-interested', [TrackingController::class, 'notInterested'])->name('response.not_interested');
+
+
+//     Route::get('/reports/campaign', [ReportController::class, 'index'])->name('report.index');
+//     Route::get('/reports/data', [ReportController::class, 'getData'])->name('report.data');
+//     Route::get('/reports/analytics', [ReportController::class, 'analytics'])->name('report.analytics');
+
+//     Route::post('/campaigns/schedule', [CampaignController::class, 'schedule'])->name('campaigns.schedule');
+
+
+
+
+
+    Route::get('/reports/campaign', [ReportController::class, 'index'])->name('report.campaign');
+    Route::post('/reports/campaign-data', [ReportController::class, 'getCampaignLogsData'])->name('report.campaign.data');
+    // Route::get('/reports/analytics', [ReportController::class, 'getAnalytics'])->name('report.analytics');
+    // Route::get('/reports/campaign-details/{id}', [ReportController::class, 'getDetails'])->name('report.campaign.details');
+
+
+
+
+
+
+
+
+
+
 });
 
 Route::get('multi-qr/{user}/{qrId}', [SocialLinksController::class, 'showMultiQR'])->name('show-multi-qr');
 Route::get('track-multi-qr-click', [SocialLinksController::class, 'trackMultiQRClick'])->name('track-multi-qr-click');
+
+Route::get('/track/click/{token}', [ReportController::class, 'trackClick'])->name('track.click');
 
 // admin info
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {

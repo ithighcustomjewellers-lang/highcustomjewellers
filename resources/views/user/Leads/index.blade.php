@@ -549,7 +549,6 @@
                             <th>Tracking</th>
                             <th>Added Date</th>
                             <th>Delete</th>
-
                         </tr>
                     </thead>
                     <tbody id="leadTableBody">
@@ -610,10 +609,10 @@
             let email = $('#email').val().trim();
             let name = $('#name').val().trim();
             let lastname = $('#lastname').val().trim();
-            let company = $('#company_name').val().trim();
+            // let company = $('#company_name').val().trim();
 
-            if (!email || !name || !lastname || !company) {
-                toastr.error('All fields are required (Email, First Name, Last Name, Company)');
+            if (!email || !name || !lastname) {
+                toastr.error('All fields are required (Email, First Name, Last Name)');
                 return;
             }
 
@@ -687,8 +686,9 @@
         });
 
         function saveInlineEdit(td, id, field, newValue) {
-            if (field !== 'type' && newValue === '') {
+            if (field !== 'type' && field !== 'company_name' && newValue === '') {
                 toastr.warning('Value cannot be empty');
+
                 // revert to original value
                 loadLeads(currentPage, isTodayFilter);
                 return;
@@ -747,7 +747,7 @@
                         <td class="editable-cell" data-field="email">${escapeHtml(item.email)}</td>
                         <td class="editable-cell" data-field="name">${escapeHtml(item.name)}</td>
                         <td class="editable-cell" data-field="lastname">${escapeHtml(item.lastname)}</td>
-                        <td class="editable-cell" data-field="company_name">${escapeHtml(item.company_name)}</td>
+                        <td data-field="company_name">${escapeHtml(item.company_name)}</td>
                         <td class="editable-cell" data-field="type">${item.type === 'B2B' ? '<span class="badge-b2b">B2B</span>' : '<span class="badge-b2c">B2C</span>'}</td>
                         <td data-field="tracking">${item.tracking}</td>
                         <td>${formattedDate}</td>

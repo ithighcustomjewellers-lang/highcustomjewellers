@@ -112,10 +112,11 @@
     <div class="sidebar">
         <h4 class="text-white text-center">My Dashboard</h4>
         <a href="#">Dashboard</a>
-         <a href="{{ route('master-data-list') }}">Master</a>
+        <a href="{{ route('master-data-list') }}">Master</a>
         <a href="{{ route('master-link-document') }}">Link</a>
         <a href="{{ route('leads-index') }}">Leads</a>
         <a href="{{ route('user-social-links') }}">Social Links</a>
+        <a href="{{ route('report.campaign') }}">Tracking Reports</a>
     </div>
 
     <!-- Navbar -->

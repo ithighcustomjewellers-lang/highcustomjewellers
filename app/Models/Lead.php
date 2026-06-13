@@ -20,4 +20,9 @@ class Lead extends Model
         return $this->hasMany(CampaignLog::class,'lead_id');
     }
 
+    public function emailLinkClicks()
+    {
+        return $this->hasManyThrough(EmailLinkClick::class, CampaignLog::class);
+    }
+
 }
