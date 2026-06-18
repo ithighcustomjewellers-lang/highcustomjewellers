@@ -103,10 +103,6 @@ class SendCampaignJob implements ShouldQueue
             $sequence->subject
         );
 
-        Log::info("sequence data", [
-            'sequence_data' => $sequence,
-        ]);
-
         $html = view('emails.sequence', [
             'lead'         => $lead,
             'sequence'     => $sequence,
@@ -117,11 +113,6 @@ class SendCampaignJob implements ShouldQueue
 
         // ✅ PASS $finalMessage as parameter
         $html = $this->processAllLinksWithTracking($html, $campaignLog, $sequence, $lead, $finalMessage);
-
-
-        Log::info("platforms data", [
-            'platforms' => $html,
-        ]);
 
         try {
             if ($user->gmail_token && $user->gmail_refresh_token) {
@@ -135,19 +126,9 @@ class SendCampaignJob implements ShouldQueue
                 'sent_at' => now()
             ]);
 
-            Log::info("Campaign sent successfully", [
-                'lead_id'     => $lead->id,
-                'sequence_id' => $sequence->id,
-                'user_id'     => $user->id,
-            ]);
         } catch (\Exception $e) {
             $campaignLog->update([
                 'status' => 'failed'
-            ]);
-            Log::error("Failed to send campaign", [
-                'lead_id'     => $lead->id,
-                'sequence_id' => $sequence->id,
-                'error'       => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -168,7 +149,7 @@ class SendCampaignJob implements ShouldQueue
             ];
         }
 
-        // 4. Add all action_links
+        // 2. Add all action_links
         if (!empty($sequence->action_links)) {
             foreach ($sequence->action_links as $link) {
                 if (!empty($link['platform_url'])) {
@@ -183,7 +164,7 @@ class SendCampaignJob implements ShouldQueue
             }
         }
 
-        // 5. Find any other URLs in the message content
+        // 3. Find any other URLs in the message content
         preg_match_all('/https?:\/\/[^\s"\'<>]+/', $finalMessage ?? '', $matches);  // ✅ Now $finalMessage works
         if (!empty($matches[0])) {
             foreach (array_unique($matches[0]) as $url) {
@@ -204,7 +185,7 @@ class SendCampaignJob implements ShouldQueue
         }
 
         // Create tracking records and replace URLs
-    foreach ($urlsToTrack as $item) {
+         foreach ($urlsToTrack as $item) {
         try {
             // ✅ Jab email send hota hai tab sirf record create hota hai
             // click_count = 0, clicked_at = NULL (kyuki click abhi hua nahi)
@@ -218,13 +199,6 @@ class SendCampaignJob implements ShouldQueue
                 'click_token' => Str::random(64),
                 'click_count' => 0,        // ✅ Initially 0
                 'clicked_at' => null       // ✅ Initially null (click nahi hua)
-            ]);
-
-            Log::info('📝 Tracking link created (not clicked yet)', [
-                'platform' => $item['platform'],
-                'click_token' => $click->click_token,
-                'click_count' => 0,
-                'clicked_at' => 'not clicked yet'
             ]);
 
             // Generate tracking URL
@@ -257,14 +231,8 @@ class SendCampaignJob implements ShouldQueue
             'snapchat' => ['snapchat.com'],
             'x' => ['twitter.com', 'x.com'],
             'threads' => ['threads.net'],
-            'facebook_messenger' => ['facebook.com', 'fb.com', 'm.me', 'messenger.com'],
-            'youtube' => ['youtube.com', 'youtu.be']
+            'facebook_messenger' => ['facebook.com', 'fb.com', 'm.me', 'messenger.com']
         ];
-
-        Log::info("platforms data", [
-            'platforms' => $platforms,
-        ]);
-
 
         foreach ($platforms as $platform => $patterns) {
             foreach ($patterns as $pattern) {
@@ -283,11 +251,6 @@ class SendCampaignJob implements ShouldQueue
     protected function normalizePlatformName($name)
     {
         $normalized = strtolower(trim($name));
-
-        Log::info("normalized data", [
-            'normalized' => $normalized,
-        ]);
-
         $mapping = [
             'fb' => 'facebook_messenger',
             'facebook' => 'facebook_messenger',
@@ -299,10 +262,7 @@ class SendCampaignJob implements ShouldQueue
             'instagram' => 'instagram',
             'snapchat' => 'snapchat',
             'threads' => 'threads',
-            'website' => 'website',
-            'business' => 'website'
         ];
-
         return $mapping[$normalized] ?? $normalized;
     }
 
@@ -347,8 +307,7 @@ class SendCampaignJob implements ShouldQueue
         $rawMessage .= "Content-Transfer-Encoding: base64\r\n\r\n";
         $rawMessage .= chunk_split(base64_encode($html)) . "\r\n";
 
-        // ATTACHMENT
-        $filePath = base_path('../public_html/' . $sequence->attachments_image);
+        $filePath = public_path($sequence->attachments_image);
 
         Log::info('Attachment Check', [
             'attachment' => $sequence->attachments_image,

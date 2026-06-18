@@ -1,5 +1,7 @@
 <?php
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminMasterController;
+use App\Http\Controllers\Admin\AdminSocialLinksController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\DashboardController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -72,12 +74,12 @@ Route::middleware(['auth', 'user'])->group(function () {
     // social links
     Route::post('social/links', [SocialLinksController::class, 'store'])->name('user.social.links.store');
     Route::get('user-social-links', [SocialLinksController::class, 'index'])->name('user-social-links');
-
-    Route::post('social/quick/update', [SocialLinksController::class, 'updateQuickLink'])->name('user.social.quick.update');
-    Route::get('social/print', [SocialLinksController::class, 'printBusinessCard'])->name('user.social.print');
-    Route::delete('social/delete/{id}', [SocialLinksController::class, 'destroy'])->name('user.social.delete');
     Route::post('social/update/{id}', [SocialLinksController::class, 'update'])->name('user-social-links-update');
+    Route::post('social/quick/update', [SocialLinksController::class, 'updateQuickLink'])->name('user.social.quick.update');
     Route::post('social/update-secondary', [SocialLinksController::class, 'updateSecondary'])->name('user-social-links-update-secondary');
+    Route::get('social/print', [SocialLinksController::class, 'printBusinessCard'])->name('user.social.print');
+
+    // Route::delete('social/delete/{id}', [SocialLinksController::class, 'destroy'])->name('user.social.delete');
 
     //tracking QR generation
     Route::post('save-multiple-qr', [SocialLinksController::class, 'saveMultipleQR'])->name('save.multiple.qr');
@@ -150,12 +152,25 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('users-print', [UserController::class, 'printCard'])->name('admin-users-print');
     Route::get('users', [UserController::class, 'index'])->name('admin-users-index');
 
+    // Route::post('/social/update/{id}', [SocialLinksController::class, 'update'])->name('social-links-update');
+
+
     Route::get('/social-links', [SocialLinksController::class, 'index'])->name('social.links');
-    Route::post('/social/links', [SocialLinksController::class, 'store'])->name('social.links.store');
-    Route::post('/social/update/{id}', [SocialLinksController::class, 'update'])->name('social-links-update');
-    Route::post('/social/quick/update', [SocialLinksController::class, 'updateQuickLink'])->name('social.quick.update');
+    Route::post('social/links', [SocialLinksController::class, 'store'])->name('admin.social.links.store');
+    Route::post('/social/quick/update', [SocialLinksController::class, 'updateQuickLink'])->name('admin.social.quick.update');
+    Route::post('social/update-secondary', [SocialLinksController::class, 'updateSecondary'])->name('admin-social-links-update-secondary');
     Route::get('/social/print', [SocialLinksController::class, 'printBusinessCard'])->name('social.print');
 
+    //tracking QR generation
+    Route::delete('multi-qr/{id}', [SocialLinksController::class, 'multiQrDestroy'])->name('admin-multi-qr-destroy');
+    Route::post('admin-update-multi-qr', [SocialLinksController::class, 'updateMultiQR'])->name('admin-update-multi-qr');
+    Route::post('admin-save-multiple-qr', [SocialLinksController::class, 'saveMultipleQR'])->name('admin.save.multiple.qr');
+    Route::get('admin-multi-qr/list', [SocialLinksController::class, 'getMultiQrCodes'])->name('admin-get-multi-qr-codes');
+    Route::post('multi-qr/update-title', [SocialLinksController::class, 'updateMultiQRTitle'])->name('admin-update-multi-qr-title');
+    Route::delete('user-social-links-destroy/{id}', [SocialLinksController::class, 'userSocialLinksDestroy'])->name('admin-social-links-destroy');
+
+    Route::get('userSequenceList', [AdminMasterController::class, 'userSequenceList'])->name('user-sequence-list');
+    Route::post('userSequenceData', [AdminMasterController::class, 'userSequenceData'])->name('user-sequence-data-list');
 });
 
 Route::get('lead-response/{log}/{status}',[CampaignController::class, 'leadResponse'])->name('lead-response');
@@ -168,9 +183,9 @@ Route::post('logout', [AuthLoginController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
-Route::get('privacy-policy', [privacyPolicyController::class, 'privacyPolicy']);
-Route::get('terms', [privacyPolicyController::class, 'terms']);
-Route::get('landing-page', [privacyPolicyController::class, 'landingPage']);
+Route::get('privacy-policy', [privacyPolicyController::class, 'privacyPolicy'])->name('privacyPolicy');
+Route::get('terms', [privacyPolicyController::class, 'terms'])->name('terms');
+Route::get('landing-page', [privacyPolicyController::class, 'landingPage'])->name('landingPage');
 
 
 

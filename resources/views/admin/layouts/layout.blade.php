@@ -70,6 +70,7 @@
             <a href="{{ route('admin-dashboard') }}">Dashboard</a>
             <a href="{{ route('admin-users-index') }}">Users</a>
             <a href="{{ route('social.links') }}">Social Links</a>
+            <a href="{{ route('user-sequence-list') }}">All tracking</a>
         </div>
 
         <!-- Content -->
@@ -78,13 +79,6 @@
             <!-- Navbar -->
             <div class="topbar d-flex justify-content-end p-2">
                 <div class="dropdown">
-                    {{-- <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
-                    <img src="/images/user.webp" width="30" class="rounded-circle">
-                    Admin User
-                </a> --}}
-
-                    {{-- <img src="{{ asset($user->user_image ?? 'images/user-icon.jpg') }}" class="profile-img me-2">
-                <strong>{{ $user->name }} {{ $user->lastname }}</strong> --}}
                     <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
                         @if (Auth::check())
                             <img src="{{ asset(Auth::user()->user_image ?? 'images/user-icon.jpg') }}"
@@ -101,7 +95,7 @@
             </div>
 
             <!-- Page Content -->
-            <div class="p-4">
+            <div class="page-content">
                 @yield('content')
             </div>
 

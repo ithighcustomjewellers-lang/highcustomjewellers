@@ -569,6 +569,94 @@
             animation: slideIn 0.3s ease;
         }
 
+
+        /* Modal Styles */
+        .platform-row {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            border: 1px solid #e0e0e0;
+        }
+
+        .platform-row:hover {
+            background: #f8f9fa;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .modal-content {
+            border-radius: 20px;
+            background: white;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .add-platform-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn-action{
+            width:100%;
+            height:42px;
+            border:none;
+            border-radius:10px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            transition:all .3s ease;
+            font-size:14px;
+        }
+
+        .btn-remove{
+            background:#fee2e2;
+            color:#dc2626;
+        }
+
+        .btn-remove:hover{
+            background:#dc2626;
+            color:#fff;
+        }
+
+        .btn-copy{
+            background:#e0e7ff;
+            color:#4f46e5;
+        }
+
+        .btn-copy:hover{
+            background:#4f46e5;
+            color:#fff;
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.25 !important;
+        }
+
+        .QR_name {
+            width: 120px;
+            max-width: 90%;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 10px 15px;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            outline: none;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -603,53 +691,13 @@
         <div class="dashboard-grid">
             <!-- Left Panel -->
             <div class="left-panel">
-                <div class="section-title">
-                    <i class="fas fa-link"></i> MY SOCIAL LINKS MANAGER
-                </div>
 
-                <!-- Social Links Table -->
-                <div style="overflow-x: auto;">
-                    <table class="links-table" id="linksTable">
-                        <thead>
-                            <tr>
-                                <th>PLATFORM</th>
-                                <th>ACTIVE LINK</th>
-                                <th>ACTIONS</th>
-                            </tr>
-                        </thead>
-                        <tbody id="linksTableBody">
-                            @foreach ($socialLinks as $link)
-                                <tr id="link-row-{{ $link->id }}" data-icon-type="{{ $link->icon_type }}">
-                                    <td>
-                                        <div class="platform-cell">
-                                            <div class="platform-icon">
-                                                {!! getPlatformIconHtml($link) !!}
-                                            </div>
-                                            <span class="platform-name">{{ $link->platform_name }}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <input type="url" id="url_{{ $link->id }}" class="link-url-input"
-                                            value="{{ $link->platform_url }}">
-                                    </td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button
-                                                onclick="copyToClipboard(document.getElementById('url_{{ $link->id }}').value)"
-                                                class="copy-btn" title="Copy Link">
-                                                <i class="fas fa-copy"></i>
-                                            </button>
-                                            <button onclick="saveLink(this, {{ $link->id }})" class="save-btn"
-                                                data-url="{{ route('social-links-update', $link->id) }}"
-                                                title="Save Changes">
-                                                <i class="fas fa-save"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+
+                <div style="margin-top:20px; text-align:end;">
+                    <button onclick="addMultipleQR()" class="btn-add">
+                        <i class="fas fa-qrcode"></i>
+                        Generate QR Code
+                    </button>
                 </div>
 
                 <!-- Editable App Links Section -->
@@ -658,8 +706,34 @@
                         <i class="fas fa-star"></i> QUICK LINKS
                     </div>
 
+                    @php
+                        $user = Auth::user();
+                        $message = "Hi {$user->name},\n"
+                            . "I came across your jewelry collection and I'm interested in learning more about it. "
+                            . "Could you please share some details about your products and offerings?\n"
+                            . "Thank you.";
+                        $defaultWhatsappUrl = 'https://wa.me/' . preg_replace('/\D/', '', $user->mobile). '?text=' . urlencode($message);
+                    @endphp
+
+                    <div class="app-link quick-link-item">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="WhatsApp" data-input="whatsapp_url">
+                        <i class="fab fa-whatsapp" style="color: #25D366;"></i>
+                        <strong>WhatsApp:</strong>
+                        <input type="url" id="whatsapp_url" placeholder="https://wa.me/yournumber"  class="link-input" value="{{ $quickLinks['whatsapp_url'] ?? $defaultWhatsappUrl }}">
+
+                        <button onclick="saveQuickLink('whatsapp_url', 'WhatsApp')" class="save-btn-sm">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+
+                        <button onclick="copyToClipboard(document.getElementById('whatsapp_url').value)"
+                            class="copy-btn-sm">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+
                     {{-- WhatsApp --}}
-                    <div class="app-link">
+                    {{-- <div class="app-link">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="WhatsApp" data-input="whatsapp_url">
                         <i class="fab fa-whatsapp" style="color: #25D366;"></i>
                         <strong>WhatsApp:</strong>
                         <input type="url" id="whatsapp_url" placeholder="https://wa.me/yournumber" class="link-input"
@@ -671,10 +745,11 @@
                             class="copy-btn-sm">
                             <i class="fas fa-copy"></i> Copy
                         </button>
-                    </div>
+                    </div> --}}
 
                     {{-- Telegram --}}
                     <div class="app-link">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Telegram" data-input="telegram_url">
                         <i class="fab fa-telegram" style="color: #0088cc;"></i>
                         <strong>Telegram:</strong>
                         <input type="url" id="telegram_url" placeholder="https://t.me/username" class="link-input"
@@ -690,6 +765,8 @@
 
                     {{-- Facebook --}}
                     <div class="app-link">
+                         <input type="checkbox" class="qr-platform-checkbox" data-platform="Facebook"
+                            data-input="facebook_url">
                         <i class="fab fa-facebook" style="color: #1877f2;"></i>
                         <strong>Facebook:</strong>
                         <input type="url" id="facebook_url" placeholder="https://facebook.com/username"
@@ -705,6 +782,8 @@
 
                     {{-- YouTube --}}
                     <div class="app-link">
+                         <input type="checkbox" class="qr-platform-checkbox" data-platform="YouTube"
+                            data-input="youtube_url">
                         <i class="fab fa-youtube" style="color: #ff0000;"></i>
                         <strong>YouTube:</strong>
                         <input type="url" id="youtube_url" placeholder="https://youtube.com/@username"
@@ -719,6 +798,8 @@
 
                     {{-- LinkedIn --}}
                     <div class="app-link">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="LinkedIn"
+                            data-input="linkedin_url">
                         <i class="fab fa-linkedin" style="color: #0077b5;"></i>
                         <strong>LinkedIn:</strong>
                         <input type="url" id="linkedin_url" placeholder="https://linkedin.com/in/username"
@@ -734,6 +815,8 @@
 
                     {{-- Instagram --}}
                     <div class="app-link">
+                         <input type="checkbox" class="qr-platform-checkbox" data-platform="Instagram"
+                            data-input="instagram_url">
                         <i class="fab fa-instagram" style="color: #E4405F;"></i>
                         <strong>Instagram:</strong>
                         <input type="url" id="instagram_url" placeholder="https://instagram.com/username"
@@ -749,6 +832,7 @@
 
                     {{-- X --}}
                     <div class="app-link">
+                           <input type="checkbox" class="qr-platform-checkbox" data-platform="X" data-input="x_url">
                         <i class="fab fa-x-twitter" style="color: #000;"></i>
                         <strong>X:</strong>
                         <input type="url" id="x_url" placeholder="https://x.com/username" class="link-input"
@@ -763,6 +847,8 @@
 
                     {{-- Threads --}}
                     <div class="app-link">
+                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Threads"
+                            data-input="threads_url">
                         <i class="fab fa-threads" style="color: #000;"></i>
                         <strong>Threads:</strong>
                         <input type="url" id="threads_url" placeholder="https://threads.net/@username"
@@ -778,6 +864,8 @@
 
                     {{-- Snapchat --}}
                     <div class="app-link">
+                         <input type="checkbox" class="qr-platform-checkbox" data-platform="Snapchat"
+                            data-input="snapchat_url">
                         <i class="fab fa-snapchat" style="color: #FFFC00;"></i>
                         <strong>Snapchat:</strong>
                         <input type="url" id="snapchat_url" placeholder="https://snapchat.com/add/username"
@@ -791,67 +879,10 @@
                         </button>
                     </div>
 
-                    {{-- Reddit --}}
-                    <div class="app-link">
-                        <i class="fab fa-reddit" style="color: #FF4500;"></i>
-                        <strong>Reddit:</strong>
-                        <input type="url" id="reddit_url" placeholder="https://reddit.com/user/username"
-                            class="link-input" value="{{ $quickLinks['reddit_url'] ?? '' }}">
-                        <button onclick="saveQuickLink('reddit_url', 'Reddit')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('reddit_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
-                    {{-- Discord --}}
-                    <div class="app-link">
-                        <i class="fab fa-discord" style="color: #5865F2;"></i>
-                        <strong>Discord:</strong>
-                        <input type="url" id="discord_url" placeholder="https://discord.gg/yourserver"
-                            class="link-input" value="{{ $quickLinks['discord_url'] ?? '' }}">
-                        <button onclick="saveQuickLink('discord_url', 'Discord')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('discord_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
-                    {{-- Pinterest --}}
-                    <div class="app-link">
-                        <i class="fab fa-pinterest" style="color: #E60023;"></i>
-                        <strong>Pinterest:</strong>
-                        <input type="url" id="pinterest_url" placeholder="https://pinterest.com/username"
-                            class="link-input" value="{{ $quickLinks['pinterest_url'] ?? '' }}">
-                        <button onclick="saveQuickLink('pinterest_url', 'Pinterest')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('pinterest_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
-                    {{-- Quora --}}
-                    <div class="app-link">
-                        <i class="fab fa-quora" style="color: #B92B27;"></i>
-                        <strong>Quora:</strong>
-                        <input type="url" id="quora_url" placeholder="https://quora.com/profile/username"
-                            class="link-input" value="{{ $quickLinks['quora_url'] ?? '' }}">
-                        <button onclick="saveQuickLink('quora_url', 'Quora')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('quora_url').value)" class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
                     {{-- Messenger --}}
                     <div class="app-link">
+                          <input type="checkbox" class="qr-platform-checkbox" data-platform="Messenger"
+                            data-input="messenger_url">
                         <i class="fab fa-facebook-messenger" style="color: #0084FF;"></i>
                         <strong>Messenger:</strong>
                         <input type="url" id="messenger_url" placeholder="https://m.me/username" class="link-input"
@@ -864,52 +895,60 @@
                             <i class="fas fa-copy"></i> Copy
                         </button>
                     </div>
-
-                    {{-- Twitch --}}
-                    <div class="app-link">
-                        <i class="fab fa-twitch" style="color: #9146FF;"></i>
-                        <strong>Twitch:</strong>
-                        <input type="url" id="twitch_url" placeholder="https://twitch.tv/username"
-                            class="link-input" value="{{ $quickLinks['twitch_url'] ?? '' }}">
-                        <button onclick="saveQuickLink('twitch_url', 'Twitch')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('twitch_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
-                    {{-- Rumble --}}
-                    <div class="app-link">
-                        <i class="fas fa-video" style="color: #85C742;"></i>
-                        <strong>Rumble:</strong>
-                        <input type="url" id="rumble_url" placeholder="https://rumble.com/user/username"
-                            class="link-input" value="{{ $quickLinks['rumble_url'] ?? '' }}">
-                        <button onclick="saveQuickLink('rumble_url', 'Rumble')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('rumble_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
-                    {{-- Viber --}}
-                    <div class="app-link">
-                        <i class="fab fa-viber" style="color: #7360F2;"></i>
-                        <strong>Viber:</strong>
-                        <input type="url" id="viber_url" placeholder="https://invite.viber.com/?g=group"
-                            class="link-input" value="{{ $quickLinks['viber_url'] ?? '' }}">
-                        <button onclick="saveQuickLink('viber_url', 'Viber')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('viber_url').value)" class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
                 </div>
 
+                <!-- Custom Social Links Section - Dynamic Links -->
+                <div style="margin-top: 20px;">
+                    <div id="customLinksContainer">
+                        @foreach ($socialLinks as $link)
+                            <div class="app-link quick-link-item"
+                                id="link-row-{{ $link->id }}"
+                                data-icon-type="{{ $link->icon_type }}">
+
+                                <input type="checkbox"
+                                    class="qr-platform-checkbox"
+                                    data-platform="{{ $link->platform_name }}"
+                                    data-input="url_{{ $link->id }}">
+
+                                <div class="platform-icon">
+                                    {!! getPlatformIconHtml($link) !!}
+                                </div>
+
+                                {{-- Platform Name Editable --}}
+                                <input type="text"
+                                    id="platform_name_{{ $link->id }}"
+                                    class="link-input platform-name-input"
+                                    value="{{ $link->platform_name }}"
+                                    placeholder="Platform Name"
+                                    style="max-width:180px;">
+
+                                {{-- URL Editable --}}
+                                <input type="url"
+                                    id="url_{{ $link->id }}"
+                                    class="link-input"
+                                    value="{{ $link->platform_url }}"
+                                    placeholder="https://...">
+
+                                <button onclick="saveCustomLink({{ $link->id }})"
+                                        class="save-btn-sm">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+
+                                <button onclick="copyToClipboard(document.getElementById('url_{{ $link->id }}').value)"
+                                        class="copy-btn-sm">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+
+                                <button onclick="deleteCustomLink({{ $link->id }})"
+                                        class="save-btn-sm"
+                                        style="background:#dc3545;">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+
+                            </div>
+                            @endforeach
+                    </div>
+                </div>
                 <!-- Bottom Actions -->
                 <div class="bottom-actions">
                     <div class="add-platform">
@@ -925,39 +964,91 @@
                     <i class="fas fa-print"></i> PRINT BUSINESS CARD
                 </button>
             </div>
-
-            <!-- Right Panel -->
+             <!-- Right Panel -->
             <div class="right-panel">
-                <!-- QR Card -->
-                <div class="card qr-card">
+                <div class="card">
                     <div class="qr-title">
-                        <i class="fas fa-qrcode"></i> DYNAMIC QR CODE
+                        <i class="fas fa-layer-group"></i>
+                        MULTIPLE QR CODES
                     </div>
-                    <div class="qr-code" id="qrCodeContainer">
-                        <div id="qrPlaceholder" style="color: #999;">Loading QR Code...</div>
-                    </div>
-                    <div class="profile-url" id="profileUrl">
-                        <i class="fas fa-link"></i> {{ $profileUrl }}
-                    </div>
-                    <div class="qr-title">
-                        <i class="fas fa-share-alt"></i> SHARE DIGITALLY
-                    </div>
-                    {{-- <div class="share-buttons">
-                        <a href="https://wa.me/?text={{ urlencode($profileUrl) }}" target="_blank"
-                            class="share-btn whatsapp-share">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
-                        <a href="https://t.me/share/url?url={{ urlencode($profileUrl) }}" target="_blank"
-                            class="share-btn telegram-share">
-                            <i class="fab fa-telegram"></i>
-                        </a>
-                        <a href="mailto:?subject=My Digital Business Card&body={{ urlencode($profileUrl) }}"
-                            class="share-btn email-share">
-                            <i class="fas fa-envelope"></i>
-                        </a>
-                    </div> --}}
+                    <div id="multipleQrContainer"></div>
+                </div>
+            </div>
+
+             <!-- Right Panel -->
+        </div>
+    </div>
+
+
+
+    <!-- Edit QR Modal -->
+    <div class="modal fade" id="editQrModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-fullscreen-sm-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-qrcode me-2"></i>
+                        Edit QR Code Links
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
+                <div class="main-container">
+                    <!-- Add New Platform Section -->
+                    <div class="add-platform-section">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Platform Dropdown</label>
+                                <select class="form-select" id="platformDropdown">
+                                    <option value="">-- Select Platform --</option>
+                                    <option class="form-select" value="WhatsApp">🟢 WhatsApp</option>
+                                    <option class="form-select" value="Instagram">📸 Instagram</option>
+                                    <option class="form-select" value="Facebook">🔵 Facebook</option>
+                                    <option class="form-select" value="Telegram">✈️ Telegram</option>
+                                    <option class="form-select" value="LinkedIn">💼 LinkedIn</option>
+                                    <option class="form-select" value="YouTube">▶️ YouTube</option>
+                                    <option class="form-select" value="Website">🌐 Website</option>
+                                    <option class="form-select" value="Twitter/X">𝕏 Twitter/X</option>
+                                    <option class="form-select" value="Pinterest">📌 Pinterest</option>
+                                    <option class="form-select" value="Snapchat">👻 Snapchat</option>
+                                    <option class="form-select" value="Messenger">💬 Messenger</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Custom Platform Name</label>
+                                <input type="text" class="form-control" id="customPlatformName"
+                                    placeholder="Custom Platform Name">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Platform URL *</label>
+                                <input type="url" class="form-control" id="platformUrl"
+                                    placeholder="https://example.com">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-semibold">&nbsp;</label>
+                                <button type="button"
+                                    class="btn btn-primary rounded-pill w-100 shadow-sm"
+                                    onclick="addNewPlatformRow()">
+                                    <i class="fas fa-plus me-2"></i>Add Link
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="editQrLinksContainer" class="qr-links-list">
+                        <!-- Dynamic rows will appear here -->
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    {{-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i> Cancel
+                    </button> --}}
+                    <button type="button"
+                        class="btn btn-success rounded-pill shadow-sm btn-save" onclick="saveEditedQR()">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -992,83 +1083,6 @@
             });
         }
 
-        function generateDynamicQRCode(profileUrl) {
-            const qrContainer = document.getElementById('qrCodeContainer');
-            if (!qrContainer) return;
-            qrContainer.innerHTML = '';
-            if (!profileUrl) {
-                const profileUrlElement = document.getElementById('profileUrl');
-                if (profileUrlElement) {
-                    let text = profileUrlElement.innerText;
-                    profileUrl = text.replace('🔗', '').replace('fa-link', '').trim();
-                }
-            }
-            if (!profileUrl) {
-                profileUrl = window.location.origin + '/profile';
-            }
-            try {
-                currentQRCode = new QRCode(qrContainer, {
-                    text: profileUrl,
-                    width: 180,
-                    height: 180,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-            } catch (error) {
-                console.error('QR Code generation error:', error);
-                qrContainer.innerHTML = '<div style="color: red;">Error generating QR Code</div>';
-            }
-        }
-
-        // Function to get platform icon based on stored icon_type
-        function getPlatformIconFromType(platformName, iconType, platformId = null) {
-            const iconMap = {
-                'whatsapp': 'fab fa-whatsapp',
-                'telegram': 'fab fa-telegram',
-                'instagram': 'fab fa-instagram',
-                'facebook': 'fab fa-facebook',
-                'youtube': 'fab fa-youtube',
-                'linkedin': 'fab fa-linkedin',
-                'twitter': 'fab fa-twitter',
-                'x': 'fab fa-x-twitter',
-                'tiktok': 'fab fa-tiktok',
-                'snapchat': 'fab fa-snapchat',
-                'reddit': 'fab fa-reddit',
-                'discord': 'fab fa-discord',
-                'pinterest': 'fab fa-pinterest',
-                'twitch': 'fab fa-twitch',
-                'quora': 'fab fa-quora',
-                'github': 'fab fa-github',
-                'spotify': 'fab fa-spotify',
-                'medium': 'fab fa-medium',
-                'stackoverflow': 'fab fa-stack-overflow',
-                'behance': 'fab fa-behance',
-                'dribbble': 'fab fa-dribbble',
-                'flickr': 'fab fa-flickr',
-                'soundcloud': 'fab fa-soundcloud',
-                'vimeo': 'fab fa-vimeo',
-                'vk': 'fab fa-vk',
-                'weibo': 'fab fa-weibo',
-                'tumblr': 'fab fa-tumblr',
-                'foursquare': 'fab fa-foursquare',
-                'slack': 'fab fa-slack',
-                'skype': 'fab fa-skype',
-                'viber': 'fab fa-viber',
-                'messenger': 'fab fa-facebook-messenger',
-                'threads': 'fab fa-threads',
-                'rumble': 'fas fa-video'
-            };
-            const platformLower = platformName.toLowerCase();
-            if (iconType === 'custom') {
-                return `<img src="/images/cm_logo.png" alt="${escapeHtml(platformName)}" style="width: 24px; height: 24px; object-fit: contain;">`;
-            }
-            if (iconMap[platformLower]) {
-                return `<i class="${iconMap[platformLower]}"></i>`;
-            }
-            return `<img src="/images/cm_logo.png" alt="${escapeHtml(platformName)}" style="width: 24px; height: 24px; object-fit: contain;">`;
-        }
-
         function escapeHtml(str) {
             if (!str) return '';
             return str.replace(/[&<>]/g, function(m) {
@@ -1079,123 +1093,26 @@
             });
         }
 
-        function saveLink(btn, id) {
-            let url = document.getElementById('url_' + id).value;
-            if (!url) {
-                showToast('Please enter a valid URL', 'error');
-                return;
-            }
-
-            // Server-side se bana-banaya clean URL uthayein
-            let fetchUrl = btn.getAttribute('data-url');
-
-            let originalHtml = btn.innerHTML;
-            btn.innerHTML = '<div class="loading-spinner"></div>';
-            btn.disabled = true;
-
-            // Ab fetchUrl bina kisi replace hack ke chalega
-            fetch(fetchUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        platform_url: url
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        // Agar server se 404, 500 ya koi aur error aaye toh handle karein
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        showToast('Link saved successfully!');
-                        if (data.profile_url) {
-                            document.getElementById('profileUrl').innerHTML = '<i class="fas fa-link"></i> ' + data
-                                .profile_url;
-                            generateDynamicQRCode(data.profile_url);
-                            updateShareButtons(data.profile_url);
-                        }
-                    } else {
-                        showToast(data.message || 'Error saving link', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showToast('Error saving link', 'error');
-                })
-                .finally(() => {
-                    btn.innerHTML = originalHtml;
-                    btn.disabled = false;
-                });
+        function printBusinessCard() {
+            window.open('{{ route('social.print') }}', '_blank');
         }
+        // new add code 16/06/2026
 
-        function saveQuickLink(platformKey, platformName) {
-            let urlInput = document.getElementById(platformKey);
-            let platformUrl = urlInput.value;
-            if (!platformUrl) {
-                showToast('Please enter a valid URL for ' + platformName, 'error');
-                return;
-            }
-            let btn = event.target.closest('button');
-            let originalHtml = btn.innerHTML;
-            btn.innerHTML = '<div class="loading-spinner"></div>';
-            btn.disabled = true;
-            fetch('{{ route('social.quick.update') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        platform_name: platformName,
-                        platform_url: platformUrl,
-                        platform_key: platformKey
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showToast(platformName + ' link saved successfully!');
-                        location.reload();
-                        if (data.profile_url) {
-                            document.getElementById('profileUrl').innerHTML = '<i class="fas fa-link"></i> ' + data
-                                .profile_url;
-                            generateDynamicQRCode(data.profile_url);
-                            updateShareButtons(data.profile_url);
-                        }
-                    } else {
-                        showToast(data.message || 'Error saving link', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showToast('Error saving link', 'error');
-                })
-                .finally(() => {
-                    btn.innerHTML = originalHtml;
-                    btn.disabled = false;
-                });
-        }
-
-        function addCustomPlatform() {
+         function addCustomPlatform() {
             let platformName = document.getElementById('newPlatformName').value.trim();
             let platformUrl = document.getElementById('newPlatformUrl').value.trim();
+
             if (!platformName || !platformUrl) {
                 showToast('Please fill both fields!', 'error');
                 return;
             }
+
             let btn = event.target;
             let originalHtml = btn.innerHTML;
             btn.innerHTML = '<div class="loading-spinner"></div>';
             btn.disabled = true;
-            fetch('{{ route('social.links.store') }}', {
+
+            fetch('{{ route('admin.social.links.store') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1213,13 +1130,7 @@
                         showToast('Platform added successfully!');
                         document.getElementById('newPlatformName').value = '';
                         document.getElementById('newPlatformUrl').value = '';
-                        addLinkRowToTable(data.link);
-                        if (data.profile_url) {
-                            document.getElementById('profileUrl').innerHTML = '<i class="fas fa-link"></i> ' + data
-                                .profile_url;
-                            generateDynamicQRCode(data.profile_url);
-                            updateShareButtons(data.profile_url);
-                        }
+                        addNewLinkToContainer(data.link);
                     } else {
                         showToast(data.message || 'Error adding platform', 'error');
                     }
@@ -1234,66 +1145,699 @@
                 });
         }
 
-        function addLinkRowToTable(link) {
-            const tbody = document.getElementById('linksTableBody');
-            const newRow = document.createElement('tr');
-            newRow.id = `link-row-${link.id}`;
-            newRow.setAttribute('data-icon-type', link.icon_type || 'custom');
-            const platformIconHtml = getPlatformIconFromType(link.platform_name, link.icon_type || 'custom', link.id);
-            const updateUrl = `/admin/social/update/${link.id}`;
-            newRow.innerHTML = `
-            <td>
-                <div class="platform-cell">
-                    <div class="platform-icon">
-                        ${platformIconHtml}
-                    </div>
-                    <span class="platform-name">${escapeHtml(link.platform_name)}</span>
-                </div>
-            </td>
-            <td>
-                <input type="url" id="url_${link.id}" class="link-url-input" value="${escapeHtml(link.platform_url)}">
-            </td>
-            <td>
-                <div class="action-buttons">
-                    <button onclick="copyToClipboard(document.getElementById('url_${link.id}').value)" class="copy-btn" title="Copy Link">
-                        <i class="fas fa-copy"></i>
-                    </button>
 
-                    <button onclick="saveLink(this, ${link.id})" class="save-btn" data-url="${updateUrl}" title="Save Changes">
-                       <i class="fas fa-save"></i>
-                   </button>
-                </div>
+        function saveQuickLink(platformKey, platformName) {
+            let urlInput = document.getElementById(platformKey);
+            let platformUrl = urlInput.value;
+            if (!platformUrl) {
+                showToast('Please enter a valid URL for ' + platformName, 'error');
+                return;
+            }
+            let btn = event.target.closest('button');
+            let originalHtml = btn.innerHTML;
+            btn.innerHTML = '<div class="loading-spinner"></div>';
+            btn.disabled = true;
 
-            </td>
-        `;
-            tbody.appendChild(newRow);
+            fetch('{{ route('admin.social.quick.update') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        platform_name: platformName,
+                        platform_url: platformUrl,
+                        platform_key: platformKey
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(platformName + ' link saved successfully!');
+                    } else {
+                        showToast(data.message || 'Error saving link', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error saving link', 'error');
+                })
+                .finally(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
         }
 
-
-
-        function updateShareButtons(profileUrl) {
-            const encodedUrl = encodeURIComponent(profileUrl);
-            const whatsappBtn = document.querySelector('.whatsapp-share');
-            const telegramBtn = document.querySelector('.telegram-share');
-            const emailBtn = document.querySelector('.email-share');
-            if (whatsappBtn) whatsappBtn.href = `https://wa.me/?text=${encodedUrl}`;
-            if (telegramBtn) telegramBtn.href = `https://t.me/share/url?url=${encodedUrl}`;
-            if (emailBtn) emailBtn.href = `mailto:?subject=My Digital Business Card&body=${encodedUrl}`;
-        }
-
-        function printBusinessCard() {
-            window.open('{{ route('social.print') }}', '_blank');
-        }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const profileUrlElement = document.getElementById('profileUrl');
-            let initialProfileUrl = profileUrlElement ? profileUrlElement.innerText.replace(/[^\x00-\x7F]/g, '')
-                .trim() : window.location.origin + '/profile';
-            initialProfileUrl = initialProfileUrl.replace('🔗', '').trim();
-            if (initialProfileUrl) {
-                generateDynamicQRCode(initialProfileUrl);
-            }
+            renderMultipleQRs(@json($multiQrs));
         });
+
+        function addMultipleQR() {
+            let checkboxes = document.querySelectorAll('.qr-platform-checkbox');
+            let selectedLinks = [];
+            checkboxes.forEach(function(box) {
+                if (box.checked) {
+                    let platform = box.getAttribute('data-platform');
+                    let inputId = box.getAttribute('data-input');
+                    let url = document.getElementById(inputId).value;
+                    if (url) {
+                        selectedLinks.push({
+                            platform: platform,
+                            url: url
+                        });
+                    }
+                }
+            });
+
+            if (selectedLinks.length === 0) {
+                showToast('Please select at least one platform', 'error');
+                return;
+            }
+
+            let btn = event.target;
+            let originalHtml = btn.innerHTML;
+            btn.innerHTML = '<div class="loading-spinner"></div>';
+            btn.disabled = true;
+
+            fetch('{{ route('admin.save.multiple.qr') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        links: selectedLinks
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('QR Code Generated Successfully!');
+                        renderMultipleQRs(data.all_qrs);
+                        checkboxes.forEach(function(box) {
+                            box.checked = false;
+                        });
+                    } else {
+                        showToast(data.message || 'Error generating QR', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error generating QR', 'error');
+                })
+                .finally(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
+        }
+
+        const qrPlatformIcons = {
+            whatsapp: 'fab fa-whatsapp',
+            telegram: 'fab fa-telegram',
+            instagram: 'fab fa-instagram',
+            facebook: 'fab fa-facebook',
+            youtube: 'fab fa-youtube',
+            linkedin: 'fab fa-linkedin',
+            x: 'fab fa-x-twitter',
+            twitter: 'fab fa-twitter',
+            snapchat: 'fab fa-snapchat',
+            reddit: 'fab fa-reddit',
+            discord: 'fab fa-discord',
+            pinterest: 'fab fa-pinterest',
+            quora: 'fab fa-quora',
+            messenger: 'fab fa-facebook-messenger',
+            twitch: 'fab fa-twitch',
+            rumble: 'fas fa-video',
+            viber: 'fab fa-viber',
+            threads: 'fab fa-threads'
+        };
+        const customPlatformLogo = '/images/cm_logo.png';
+
+
+        function renderMultipleQRs(qrs) {
+            let container = document.getElementById('multipleQrContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            if (!qrs || qrs.length === 0) {
+                container.innerHTML = `
+                <div style="text-align:center; color:#999; padding:20px;">
+                    No QR codes generated yet. Select platforms and click "Generate QR Code" to create one.
+                </div>
+                `;
+                return;
+            }
+
+            qrs.forEach(function(qr) {
+                let platformIconsHtml = '';
+                if (qr.links) {
+                    qr.links.forEach(function(link) {
+                        let platformName = link.platform.toLowerCase();
+                        let iconClass = qrPlatformIcons[platformName];
+                        if (iconClass) {
+                            platformIconsHtml += `
+                            <i class="${iconClass}"
+                            title="${link.platform}"
+                            style="font-size:22px; margin:5px; color:#667eea;">
+                            </i>
+                            `;
+                        } else {
+                            platformIconsHtml += `
+                                <img src="${customPlatformLogo}"
+                                    title="${link.platform}"
+                                    style="width:24px;height:24px;object-fit:contain;margin:5px;">
+                            `;
+                        }
+                    });
+                }
+
+                let qrBox = document.createElement('div');
+                qrBox.style.marginBottom = '40px';
+                qrBox.style.borderBottom = '1px solid #f0f0f0';
+                qrBox.style.paddingBottom = '20px';
+
+                let qrId = 'qr_' + qr.id;
+
+                qrBox.innerHTML = `
+                    <div style="text-align:center; margin-bottom:10px;">
+                        <input type="text" class="QR_name"
+                               value="${qr.title ?? ''}"
+                               placeholder="QR Name"
+                               onblur="updateQRTitle('${qr.id}', this.value)">
+                    </div>
+                    <div id="${qrId}" style="display:flex; justify-content:center; margin-bottom:15px;"></div>
+                    <div style="text-align:center; margin-top:15px;">
+                        <button onclick='openEditQRModal(${JSON.stringify(qr)})'
+                                class="btn-add"
+                                style="padding:8px 15px; font-size:13px; margin-right:8px;">
+                            <i class="fas fa-edit"></i> Edit QR
+                        </button>
+                        <button onclick="deleteQR('${qr.id}')"
+                                style="padding:8px 15px; font-size:13px; background:#dc3545; color:#fff; border:none; border-radius:5px; cursor:pointer;">
+                            <i class="fas fa-trash"></i> Delete QR
+                        </button>
+                    </div>
+                    <div style="text-align:center; margin-bottom:15px;">
+                        ${platformIconsHtml}
+                    </div>
+                    <div onclick="copyQrLink(this)" data-link="${window.location.origin}/multi-qr/{{ Auth::id() }}/${qr.id}"
+                        style="text-align:center; font-size:12px; word-break:break-all; margin-bottom:15px; background:#f8f9fa; padding:10px; border-radius:8px; cursor:pointer;">
+                        <i class="fas fa-link"></i>
+                        ${window.location.origin}/multi-qr/{{ Auth::id() }}/${qr.id}
+                    </div>
+                    <div class="stats">
+                        <div class="stat-box">
+                            <div class="stat-number">${qr.qr_scans ?? 0}</div>
+                            <div class="stat-label">QR Scans</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">${qr.button_clicks ?? 0}</div>
+                            <div class="stat-label">Button Clicks</div>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(qrBox);
+
+                new QRCode(document.getElementById(qrId), {
+                    text: `${window.location.origin}/multi-qr/{{ Auth::id() }}/${qr.id}`,
+                    width: 180,
+                    height: 180
+                });
+            });
+        }
+
+
+        function openEditQRModal(qr) {
+            currentEditingQR = qr;
+            let container = document.getElementById('editQrLinksContainer');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            if (qr.links && qr.links.length > 0) {
+                qr.links.forEach(function(link) {
+                    addEditableRow(link.platform, link.url);
+                });
+            }
+
+            let modal = new bootstrap.Modal(document.getElementById('editQrModal'));
+            modal.show();
+        }
+
+        function addEditableRow(platform = '', url = '') {
+            let container = document.getElementById('editQrLinksContainer');
+            if (!container) return;
+
+            let platformIcon = getPlatformIcon(platform);
+
+            let rowDiv = document.createElement('div');
+            rowDiv.className = 'row g-2 mb-3 platform-row align-items-center';
+
+            rowDiv.innerHTML = `
+                <div class="col-md-4">
+                    <div class="platform-cell">
+                        <div class="platform-icon">
+                            ${platformIcon}
+                        </div>
+                        <input type="text"
+                               class="form-control edit-platform-name"
+                               value="${escapeHtml(platform)}"
+                               placeholder="Platform Name"
+                               style="margin-left: 10px;">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <input type="url"
+                        class="form-control edit-platform-url"
+                        value="${escapeHtml(url)}"
+                        placeholder="https://example.com">
+                </div>
+
+                <div class="col-md-1 col-6">
+                    <button type="button"
+                            class="btn-action btn-remove"
+                            onclick="removePlatformRow(this)">
+                        <i class="fas fa-trash me-1"></i>
+                    </button>
+                </div>
+
+                <div class="col-md-1 col-6">
+                    <button type="button"
+                            class="btn-action btn-copy"
+                            onclick="copyPlatformRow(this)">
+                        <i class="fas fa-copy me-1"></i>
+                    </button>
+                </div>
+            `;
+
+            container.appendChild(rowDiv);
+        }
+
+        function getPlatformIcon(platform) {
+            platform = platform.toLowerCase();
+            const icons = {
+                whatsapp: '<i class="fab fa-whatsapp"></i>',
+                telegram: '<i class="fab fa-telegram"></i>',
+                instagram: '<i class="fab fa-instagram"></i>',
+                facebook: '<i class="fab fa-facebook"></i>',
+                youtube: '<i class="fab fa-youtube"></i>',
+                linkedin: '<i class="fab fa-linkedin"></i>',
+                twitter: '<i class="fab fa-twitter"></i>',
+                x: '<i class="fab fa-x-twitter"></i>',
+                tiktok: '<i class="fab fa-tiktok"></i>',
+                snapchat: '<i class="fab fa-snapchat"></i>',
+                reddit: '<i class="fab fa-reddit"></i>',
+                discord: '<i class="fab fa-discord"></i>',
+                pinterest: '<i class="fab fa-pinterest"></i>',
+                twitch: '<i class="fab fa-twitch"></i>',
+                quora: '<i class="fab fa-quora"></i>',
+                github: '<i class="fab fa-github"></i>',
+                spotify: '<i class="fab fa-spotify"></i>',
+                medium: '<i class="fab fa-medium"></i>',
+                stackoverflow: '<i class="fab fa-stack-overflow"></i>',
+                behance: '<i class="fab fa-behance"></i>',
+                dribbble: '<i class="fab fa-dribbble"></i>',
+                flickr: '<i class="fab fa-flickr"></i>',
+                soundcloud: '<i class="fab fa-soundcloud"></i>',
+                vimeo: '<i class="fab fa-vimeo"></i>',
+                vk: '<i class="fab fa-vk"></i>',
+                weibo: '<i class="fab fa-weibo"></i>',
+                tumblr: '<i class="fab fa-tumblr"></i>',
+                foursquare: '<i class="fab fa-foursquare"></i>',
+                slack: '<i class="fab fa-slack"></i>',
+                skype: '<i class="fab fa-skype"></i>',
+                viber: '<i class="fab fa-viber"></i>',
+                messenger: '<i class="fab fa-facebook-messenger"></i>',
+                threads: '<i class="fab fa-threads"></i>',
+                rumble: '<i class="fas fa-video"></i>'
+            };
+            return icons[platform] || '<img src="/images/cm_logo.png" style="width:22px;height:22px;">';
+        }
+
+        function addNewPlatformRow() {
+            let dropdown = document.getElementById('platformDropdown').value;
+            let customName = document.getElementById('customPlatformName').value.trim();
+            let url = document.getElementById('platformUrl').value.trim();
+
+            let platform = dropdown || customName;
+
+            if (!platform) {
+                showToast('Please select or enter a platform name', 'error');
+                return;
+            }
+
+            if (!url) {
+                showToast('Please enter a platform URL', 'error');
+                return;
+            }
+
+            addEditableRow(platform, url);
+
+            document.getElementById('platformDropdown').value = '';
+            document.getElementById('customPlatformName').value = '';
+            document.getElementById('platformUrl').value = '';
+
+            showToast('Platform added to edit list', 'success');
+        }
+
+        function saveEditedQR() {
+            let platformNames = document.querySelectorAll('.edit-platform-name');
+            let urls = document.querySelectorAll('.edit-platform-url');
+            let updatedLinks = [];
+
+            for (let i = 0; i < platformNames.length; i++) {
+                let platform = platformNames[i].value.trim();
+                let url = urls[i].value.trim();
+
+                if (platform && url) {
+                    updatedLinks.push({
+                        platform: platform,
+                        url: url
+                    });
+                } else if (platform && !url) {
+                    showToast(`Please enter URL for ${platform}`, 'error');
+                    return;
+                }
+            }
+
+            if (updatedLinks.length === 0) {
+                showToast('Please add at least one valid link', 'error');
+                return;
+            }
+
+            let saveBtn = document.querySelector('#editQrModal .btn-save');
+            let originalHtml = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<div class="loading-spinner"></div> Saving...';
+            saveBtn.disabled = true;
+
+            fetch('{{ route('admin-update-multi-qr') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        qr_id: currentEditingQR.id,
+                        links: updatedLinks
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('QR Updated Successfully!');
+                        renderMultipleQRs(data.all_qrs);
+                        let modal = bootstrap.Modal.getInstance(document.getElementById('editQrModal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+                    } else {
+                        showToast(data.message || 'Error updating QR', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error updating QR code', 'error');
+                })
+                .finally(() => {
+                    saveBtn.innerHTML = originalHtml;
+                    saveBtn.disabled = false;
+                });
+        }
+
+
+         function copyQrLink(element) {
+            const link = element.dataset.link;
+            navigator.clipboard.writeText(link)
+                .then(() => {
+                    showToast('Link copied successfully');
+                    const original = element.innerHTML;
+                    element.innerHTML = '<i class="fas fa-check text-success"></i> Copied!';
+                    setTimeout(() => {
+                        element.innerHTML = original;
+                    }, 100);
+                })
+                .catch(() => {
+                    showToast('Failed to copy link', 'error');
+                });
+        }
+
+        function loadUserQRs() {
+            $.ajax({
+                url: "{{ route('admin-get-multi-qr-codes') }}",
+                type: "GET",
+                success: function(response) {
+                    if (response.success) {
+                        renderMultipleQRs(response.qrs);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Failed to load QRs', xhr);
+                }
+            });
+        }
+
+        function deleteQR(qrId) {
+            Swal.fire({
+                title: 'Delete QR Code?',
+                text: "This QR code will be permanently deleted.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('admin-multi-qr-destroy', ':id') }}".replace(':id', qrId),
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: 'QR Code deleted successfully.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                            loadUserQRs();
+                        },
+                        error: function(xhr) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Unable to delete QR code.'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function removePlatformRow(button) {
+            if (button && button.closest) {
+                let row = button.closest('.platform-row');
+                if (row) {
+                    row.remove();
+                    showToast('Platform removed', 'success');
+                }
+            }
+        }
+
+        function copyPlatformRow(button) {
+            if (button && button.closest) {
+                let row = button.closest('.platform-row');
+                if (row) {
+                    let urlInput = row.querySelector('.edit-platform-url');
+                    if (urlInput && urlInput.value) {
+                        navigator.clipboard.writeText(urlInput.value)
+                            .then(() => {
+                                showToast('URL copied to clipboard!');
+                            })
+                            .catch(() => {
+                                showToast('Failed to copy URL', 'error');
+                            });
+                    } else {
+                        showToast('No URL to copy', 'error');
+                    }
+                }
+            }
+        }
+
+        function updateQRTitle(qrId, title) {
+            fetch('{{ route('admin-update-multi-qr-title') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        qr_id: qrId,
+                        title: title
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // console.log('QR Title Saved');
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+
+        function addNewLinkToContainer(link) {
+
+            const container = document.getElementById('customLinksContainer');
+
+            const html = `
+                <div class="app-link quick-link-item"
+                    id="link-row-${link.id}">
+
+                    <input type="checkbox"
+                        class="qr-platform-checkbox"
+                        data-platform="${link.platform_name}"
+                        data-input="url_${link.id}">
+
+                    <div class="platform-icon">
+                        <img src="/images/cm_logo.png"
+                            style="width:24px;height:24px;">
+                    </div>
+
+                    <input type="text"
+                        id="platform_name_${link.id}"
+                        class="link-input platform-name-input"
+                        value="${link.platform_name}">
+
+                    <input type="url"
+                        id="url_${link.id}"
+                        class="link-input"
+                        value="${link.platform_url}">
+
+                    <button onclick="saveCustomLink(${link.id})"
+                            class="save-btn-sm">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+
+                    <button onclick="copyToClipboard(document.getElementById('url_${link.id}').value)"
+                            class="copy-btn-sm">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+
+                    <button onclick="deleteCustomLink(${link.id})"
+                            class="save-btn-sm"
+                            style="background:#dc3545;">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function saveCustomLink(linkId)
+        {
+            console.log('id=', linkId);
+
+            let platformElement =
+                document.getElementById('platform_name_' + linkId);
+
+            let urlElement =
+                document.getElementById('url_' + linkId);
+
+            if (!platformElement) {
+                console.error(
+                    'Platform input not found:',
+                    'platform_name_' + linkId
+                );
+                return;
+            }
+
+            if (!urlElement) {
+                console.error(
+                    'URL input not found:',
+                    'url_' + linkId
+                );
+                return;
+            }
+
+            let platformName = platformElement.value;
+            let platformUrl = urlElement.value;
+
+            fetch('{{ route('admin-social-links-update-secondary') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    id: linkId,
+                    platform_name: platformName,
+                    platform_url: platformUrl
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                if (data.success) {
+                    showToast('Updated Successfully');
+                } else {
+                    showToast(data.message || 'Update Failed');
+                }
+
+            })
+            .catch(error => {
+                console.error(error);
+                showToast('Something went wrong');
+            });
+        }
+        function deleteCustomLink(linkId) {
+            Swal.fire({
+                title: 'Delete Link?',
+                text: "This link will be permanently deleted.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('admin-social-links-destroy', ':id') }}".replace(':id', linkId),
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: 'Link deleted successfully.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                            document.getElementById(`link-row-${linkId}`).remove();
+                        },
+                        error: function(xhr) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Unable to delete link.'
+                            });
+                        }
+                    });
+                }
+            });
+        }
     </script>
 @endsection
 

@@ -91,11 +91,9 @@ class CampaignController extends Controller
                 'seen_at' => now(),
                 'status'  => 'seen'
             ]);
-            Log::info('Email Opened', [
-                'log_id' => $log->id,
-                'opened_at' => now(),
-                'ip' => request()->ip(),
-                'user_agent' => request()->userAgent()
+            Log::info('CampaignLog Found', [
+                'found' => $log ? true : false,
+                'log_id' => $logId,
             ]);
         }
 

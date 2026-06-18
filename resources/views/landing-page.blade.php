@@ -266,8 +266,8 @@
       <!-- links: Privacy Policy, Terms & Conditions, Login -->
       <div class="links-row">
         <div class="nav-links">
-          <a href="https://highcustomai.com/privacy-policy" target="_blank" rel="noopener noreferrer">📄 Privacy Policy</a>
-          <a href="https://highcustomai.com/terms" target="_blank" rel="noopener noreferrer">⚖️ Terms & Conditions</a>
+          <a href="{{ route('privacyPolicy') }}" target="_blank" rel="noopener noreferrer">📄 Privacy Policy</a>
+          <a href="{{ route('terms') }}" target="_blank" rel="noopener noreferrer">⚖️ Terms & Conditions</a>
         </div>
         <a href="https://highcustomai.com" class="login-btn">
           🔑 Login

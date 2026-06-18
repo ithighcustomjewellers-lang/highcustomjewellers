@@ -135,9 +135,22 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><a class="dropdown-item" href="{{ route('user-profile') }}">Profile</a></li>
-                    <li>
+                    {{-- <li>
                         <a class="dropdown-item" href="{{ url('/connect-gmail') }}">Connect Gmail</a>
-                    </li>
+                    </li> --}}
+
+
+                    @if(auth()->user()->gmail_token && auth()->user()->gmail_refresh_token)
+                        <a href="{{ url('connect-gmail') }}" class="btn btn-primary">
+                           Connect Gmail
+                        </a>
+                    @else
+                        <span class="text-success">
+                            Gmail Already Connected
+                        </span>
+                    @endif
+
+
                     <li>
                         <hr class="dropdown-divider">
                     </li>

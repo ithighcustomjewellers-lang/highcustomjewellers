@@ -9,12 +9,8 @@ use App\Models\AnalyticsTracking;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
-use App\Models\MultiQrLink;
-use App\Models\Sequence;
 
 class SocialLinksController extends Controller
 {
@@ -23,306 +19,149 @@ class SocialLinksController extends Controller
     {
         $user = Auth::user();
 
+        // Define platform whitelist for users
         $quickLinkPlatforms = [
-            'whatsapp',
-            'telegram',
-            'facebook',
-            'youtube',
-            'linkedin',
-            'instagram',
-            'x',
-            'threads',
-            'snapchat',
-            'reddit',
-            'discord',
-            'pinterest',
-            'quora',
-            'messenger',
-            'twitch',
-            'rumble',
-            'viber'
+            'whatsapp', 'telegram', 'facebook', 'youtube', 'linkedin',
+            'instagram', 'x', 'threads', 'snapchat', 'messenger'
         ];
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | SOCIAL LINKS
-        |--------------------------------------------------------------------------
-        */
-
         if ($user->is_admin == 1) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | ADMIN LINKS
-            |--------------------------------------------------------------------------
-            */
-
-            // $socialLinks = SocialLink::where('user_id', $user->id)
-            //     ->orderBy('sort_order')
-            //     ->get();
-
+            // ADMIN: Can see ALL custom links they created
             $socialLinks = SocialLink::where('user_id', $user->id)
                 ->whereNotIn(DB::raw('LOWER(platform_name)'), $quickLinkPlatforms)
                 ->orderBy('sort_order')
                 ->get();
+
+            // Quick links for admin
+            $quickLinks = UserSetting::getValue($user->id, 'quick_links', []);
+
         } else {
+            // USER: Should ONLY see predefined platforms and their OWN custom links
+            // NOT admin's custom links
 
-            /*
-            |--------------------------------------------------------------------------
-            | ADMIN FIND
-            |--------------------------------------------------------------------------
-            */
-
-            $admin = User::where('is_admin', 1)->first();
-
-            $adminLinks = collect();
-
-            if ($admin) {
-
-                $adminLinks = SocialLink::where('user_id', $admin->id)
-                    ->whereRaw('LOWER(platform_name) != ?', ['whatsapp'])
-                    ->orderBy('sort_order')
-                    ->get();
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | USER LINKS
-            |--------------------------------------------------------------------------
-            */
-
+            // 1. Get user's own social links (including custom ones they created)
             $userLinks = SocialLink::where('user_id', $user->id)
                 ->orderBy('sort_order')
                 ->get();
 
-            /*
-            |--------------------------------------------------------------------------
-            | MERGE ADMIN + USER LINKS
-            |--------------------------------------------------------------------------
-            */
-
-            $socialLinks = $adminLinks->map(function ($adminLink) use ($userLinks) {
-                $userLink = $userLinks->first(function ($item) use ($adminLink) {
-                    return strtolower(trim($item->platform_name)) == strtolower(trim($adminLink->platform_name));
-                });
-                return $userLink ? $userLink : $adminLink;
-            });
-
-            /*
-            |--------------------------------------------------------------------------
-            | USER EXTRA CUSTOM LINKS
-            |--------------------------------------------------------------------------
-            */
-
-            $adminPlatformNames = $adminLinks->map(function ($item) {
-                return strtolower(trim($item->platform_name));
-            })->toArray();
-
-            $extraUserLinks = $userLinks->filter(function ($link) use ($adminPlatformNames, $quickLinkPlatforms) {
-                // Skip if platform is in quick links
-                if (in_array(strtolower(trim($link->platform_name)), $quickLinkPlatforms)) {
-                    return false;
-                }
-                return !in_array(strtolower(trim($link->platform_name)), $adminPlatformNames);
-            });
-
-            $socialLinks = $socialLinks->merge($extraUserLinks);
-
-
-            $socialLinks = $socialLinks->unique(function ($item) {
-                return strtolower(trim($item->platform_name));
-            })->filter(function ($link) use ($quickLinkPlatforms) {
+            // 2. Filter user's custom links - they can keep their own custom links
+            // But exclude predefined platforms from the custom section
+            $socialLinks = $userLinks->filter(function ($link) use ($quickLinkPlatforms) {
+                // Exclude predefined platforms from custom section
                 return !in_array(strtolower(trim($link->platform_name)), $quickLinkPlatforms);
             });
-        }
 
-        /*
-            |--------------------------------------------------------------------------
-            | QUICK LINKS
-            |--------------------------------------------------------------------------
-            */
-
-        if ($user->is_admin == 1) {
-
-            $quickLinks = UserSetting::getValue(
-                $user->id,
-                'quick_links',
-                []
-            );
-        } else {
-
-            /*
-            |--------------------------------------------------------------------------
-            | ADMIN QUICK LINKS
-            |--------------------------------------------------------------------------
-            */
-
+            // 3. Get quick links (predefined platforms)
             $admin = User::where('is_admin', 1)->first();
-
             $adminQuickLinks = [];
-
             if ($admin) {
-
-                $adminQuickLinks = UserSetting::getValue(
-                    $admin->id,
-                    'quick_links',
-                    []
-                );
+                $adminQuickLinks = UserSetting::getValue($admin->id, 'quick_links', []);
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | USER QUICK LINKS
-            |--------------------------------------------------------------------------
-            */
+            $userQuickLinks = UserSetting::getValue($user->id, 'quick_links', []);
 
-            $userQuickLinks = UserSetting::getValue(
-                $user->id,
-                'quick_links',
-                []
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | MERGE QUICK LINKS
-            |--------------------------------------------------------------------------
-            */
+            // Merge: Admin quick links (except WhatsApp) + User quick links
             unset($adminQuickLinks['whatsapp_url']);
-            $quickLinks = array_merge(
-                $adminQuickLinks,
-                $userQuickLinks
-            );
+            $quickLinks = array_merge($adminQuickLinks, $userQuickLinks);
+
+            // IMPORTANT: Users should NOT see admin's custom links
+            // We only show predefined platforms + user's own custom links
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | PROFILE SLUG
-        |--------------------------------------------------------------------------
-        */
-
-        $profileSlug = UserSetting::getValue(
-            $user->id,
-            'profile_slug'
-        );
-
+        // Get profile slug
+        $profileSlug = UserSetting::getValue($user->id, 'profile_slug');
         if (!$profileSlug) {
-
             $profileSlug = Str::slug($user->name) . '-' . $user->id;
-
-            UserSetting::setValue(
-                $user->id,
-                'profile_slug',
-                $profileSlug
-            );
+            UserSetting::setValue($user->id, 'profile_slug', $profileSlug);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | PROFILE URL
-        |--------------------------------------------------------------------------
-        */
 
         $profileUrl = url('/profile/' . $profileSlug);
 
-        $multiQrs = UserSetting::getValue(
-            $user->id,
-            'multi_qr_codes',
-            []
-        );
+        // Get multi QR codes
+        $multiQrs = UserSetting::getValue($user->id, 'multi_qr_codes', []);
 
         foreach ($multiQrs as &$qr) {
             $trackingSlug = $qr['tracking_slug'] ?? $qr['id'];
-            $qr['qr_scans'] = AnalyticsTracking::getQRWiseScans(
-                $trackingSlug
-            );
-            $qr['button_clicks'] = AnalyticsTracking::getQRWiseClicks(
-                $trackingSlug
-            );
+            $qr['qr_scans'] = AnalyticsTracking::getQRWiseScans($trackingSlug);
+            $qr['button_clicks'] = AnalyticsTracking::getQRWiseClicks($trackingSlug);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | ANALYTICS
-        |--------------------------------------------------------------------------
-        */
+        $qrScans = AnalyticsTracking::getQRScansCount($profileSlug);
+        $btnClicks = AnalyticsTracking::getButtonClicksCount($profileSlug);
 
-        $qrScans = AnalyticsTracking::getQRScansCount(
-            $profileSlug
-        );
-
-        $btnClicks = AnalyticsTracking::getButtonClicksCount(
-            $profileSlug
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | VIEW
-        |--------------------------------------------------------------------------
-        */
-
+        // Return appropriate view
         if ($user->is_admin == 1) {
             return view('admin.social.index', compact(
-                'socialLinks',
-                'quickLinks',
-                'profileUrl',
-                'qrScans',
-                'btnClicks',
-                'profileSlug'
+                'socialLinks', 'quickLinks', 'profileUrl', 'qrScans',
+                'btnClicks', 'profileSlug', 'multiQrs'
             ));
         } else {
             return view('user.user-social.index', compact(
-                'socialLinks',
-                'quickLinks',
-                'profileUrl',
-                'qrScans',
-                'btnClicks',
-                'profileSlug',
-                'multiQrs'
+                'socialLinks', 'quickLinks', 'profileUrl', 'qrScans',
+                'btnClicks', 'profileSlug', 'multiQrs'
             ));
         }
     }
 
+
     // public function index()
     // {
     //     $user = Auth::user();
+    //     $quickLinkPlatforms = ['whatsapp', 'telegram', 'facebook', 'youtube', 'linkedin', 'instagram', 'x', 'threads', 'snapchat', 'reddit', 'discord', 'pinterest', 'quora', 'messenger', 'twitch', 'rumble', 'viber'];
+
     //     if ($user->is_admin == 1) {
-    //         $socialLinks = SocialLink::where('user_id', $user->id)->orderBy('sort_order')->get();
+    //         $socialLinks = SocialLink::where('user_id', $user->id)
+    //             ->whereNotIn(DB::raw('LOWER(platform_name)'), $quickLinkPlatforms)
+    //             ->orderBy('sort_order')
+    //             ->get();
     //     } else {
     //         $admin = User::where('is_admin', 1)->first();
     //         $adminLinks = collect();
     //         if ($admin) {
-    //             $adminLinks = SocialLink::where('user_id', $admin->id)->whereRaw('LOWER(platform_name) != ?', ['whatsapp'])->orderBy('sort_order')->get();
+    //             $adminLinks = SocialLink::where('user_id', $admin->id)
+    //                 ->whereRaw('LOWER(platform_name) != ?', ['whatsapp'])
+    //                 ->orderBy('sort_order')
+    //                 ->get();
     //         }
-    //         $userLinks = SocialLink::where('user_id', $user->id)->orderBy('sort_order')->get();
+
+    //         $userLinks = SocialLink::where('user_id', $user->id)
+    //             ->orderBy('sort_order')
+    //             ->get();
+
     //         $socialLinks = $adminLinks->map(function ($adminLink) use ($userLinks) {
     //             $userLink = $userLinks->first(function ($item) use ($adminLink) {
-    //                 return strtolower(trim($item->platform_name))
-    //                     == strtolower(trim($adminLink->platform_name));
+    //                 return strtolower(trim($item->platform_name)) == strtolower(trim($adminLink->platform_name));
     //             });
-    //             if ($userLink) {
-    //                 return $userLink;
-    //             }
-    //             return $adminLink;
+    //             return $userLink ? $userLink : $adminLink;
     //         });
+
     //         $adminPlatformNames = $adminLinks->map(function ($item) {
     //             return strtolower(trim($item->platform_name));
     //         })->toArray();
-    //         $extraUserLinks = $userLinks->filter(function ($link) use ($adminPlatformNames) {
-    //             return !in_array(
-    //                 strtolower(trim($link->platform_name)),
-    //                 $adminPlatformNames
-    //             );
+
+    //         $extraUserLinks = $userLinks->filter(function ($link) use ($adminPlatformNames, $quickLinkPlatforms) {
+    //             // Skip if platform is in quick links
+    //             if (in_array(strtolower(trim($link->platform_name)), $quickLinkPlatforms)) {
+    //                 return false;
+    //             }
+    //             return !in_array(strtolower(trim($link->platform_name)), $adminPlatformNames);
     //         });
+
     //         $socialLinks = $socialLinks->merge($extraUserLinks);
+    //         $socialLinks = $socialLinks->unique(function ($item) {
+    //             return strtolower(trim($item->platform_name));
+    //         })->filter(function ($link) use ($quickLinkPlatforms) {
+    //             return !in_array(strtolower(trim($link->platform_name)), $quickLinkPlatforms);
+    //         });
     //     }
+
     //     if ($user->is_admin == 1) {
     //         $quickLinks = UserSetting::getValue($user->id,'quick_links',[]);
     //     } else {
     //         $admin = User::where('is_admin', 1)->first();
     //         $adminQuickLinks = [];
     //         if ($admin) {
-    //             $adminQuickLinks = UserSetting::getValue($admin->id,'quick_links',[]);
+    //             $adminQuickLinks = UserSetting::getValue($admin->id, 'quick_links', []);
     //         }
     //         $userQuickLinks = UserSetting::getValue($user->id, 'quick_links',[]);
     //         unset($adminQuickLinks['whatsapp_url']);
@@ -331,34 +170,47 @@ class SocialLinksController extends Controller
     //             $userQuickLinks
     //         );
     //     }
-    //     $profileSlug = UserSetting::getValue($user->id,'profile_slug');
+
+    //     $profileSlug = UserSetting::getValue(
+    //         $user->id,
+    //         'profile_slug'
+    //     );
+
     //     if (!$profileSlug) {
     //         $profileSlug = Str::slug($user->name) . '-' . $user->id;
     //         UserSetting::setValue($user->id, 'profile_slug', $profileSlug);
     //     }
 
     //     $profileUrl = url('/profile/' . $profileSlug);
-    //     $multiQrs = UserSetting::getValue($user->id, 'multi_qr_codes',[]);
+    //     $multiQrs = UserSetting::getValue($user->id, 'multi_qr_codes', []);
+
     //     foreach ($multiQrs as &$qr) {
     //         $trackingSlug = $qr['tracking_slug'] ?? $qr['id'];
-    //         $qr['qr_scans'] = AnalyticsTracking::getQRWiseScans($trackingSlug);
-    //         $qr['button_clicks'] = AnalyticsTracking::getQRWiseClicks($trackingSlug);
+    //         $qr['qr_scans'] = AnalyticsTracking::getQRWiseScans(
+    //             $trackingSlug
+    //         );
+    //         $qr['button_clicks'] = AnalyticsTracking::getQRWiseClicks(
+    //             $trackingSlug
+    //         );
     //     }
-    //     $qrScans = AnalyticsTracking::getQRScansCount($profileSlug);
-    //     $btnClicks = AnalyticsTracking::getButtonClicksCount($profileSlug);
+
+    //     $qrScans = AnalyticsTracking::getQRScansCount(
+    //         $profileSlug
+    //     );
+
+    //     $btnClicks = AnalyticsTracking::getButtonClicksCount(
+    //         $profileSlug
+    //     );
 
     //     if ($user->is_admin == 1) {
-    //         return view('admin.social.index', compact('socialLinks','quickLinks','profileUrl','qrScans','btnClicks','profileSlug'));
+    //         return view('admin.social.index', compact('socialLinks', 'quickLinks', 'profileUrl', 'qrScans', 'btnClicks', 'profileSlug','multiQrs'));
     //     } else {
-    //         return view('user.user-social.index', compact('socialLinks','quickLinks','profileUrl','qrScans','btnClicks','profileSlug','multiQrs'));
+    //         return view('user.user-social.index', compact('socialLinks', 'quickLinks', 'profileUrl', 'qrScans', 'btnClicks', 'profileSlug','multiQrs'));
     //     }
     // }
 
     public function store(Request $request)
     {
-
-
-
         $request->validate([
             'platform_name' => 'required|string|max:255',
             'platform_url' => 'required|url|max:500'
@@ -367,25 +219,8 @@ class SocialLinksController extends Controller
         $user = Auth::user();
 
         // Check if platform is predefined
-        $predefinedPlatforms = [
-            'whatsapp',
-            'telegram',
-            'facebook',
-            'youtube',
-            'linkedin',
-            'instagram',
-            'twitter',
-            'x',
-            'tiktok',
-            'snapchat',
-            'reddit',
-            'discord',
-            'pinterest',
-            'twitch',
-            'quora',
-            'github',
-            'spotify',
-            'medium'
+        $predefinedPlatforms = ['whatsapp', 'telegram', 'facebook', 'youtube', 'linkedin', 'instagram', 'twitter',
+         'x', 'tiktok', 'snapchat', 'reddit', 'discord', 'pinterest', 'twitch', 'quora', 'github', 'spotify', 'medium'
         ];
 
         $isPredefined = in_array(strtolower($request->platform_name), $predefinedPlatforms);
@@ -575,6 +410,19 @@ class SocialLinksController extends Controller
             $savedQrs
         );
 
+        foreach ($savedQrs as &$qr) {
+
+            $trackingSlug = $qr['tracking_slug'] ?? $qr['id'];
+
+            $qr['qr_scans'] = AnalyticsTracking::getQRWiseScans(
+                $trackingSlug
+            );
+
+            $qr['button_clicks'] = AnalyticsTracking::getQRWiseClicks(
+                $trackingSlug
+            );
+        }
+
         return response()->json([
             'success' => true,
             'qr_id' => $qrId,
@@ -724,14 +572,43 @@ class SocialLinksController extends Controller
         ]);
     }
 
+    // public function getMultiQrCodes()
+    // {
+    //     $user = auth::user();
+    //     $qrs = UserSetting::getValue(
+    //         $user->id,
+    //         'multi_qr_codes',
+    //         []
+    //     );
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'qrs' => $qrs
+    //     ]);
+    // }
+
     public function getMultiQrCodes()
     {
-        $user = auth::user();
+        $user = Auth::user();
+
         $qrs = UserSetting::getValue(
             $user->id,
             'multi_qr_codes',
             []
         );
+
+        foreach ($qrs as &$qr) {
+
+            $trackingSlug = $qr['tracking_slug'] ?? $qr['id'];
+
+            $qr['qr_scans'] = AnalyticsTracking::getQRWiseScans(
+                $trackingSlug
+            );
+
+            $qr['button_clicks'] = AnalyticsTracking::getQRWiseClicks(
+                $trackingSlug
+            );
+        }
 
         return response()->json([
             'success' => true,

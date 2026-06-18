@@ -82,119 +82,11 @@
                 <div>
                     <h2>📊 Email Tracking Report</h2>
                 </div>
-                {{-- <div>
-                    <button type="button" class="btn btn-primary" onclick="refreshTable()">
-                        🔄 Refresh
-                    </button>
-                </div> --}}
             </div>
         </div>
     </div>
-
-    <!-- Stats Cards -->
-    {{-- <div class="row mb-4" id="analyticsCards">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">Total Sent</h6>
-                            <h2 class="mb-0" id="totalSent">-</h2>
-                        </div>
-                        <i class="fas fa-envelope fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">Opens</h6>
-                            <h2 class="mb-0" id="totalOpens">-</h2>
-                        </div>
-                        <i class="fas fa-envelope-open fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">Open Rate</h6>
-                            <h2 class="mb-0" id="openRate">-</h2>
-                        </div>
-                        <i class="fas fa-chart-line fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">Click Rate</h6>
-                            <h2 class="mb-0" id="clickRate">-</h2>
-                        </div>
-                        <i class="fas fa-mouse-pointer fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> --}}
-
-    <!-- Second Row Stats -->
-    {{-- <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card bg-danger text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">Not Interested</h6>
-                            <h2 class="mb-0" id="totalNotInterested">-</h2>
-                        </div>
-                        <i class="fas fa-thumbs-down fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card bg-secondary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">Total Clicks</h6>
-                            <h2 class="mb-0" id="totalClicks">-</h2>
-                        </div>
-                        <i class="fas fa-hand-pointer fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card bg-dark text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">Interested</h6>
-                            <h2 class="mb-0" id="totalInterested">-</h2>
-                        </div>
-                        <i class="fas fa-thumbs-up fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> --}}
-
     <!-- DataTable -->
     <div class="card">
-        {{-- <div class="card-header bg-white">
-            <h5 class="mb-0">📋 Campaign Logs</h5>
-        </div> --}}
         <div class="card-body">
             <div class="table-responsive">
                 <table id="campaignTable" class="table table-bordered table-hover align-middle">
@@ -217,6 +109,7 @@
                             <th width="10%">Snapchat</th>
                             <th width="10%">X</th>
                             <th width="10%">linkedin</th>
+                            <th width="10%">Other</th>
                             <th width="10%">Total</th>
                         </tr>
                     </thead>
@@ -291,6 +184,7 @@ $(document).ready(function () {
             { data: 'snapchat_clicks', orderable: false, searchable: false },
             { data: 'x_clicks', orderable: false, searchable: false },
             { data: 'linkedin_clicks', orderable: false, searchable: false },
+            { data: 'other_clicks', orderable: false, searchable: false },
             { data: 'total_clicks', orderable: false, searchable: false }
         ],
 

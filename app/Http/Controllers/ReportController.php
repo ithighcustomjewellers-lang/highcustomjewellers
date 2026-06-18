@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
@@ -20,105 +21,118 @@ class ReportController extends Controller
     public function getCampaignLogsData(Request $request)
     {
         $columns = [
-            0 => 'id',
+            0 => 'campaign_logs.id',
             1 => 'lead_name',
             2 => 'lead_email',
             3 => 'step',
             4 => 'subject',
-            5 => 'status',
-            6 => 'scheduled_at',
-            7 => 'sent_at',
-            8 => 'seen_at',
-            9 => 'whatsapp_clicks',
-            10 => 'instagram_clicks',
-            11 => 'facebook_messenger_clicks',
-            12 => 'threads_clicks',
-            13 => 'telegram_clicks',
-            14 => 'snapchat_clicks',
-            15 => 'x_clicks',
-            16 => 'linkedin_clicks',
-            17 => 'total_clicks',
+            5 => 'campaign_logs.status',
+            6 => 'campaign_logs.scheduled_at',
+            7 => 'campaign_logs.sent_at',
+            8 => 'campaign_logs.seen_at',
+            9 => 'campaign_logs.total_clicks',
         ];
 
-        // Base query with eager loading
-        $query = CampaignLog::query()
-        ->leftJoin('leads', 'campaign_logs.lead_id', '=', 'leads.id')
-        ->leftJoin('sequences', 'campaign_logs.sequence_id', '=', 'sequences.id')
-        ->select(
-            'campaign_logs.*',
-            'leads.name as lead_name',
-            'leads.email as lead_email',
-            'sequences.step',
-            'sequences.subject'
-        );
+        $query = CampaignLog::with('linkClicks')
+            ->leftJoin('leads', 'campaign_logs.lead_id', '=', 'leads.id')
+            ->leftJoin('sequences', 'campaign_logs.sequence_id', '=', 'sequences.id')
+            ->where('campaign_logs.user_id', Auth::id())
+            ->select([
+                'campaign_logs.*',
+                'leads.name as lead_name',
+                'leads.email as lead_email',
+                'sequences.step as step',
+                'sequences.subject as subject',
+            ]);
 
+        // Total Records
+        $totalData = (clone $query)->count();
 
-        // Total records
-        $totalData = $query->count();
-
-        // Search filter
-        if ($request->has('search') && $request->search['value'] != '') {
+        // Search
+        if (!empty($request->search['value'])) {
             $search = $request->search['value'];
             $query->where(function ($q) use ($search) {
-                $q->whereHas('lead', function ($q2) use ($search) {
-                    $q2->where('name', 'LIKE', "%$search%")
-                        ->orWhere('email', 'LIKE', "%$search%");
-                })->orWhereHas('sequence', function ($q2) use ($search) {
-                    $q2->where('step', 'LIKE', "%$search%")
-                        ->orWhere('subject', 'LIKE', "%$search%");
-                })->orWhere('status', 'LIKE', "%$search%");
+                $q->where('leads.name', 'LIKE', "%{$search}%")
+                    ->orWhere('leads.email', 'LIKE', "%{$search}%")
+                    ->orWhere('sequences.step', 'LIKE', "%{$search}%")
+                    ->orWhere('sequences.subject', 'LIKE', "%{$search}%")
+                    ->orWhere('campaign_logs.status', 'LIKE', "%{$search}%");
             });
         }
-
-        // Total after search
-        $totalFiltered = $query->count();
-
-        // Ordering
-        $orderColumn = $columns[$request->input('order.0.column', 0)];
+        $totalFiltered = (clone $query)->count();
+        // Sorting
+        $orderColumn = $columns[$request->input('order.0.column', 0)]
+            ?? 'campaign_logs.id';
         $orderDir = $request->input('order.0.dir', 'desc');
         $query->orderBy($orderColumn, $orderDir);
 
         // Pagination
         $limit = $request->input('length', 25);
         $start = $request->input('start', 0);
-        $campaignLogs = $query->offset($start)->limit($limit)->get();
-
-
+        $campaignLogs = $query
+            ->offset($start)
+            ->limit($limit)
+            ->get();
         $data = [];
         foreach ($campaignLogs as $log) {
-            // Get click counts by platform
-            $whatsappClicks = $log->linkClicks->where('platform_name', 'whatsapp')->count();
-            $instagramClicks = $log->linkClicks->where('platform_name', 'instagram')->count();
-            $fbMessengerClicks = $log->linkClicks->where('platform_name', 'facebook_messenger')->count();
-            $threadsClicks = $log->linkClicks->where('platform_name', 'threads')->count();
-            $telegramClicks = $log->linkClicks->where('platform_name', 'telegram')->count();
-            $snapchatClicks = $log->linkClicks->where('platform_name', 'snapchat')->count();
-            $xClicks = $log->linkClicks->where('platform_name', 'x')->count();
-            $linkedinClicks = $log->linkClicks->where('platform_name', 'linkedin')->count();
-            $totalClicks = $log->linkClicks->count();
+            $whatsappClicks = $log->linkClicks->where('platform_name', 'whatsapp')->sum('click_count');
+            $telegramClicks = $log->linkClicks->where('platform_name', 'telegram')->sum('click_count');
+            $linkedinClicks = $log->linkClicks->where('platform_name', 'linkedin')->sum('click_count');
+            $instagramClicks = $log->linkClicks->where('platform_name', 'instagram')->sum('click_count');
+            $snapchatClicks = $log->linkClicks->where('platform_name', 'snapchat')->sum('click_count');
+            $xClicks = $log->linkClicks->where('platform_name', 'x')->sum('click_count');
+            $threadsClicks = $log->linkClicks->where('platform_name', 'threads')->sum('click_count');
+            $fbMessengerClicks = $log->linkClicks->where('platform_name', 'facebook_messenger')->sum('click_count');
 
-            // Status badge HTML
+            $knownPlatforms = ['whatsapp', 'telegram', 'linkedin', 'instagram', 'snapchat', 'x', 'threads', 'facebook_messenger'];
+            $otherClicks = $log->linkClicks
+            ->whereNotIn('platform_name', $knownPlatforms)
+            ->sum('click_count');
+
+            // ✅ Total clicks - sum of all click_count
+            $totalClicks = $log->linkClicks->sum('click_count');
+
             $statusBadge = $this->getStatusBadge($log->status);
-
             $data[] = [
                 'id' => $log->id,
-                'lead_name' => $log->lead ? $log->lead->name : 'N/A',
-                'lead_email' => $log->lead ? $log->lead->email : 'N/A',
-                'step' => $log->sequence ? $log->sequence->step : 'N/A',
-                'subject' => $log->sequence ? Str::limit($log->sequence->subject, 40) : 'N/A',
+                'lead_name' => $log->lead_name ?? 'N/A',
+                'lead_email' => $log->lead_email ?? 'N/A',
+                'step' => $log->step ?? '-',
+                'subject' => $log->subject
+                    ? Str::limit($log->subject, 40)
+                    : '-',
                 'status_badge' => $statusBadge,
-                'scheduled_at' => $log->scheduled_at ? date('d M Y h:i A', strtotime($log->scheduled_at)) : '-',
-                'sent_at' => $log->sent_at ? date('d M Y h:i A', strtotime($log->sent_at)) : '-',
-                'seen_at' => $log->seen_at ? date('d M Y h:i A', strtotime($log->seen_at)) : '-',
-                'whatsapp_clicks' => $whatsappClicks > 0 ? '<span class="badge bg-success">' . $whatsappClicks . '</span>' : '0',
-                'instagram_clicks' => $instagramClicks > 0 ? '<span class="badge bg-danger">' . $instagramClicks . '</span>' : '0',
-                'facebook_messenger_clicks' => $fbMessengerClicks > 0 ? '<span class="badge bg-primary">' . $fbMessengerClicks . '</span>' : '0',
-                'threads_clicks' => $threadsClicks > 0 ? '<span class="badge bg-secondary">' . $threadsClicks . '</span>' : '0',
-                'telegram_clicks' => $telegramClicks > 0 ? '<span class="badge bg-info">' . $telegramClicks . '</span>' : '0',
-                'snapchat_clicks' => $snapchatClicks > 0 ? '<span class="badge bg-warning">' . $snapchatClicks . '</span>' : '0',
-                'x_clicks' => $xClicks > 0 ? '<span class="badge bg-dark">' . $xClicks . '</span>' : '0',
-                'linkedin_clicks' => $linkedinClicks > 0 ? '<span class="badge bg-primary">' . $linkedinClicks . '</span>' : '0',
-                'total_clicks' => $totalClicks > 0 ? '<span class="badge bg-dark fs-6">' . $totalClicks . '</span>' : '0',
+                'scheduled_at' => $this->convertToIST($log->scheduled_at),
+                'sent_at' => $this->convertToIST($log->sent_at),
+                'seen_at' => $this->convertToIST($log->seen_at),
+                'whatsapp_clicks' => $whatsappClicks > 0
+                    ? '<span class="badge bg-success">'.$whatsappClicks.'</span>'
+                    : '0',
+                'instagram_clicks' => $instagramClicks > 0
+                    ? '<span class="badge bg-danger">'.$instagramClicks.'</span>'
+                    : '0',
+                'facebook_messenger_clicks' => $fbMessengerClicks > 0
+                    ? '<span class="badge bg-primary">'.$fbMessengerClicks.'</span>'
+                    : '0',
+                'threads_clicks' => $threadsClicks > 0
+                    ? '<span class="badge bg-secondary">'.$threadsClicks.'</span>'
+                    : '0',
+                'telegram_clicks' => $telegramClicks > 0
+                    ? '<span class="badge bg-info">'.$telegramClicks.'</span>'
+                    : '0',
+                'snapchat_clicks' => $snapchatClicks > 0
+                    ? '<span class="badge bg-warning">'.$snapchatClicks.'</span>'
+                    : '0',
+                'x_clicks' => $xClicks > 0
+                    ? '<span class="badge bg-dark">'.$xClicks.'</span>'
+                    : '0',
+                'linkedin_clicks' => $linkedinClicks > 0
+                    ? '<span class="badge bg-primary">'.$linkedinClicks.'</span>'
+                    : '0',
+                'other_clicks' => $otherClicks > 0 ? '<span class="badge bg-secondary">' . $otherClicks . '</span>' : '0',
+                'total_clicks' => $totalClicks > 0
+                    ? '<span class="badge bg-dark fs-6">'.$totalClicks.'</span>'
+                    : '0',
             ];
         }
 
@@ -126,8 +140,25 @@ class ReportController extends Controller
             'draw' => intval($request->draw),
             'recordsTotal' => $totalData,
             'recordsFiltered' => $totalFiltered,
-            'data' => $data
+            'data' => $data,
         ]);
+    }
+
+      private function convertToIST($datetime)
+    {
+        if (empty($datetime)) {
+            return '-';
+        }
+
+        try {
+            $date = Carbon::parse($datetime);
+            $date->setTimezone('Asia/Kolkata');
+
+            // Format: 15/06/26 12:21 PM
+            return $date->format('d/m/y h:i A');
+        } catch (\Exception $e) {
+            return '-';
+        }
     }
 
     private function getStatusBadge($status)
