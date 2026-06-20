@@ -43,7 +43,10 @@ class MasterController extends Controller
         $validator = Validator::make($request->all(), [
             'whatsapp_link' => 'required|url|max:1000',
             'company_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'social_link_ids' => 'nullable|array',
+            'social_link_ids.*' => 'exists:social_links,id'
         ]);
+
         // VALIDATION ERROR
         if ($validator->fails()) {
             return response()->json([
@@ -51,28 +54,35 @@ class MasterController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
+
         // LOGIN USER ID
         $userId = Auth::id();
+
         // CHECK USER RECORD
         $business = BusinessLink::where('user_id', $userId)->first();
+
         // CREATE NEW RECORD IF NOT EXISTS
         if (!$business) {
             $business = new BusinessLink();
             $business->user_id = $userId;
         }
+
         // UPDATE DATA
         $business->whatsapp_link = $request->whatsapp_link;
 
         $selectedLinks = [];
 
-        if ($request->filled('social_link_ids')) {
+        // Check if social_link_ids exists and is not null/empty
+        if ($request->has('social_link_ids') && is_array($request->social_link_ids) && !empty($request->social_link_ids)) {
             $selectedLinks = SocialLink::where('user_id', $userId)
                 ->whereIn('id', $request->social_link_ids)
                 ->select('id', 'platform_name', 'platform_url')
                 ->get()
                 ->toArray();
         }
-        $business->action_links = $selectedLinks;
+
+        // Convert array to JSON string for database storage
+        $business->action_links = json_encode($selectedLinks);
 
         // IMAGE UPLOAD
         if ($request->hasFile('company_logo')) {
@@ -96,31 +106,6 @@ class MasterController extends Controller
             'data' => $business,
         ], 200);
     }
-
-    // public function getBusinessLinks()
-    // {
-    //     $userId = Auth::id();
-    //     $businessLinks = DB::table('business_links')->where('user_id', $userId)->first();
-    //     if (!$businessLinks) {
-    //         return response()->json([
-    //             'image_type' => 'logo'
-    //         ]);
-    //     }
-    //     if (!empty($businessLinks->company_logo)) {
-    //         $imagePath = public_path($businessLinks->company_logo);
-    //         if (file_exists($imagePath)) {
-    //             list($width, $height) = getimagesize($imagePath);
-    //             $isBanner = ($width > 400) || (($width / $height) > 2);
-    //             $businessLinks->image_type = $isBanner ? 'banner' : 'logo';
-    //         } else {
-    //             $businessLinks->image_type = 'logo';
-    //         }
-    //     } else {
-    //         $businessLinks->image_type = 'logo';
-    //     }
-    //     return response()->json($businessLinks);
-    // }
-
 
 
     public function getBusinessLinks()
@@ -157,8 +142,6 @@ class MasterController extends Controller
 
     public function sequencesStore(Request $request)
     {
-        // dd($request);
-        // die();
         Log::info('Store sequence request received', [
             'data' => $request->all()
         ]);
@@ -371,34 +354,49 @@ class MasterController extends Controller
         return view('user.master-list');
     }
 
-    public function inlineUpdate(Request $request)
+
+
+
+     public function inlineUpdate(Request $request)
     {
-        $request->validate([
-            'id'    => 'required|exists:sequences,id',
-            'field' => 'required|in:step,gap_days,variant',
-            'value' => 'required|string|max:255'
-        ]);
+        try {
+            $id = $request->id;
+            $field = $request->field;
+            $value = $request->value;
 
-        $sequence = Sequence::findOrFail($request->id);
-        $field = $request->field;
-        $value = $request->value;
+            $sequence = Sequence::where('id', $id)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
 
-        if ($field === 'step') {
-            $request->validate(['value' => 'required|integer|min:1']);
+            $allowedFields = ['step', 'gap_days', 'variant'];
+            if (!in_array($field, $allowedFields)) {
+                return response()->json(['message' => 'Invalid field'], 422);
+            }
+
+            if ($field === 'step') {
+                $request->validate(['value' => 'integer|min:1']);
+            }
+            if ($field === 'gap_days') {
+                $request->validate(['value' => 'integer|min:0']);
+            }
+            if ($field === 'variant') {
+                $value = strtoupper($value);
+                $request->validate(['value' => 'nullable|string|max:10|regex:/^[A-Z0-9]*$/']);
+            }
+
+            $sequence->$field = $value;
+            $sequence->save();
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
         }
-        if ($field === 'gap_days') {
-            $request->validate(['value' => 'required|integer|min:0']);
-        }
-        if ($field === 'variant') {
-            $value = strtoupper($value); // optional
-        }
-
-        $sequence->$field = $value;
-        $sequence->save();
-
-        return response()->json(['success' => true, 'message' => 'Updated successfully']);
     }
 
+
+    /**
+     * Get sequences data for DataTable
+     */
     public function getSequencesList(Request $request)
     {
         $columns = [
@@ -414,13 +412,10 @@ class MasterController extends Controller
             9 => 'updated_at',
         ];
 
-        // ✅ Base query with user_id filter
         $query = Sequence::where('user_id', Auth::id());
-
-        // Total records (user wise)
         $totalData = $query->count();
 
-        // Search filter (same but on filtered query)
+        // Search filter
         if ($request->has('search') && $request->search['value'] != '') {
             $search = $request->search['value'];
             $query->where(function ($q) use ($search) {
@@ -432,23 +427,33 @@ class MasterController extends Controller
             });
         }
 
-        // Total after search
         $totalFiltered = $query->count();
 
-        // Ordering
         $orderColumn = $columns[$request->input('order.0.column', 0)];
         $orderDir = $request->input('order.0.dir', 'desc');
-        $query->orderBy($orderColumn, $orderDir);
 
-        // Pagination
+        // Order by admin_updated_at first (show updated sequences at top)
+        if ($orderColumn == 'updated_at') {
+            $query->orderByRaw('CASE WHEN admin_updated_at IS NOT NULL THEN 0 ELSE 1 END')
+                  ->orderBy('admin_updated_at', 'desc')
+                  ->orderBy('updated_at', $orderDir);
+        } else {
+            $query->orderBy($orderColumn, $orderDir);
+        }
+
         $limit = $request->input('length', 10);
         $start = $request->input('start', 0);
         $sequences = $query->offset($start)->limit($limit)->get();
 
+        // ============ DO NOT RESET admin_updated_at HERE ============
+        // Highlight tab tak rahega jab tak user edit nahi karta
+
         $data = [];
         foreach ($sequences as $seq) {
+            $isAdminUpdated = !is_null($seq->admin_updated_at);
+
             $data[] = [
-                'edit' => '<a href="' . route('sequences-list-edit', $seq->id) . '" class="btn btn-sm btn-primary">Edit</a>',
+                'edit' => '<a href="' . route('sequences-list-edit', $seq->id) . '" class="edit-btn"><i class="fas fa-edit"></i> Edit</a>',
                 'id' => $seq->id,
                 'step' => $seq->step,
                 'gap_days' => $seq->gap_days ?? '-',
@@ -456,14 +461,15 @@ class MasterController extends Controller
                 'message' => Str::limit($seq->message, 50),
                 'subject' => $seq->subject,
                 'type' => $seq->type,
-                'whatsapp_link' => $seq->whatsapp_link ? '<a href="' . $seq->whatsapp_link . '" target="_blank">Link</a>' : '-',
+                'whatsapp_link' => $seq->whatsapp_link ? '<a href="' . $seq->whatsapp_link . '" target="_blank" class="table-link"><i class="fas fa-external-link-alt"></i> Link</a>' : '-',
                 'created_at' => date('Y-m-d', strtotime($seq->created_at)),
-                'updated_at' => date('Y-m-d', strtotime($seq->updated_at)),
+                'updated_at' => date('Y-m-d H:i:s', strtotime($seq->updated_at)),
+                'is_admin_updated' => $isAdminUpdated ? 1 : 0,
                 'delete' => '
                 <button type="button"
                     onclick="deleteList('.$seq->id.')"
                     class="btn btn-sm btn-danger">
-                    <i class="fas fa-trash"></i> Delete
+                    <i class="fas fa-trash"></i>
                 </button>',
             ];
         }
@@ -476,27 +482,56 @@ class MasterController extends Controller
         ]);
     }
 
+
+     /**
+     * Check if there are any admin updates (for polling)
+     */
+    public function checkAdminUpdates()
+    {
+        try {
+            $userId = Auth::id();
+
+            $hasUpdates = Sequence::where('user_id', $userId)
+                ->whereNotNull('admin_updated_at')
+                ->exists();
+
+            return response()->json([
+                'has_updates' => $hasUpdates
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'has_updates' => false,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+
     public function sequencesListEdit($id)
     {
         $sequence = Sequence::where('id', $id)
-            ->where('user_id', Auth::id())
             ->firstOrFail();
+
+        if (!is_null($sequence->admin_updated_at)) {
+            $sequence->admin_updated_at = null;
+            $sequence->save();
+        }
 
         return view('user.sequences-edit', compact('sequence'));
     }
 
+    /**
+     * User updates their own sequence - THIS REMOVES HIGHLIGHT
+     */
     public function sequencesListUpdate(Request $request, $id)
     {
-
         $userId = Auth::id();
         DB::beginTransaction();
         try {
             $sequence = Sequence::where('id', $id)
                 ->where('user_id', Auth::id())
                 ->firstOrFail();
-            // =========================
-            // VALIDATION
-            // =========================
+
             $validated = $request->validate([
                 'step'           => 'required|integer|min:1',
                 'gap_days'       => 'required|integer|min:0',
@@ -514,14 +549,10 @@ class MasterController extends Controller
                 'attachments_image' => 'nullable|file|max:5120',
                 'company_logo'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
-            // =========================
-            // NORMALIZE
-            // =========================
+
             $validated['type'] = strtoupper($validated['type']);
             $validated['variant'] = !empty($validated['variant']) ? strtoupper($validated['variant']) : null;
-            // =========================
-            // DUPLICATE CHECK
-            // =========================
+
             $exists = Sequence::where('user_id', Auth::id())
                 ->where('id', '!=', $sequence->id)
                 ->where('step', $validated['step'])
@@ -535,15 +566,29 @@ class MasterController extends Controller
                     }
                 })
                 ->exists();
+
             if ($exists) {
                 return response()->json([
                     'status' => false,
-                    'errors' => [
-                        'step' => ['Sequence already exists ❌']
-                    ]
+                    'errors' => ['step' => ['Sequence already exists ❌']]
                 ], 422);
             }
 
+            $actionLinks = [];
+            if ($request->filled('action_links')) {
+                foreach ($request->action_links as $link) {
+                    if (!empty($link['platform_url'])) {
+                        $actionLinks[] = [
+                            'id' => $link['id'] ?? null,
+                            'platform_name' => $link['platform_name'] ?? 'Link',
+                            'platform_url' => trim($link['platform_url']),
+                        ];
+                    }
+                }
+            }
+            $validated['action_links'] = $actionLinks;
+
+            // Handle files...
             if ($request->hasFile('hero_image')) {
                 $request->validate(['hero_image' => 'image|mimes:jpeg,png,jpg,gif|max:2048']);
                 $file = $request->file('hero_image');
@@ -553,55 +598,19 @@ class MasterController extends Controller
                 $file->move($destination, $filename);
                 $validated['hero_image'] = 'hero_image/' . $filename;
             } else {
-                // Keep existing if no new file uploaded
                 $validated['hero_image'] = $sequence->hero_image;
             }
 
-            // Handle attachment upload (replace)
-            // if ($request->hasFile('attachments_image')) {
-            //     $request->validate(['attachments_image' => 'file|max:5120']);
-            //     $file = $request->file('attachments_image');
-            //     $filename = date('Ymd_His') . '_attach_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            //     $destination = public_path('attachments_image');
-            //     if (!file_exists($destination)) mkdir($destination, 0777, true);
-            //     $file->move($destination, $filename);
-            //     $validated['attachments_image'] = 'attachments_image/' . $filename;
-            //     $validated['attachment_name'] = $file->getClientOriginalName();
-            //     $validated['attachment_size'] = $file->getSize();
-            // } else {
-            //     $validated['attachments_image'] = $sequence->attachments_image;
-            //     $validated['attachment_name'] = $sequence->attachment_name;
-            //     $validated['attachment_size'] = $sequence->attachment_size;
-            // }
-
-            // Handle attachment upload (replace)
             if ($request->hasFile('attachments_image')) {
-                $request->validate([ 'attachments_image' => 'file|max:5120']);
+                $request->validate(['attachments_image' => 'file|max:5120']);
                 $file = $request->file('attachments_image');
-                // =========================
-                // ✅ FILE INFO FIRST
-                // =========================
                 $originalName = $file->getClientOriginalName();
                 $fileSize = $file->getSize();
                 $extension = $file->getClientOriginalExtension();
-                // =========================
-                // ✅ FILE NAME
-                // =========================
                 $filename = date('Ymd_His') .'_attach_' . uniqid() .'.' . $extension;
-                // =========================
-                // ✅ DESTINATION
-                // =========================
                 $destination = public_path('attachments_image');
-                if (!file_exists($destination)) {
-                    mkdir($destination, 0777, true);
-                }
-                // =========================
-                // ✅ MOVE FILE
-                // =========================
+                if (!file_exists($destination)) mkdir($destination, 0777, true);
                 $file->move($destination, $filename);
-                // =========================
-                // ✅ SAVE DATA
-                // =========================
                 $validated['attachments_image'] = 'attachments_image/' . $filename;
                 $validated['attachment_name'] = $originalName;
                 $validated['attachment_size'] = $fileSize;
@@ -611,7 +620,6 @@ class MasterController extends Controller
                 $validated['attachment_size'] = $sequence->attachment_size;
             }
 
-            // Handle company logo upload (replace)
             if ($request->hasFile('company_logo')) {
                 $request->validate(['company_logo' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048']);
                 $file = $request->file('company_logo');
@@ -621,7 +629,6 @@ class MasterController extends Controller
                 $file->move($destination, $filename);
                 $validated['existing_company_logo'] = 'uploads/company_logo/' . $filename;
             } else {
-                // Keep existing (if not removed)
                 if ($request->input('remove_logo') == 1) {
                     $validated['existing_company_logo'] = null;
                 } else {
@@ -629,95 +636,35 @@ class MasterController extends Controller
                 }
             }
 
-            // =========================
-            // UPDATE SEQUENCE
-            // =========================
+            // ============ UPDATE SEQUENCE AND REMOVE HIGHLIGHT ============
             $sequence->update($validated);
-            // =========================
-            // DELETE OLD PENDING LOGS
-            // =========================
-            // CampaignLog::where('sequence_id', $sequence->id)
-            //     ->where('status', 'pending')
-            //     ->delete();
+
+            // ============ REMOVE ADMIN UPDATE HIGHLIGHT ============
+            // Jab user edit karega tab highlight remove ho jayega
+            $sequence->admin_updated_at = null;
+            $sequence->save();
 
             CampaignLog::where('sequence_id', $sequence->id)
                 ->where('status', 'pending')
-                ->update([
-                    'status' => 'cancelled'
-                ]);
-            // =========================
-            // GET MATCHING LEADS
-            // =========================
+                ->update(['status' => 'cancelled']);
+
             $leads = Lead::where('user_id', Auth::id())
                 ->whereRaw('UPPER(type) = ?', [$sequence->type])
                 ->get();
 
-
-            // =========================
-            // RECREATE JOBS
-            // =========================
-            // foreach ($leads as $lead) {
-            //     // Prevent duplicate
-            //     $alreadyQueued = CampaignLog::where('lead_id', $lead->id)
-            //         ->where('sequence_id', $sequence->id)
-            //         ->where('status', 'pending')
-            //         ->exists();
-            //     if ($alreadyQueued) {
-            //         continue;
-            //     }
-            //     // Delay
-            //     $delay = now()->addDays((int) $sequence->gap_days);
-            //     // Create fresh log
-            //     CampaignLog::create([
-            //         'user_id' => Auth::id(),
-            //         'lead_id' => $lead->id,
-            //         'sequence_id' => $sequence->id,
-            //         'status' => 'pending',
-            //         'scheduled_at' => $delay,
-            //     ]);
-            //     // Dispatch fresh job
-            //     SendCampaignJob::dispatch(
-            //         $lead->id,
-            //         $sequence->id,
-            //         Auth::id()
-            //     )->delay($delay);
-            // }
-
             foreach ($leads as $lead) {
-                // =========================
-                // ❌ PREVENT DUPLICATE
-                // =========================
                 $alreadyQueued = CampaignLog::where('user_id', $userId)
                     ->where('lead_id', $lead->id)
                     ->where('sequence_id', $sequence->id)
                     ->exists();
 
-                if ($alreadyQueued) {
-                    continue;
-                }
+                if ($alreadyQueued) continue;
 
-                // =========================
-                // ✅ BASE DELAY (DAYS)
-                // =========================
                 $baseDelay = now()->addDays((int) $sequence->gap_days);
-
-                // =========================
-                // ✅ RANDOM STAGGER DELAY
-                // =========================
-                if (!isset($delaySeconds)) {
-                    $delaySeconds = 0;
-                }
-
-                // Add stagger delay
-                $finalDelay = $baseDelay->copy()
-                    ->addSeconds($delaySeconds);
-
-                // Next lead random delay
+                if (!isset($delaySeconds)) $delaySeconds = 0;
+                $finalDelay = $baseDelay->copy()->addSeconds($delaySeconds);
                 $delaySeconds += rand(20, 40);
 
-                // =========================
-                // ✅ CREATE LOG
-                // =========================
                 CampaignLog::create([
                     'user_id' => $userId,
                     'lead_id' => $lead->id,
@@ -726,30 +673,47 @@ class MasterController extends Controller
                     'scheduled_at' => $finalDelay,
                 ]);
 
-                // =========================
-                // ✅ DISPATCH JOB
-                // =========================
-                SendCampaignJob::dispatch(
-                    $lead->id,
-                    $sequence->id,
-                    $userId
-                )->delay($finalDelay);
+                SendCampaignJob::dispatch($lead->id, $sequence->id, $userId)->delay($finalDelay);
             }
+
             DB::commit();
+
             return response()->json([
                 'status' => true,
                 'message' => 'Sequence updated & campaign restarted successfully 🚀'
             ]);
+
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Sequence Update Error', [
-                'message' => $e->getMessage()
-            ]);
+            Log::error('Sequence Update Error', ['message' => $e->getMessage()]);
             return response()->json([
                 'status' => false,
                 'message' => $e->getMessage()
             ], 500);
         }
     }
+
+    public function getUserSequences()
+    {
+        $userId = Auth::id();
+
+        $sequences = Sequence::where('user_id', $userId)
+            ->orderBy('admin_updated_at', 'desc') // Admin updated sequences come first
+            ->orderBy('step', 'asc')
+            ->get();
+
+        // Check if any sequence was admin updated
+        $adminUpdated = $sequences->contains('admin_updated', true);
+
+        return response()->json([
+            'status' => true,
+            'data' => $sequences,
+            'has_admin_update' => $adminUpdated,
+            'admin_updated_sequence_id' => $sequences->where('admin_updated', true)->first()?->id
+        ]);
+    }
+
+
+
 
 }

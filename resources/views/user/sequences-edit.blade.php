@@ -1,5 +1,187 @@
 @extends('user.dashboard')
+<style>
+    body {
+        background: #f3f6fc;
+    }
 
+    .text-gradient {
+        background: linear-gradient(135deg, #2b3b4e, #1a4d8c);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .toolbar button,
+    .toolbar select {
+        cursor: pointer;
+        transition: all 0.1s ease;
+    }
+
+    .toolbar button:hover {
+        background-color: #e9ecef;
+        transform: scale(0.96);
+    }
+
+    /* =======================================
+    EDITOR
+    ======================================= */
+
+    #emailEditor {
+        line-height: 1.4;
+        min-height: 300px;
+    }
+
+    #emailEditor p,
+    #emailEditor div {
+        margin: 0;
+        padding: 0;
+    }
+
+    #emailEditor img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* =======================================
+    MOBILE PREVIEW
+    ======================================= */
+
+    #mobilePreviewContent {
+        line-height: 1.4;
+        word-break: break-word;
+    }
+
+    #mobilePreviewContent p,
+    #mobilePreviewContent div {
+        margin: 0;
+        padding: 0;
+    }
+
+    #mobilePreviewContent img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* =======================================
+    DESKTOP PREVIEW
+    ======================================= */
+
+    #desktopPreviewContent {
+        line-height: 1.4;
+        word-break: break-word;
+    }
+
+    #desktopPreviewContent p,
+    #desktopPreviewContent div {
+        margin: 0;
+        padding: 0;
+    }
+
+    #desktopPreviewContent img {
+        max-width: 100%;
+        height: auto;
+    }
+
+
+
+    /* =======================================
+    EMAIL PREVIEW
+    ======================================= */
+
+    .email-preview img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+    }
+
+    .email-preview .company-logo {
+        max-width: 140px;
+        max-height: 70px;
+        object-fit: contain;
+    }
+
+    .logo-left {
+        text-align: left;
+    }
+
+    .logo-center {
+        text-align: center;
+    }
+
+    .logo-right {
+        text-align: right;
+    }
+
+    /* =======================================
+    BUTTONS
+    ======================================= */
+
+    .mobile-preview .btn,
+    .desktop-preview .btn {
+        /* display: inline-block;
+        padding: 8px 18px;
+        margin: 4px;
+        border-radius: 40px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500; */
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-width: 130px;
+        height: 42px;
+
+        padding: 0 18px;
+
+        border-radius: 50px;
+        text-decoration: none;
+
+        font-size: 14px;
+        font-weight: 600;
+
+        color: #fff;
+
+        transition: all .25s ease;
+    }
+
+    .active-preview {
+        background-color: #0d6efd !important;
+        color: #fff !important;
+    }
+
+    /* =======================================
+    FOCUS
+    ======================================= */
+
+    #emailEditor:focus {
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+        outline: none;
+    }
+
+    /* =======================================
+    DESKTOP CONTAINER
+    ======================================= */
+
+    .desktop-preview {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        overflow-wrap: break-word;
+    }
+
+    /* =======================================
+    MOBILE CONTAINER
+    ======================================= */
+
+    .mobile-preview {
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto;
+        overflow-wrap: break-word;
+    }
+</style>
 @section('content')
     <div class="container-fluid mt-4 px-4">
         <div class="row g-4">
@@ -207,29 +389,15 @@
                                 </div>
                             </div>
 
-                            <!-- Social & Business Links -->
                             <div class="card bg-white border rounded-4 mb-4">
                                 <div class="card-body p-3">
-                                    <label class="form-label fw-semibold small mb-2">🔗 Action Links (CTA Buttons)</label>
+                                    <label class="form-label fw-semibold small mb-2">whatsapp</label>
                                     <div class="row g-2">
                                         <div class="col-md-4">
                                             <input type="text" name="whatsapp_link" class="form-control"
-                                                id="whatsappLink"
-                                                value="{{ old('whatsapp_link', $sequence->whatsapp_link) }}"
-                                                placeholder="WhatsApp URL">
+                                                id="whatsappLink" placeholder="WhatsApp URL">
                                         </div>
-                                        <div class="col-md-4">
-                                            <input type="text" name="telegram_link" class="form-control"
-                                                id="telegramLink"
-                                                value="{{ old('telegram_link', $sequence->telegram_link) }}"
-                                                placeholder="Telegram URL">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <input type="text" name="business_link" class="form-control"
-                                                id="businessLink"
-                                                value="{{ old('business_link', $sequence->business_link) }}"
-                                                placeholder="Business Website">
-                                        </div>
+                                        <div class="row g-2 mt-2" id="dynamicActionLinks"></div>
                                     </div>
                                 </div>
                             </div>
@@ -302,168 +470,7 @@
 
     <!-- Styles and Scripts (copy exactly from your create blade) -->
     <script src="{{ asset('js/jquery.min.js') }}"></script>
-    <style>
-        body {
-            background: #f3f6fc;
-        }
 
-        .text-gradient {
-            background: linear-gradient(135deg, #2b3b4e, #1a4d8c);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .toolbar button,
-        .toolbar select {
-            cursor: pointer;
-            transition: all 0.1s ease;
-        }
-
-        .toolbar button:hover {
-            background-color: #e9ecef;
-            transform: scale(0.96);
-        }
-
-        /* =======================================
-        EDITOR
-        ======================================= */
-
-        #emailEditor {
-            line-height: 1.4;
-            min-height: 300px;
-        }
-
-        #emailEditor p,
-        #emailEditor div {
-            margin: 0;
-            padding: 0;
-        }
-
-        #emailEditor img {
-            max-width: 100%;
-            height: auto;
-        }
-
-        /* =======================================
-        MOBILE PREVIEW
-        ======================================= */
-
-        #mobilePreviewContent {
-            line-height: 1.4;
-            word-break: break-word;
-        }
-
-        #mobilePreviewContent p,
-        #mobilePreviewContent div {
-            margin: 0;
-            padding: 0;
-        }
-
-        #mobilePreviewContent img {
-            max-width: 100%;
-            height: auto;
-        }
-
-        /* =======================================
-        DESKTOP PREVIEW
-        ======================================= */
-
-        #desktopPreviewContent {
-            line-height: 1.4;
-            word-break: break-word;
-        }
-
-        #desktopPreviewContent p,
-        #desktopPreviewContent div {
-            margin: 0;
-            padding: 0;
-        }
-
-        #desktopPreviewContent img {
-            max-width: 100%;
-            height: auto;
-        }
-
-        /* =======================================
-        EMAIL PREVIEW
-        ======================================= */
-
-        .email-preview img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 12px;
-        }
-
-        .email-preview .company-logo {
-            max-width: 140px;
-            max-height: 70px;
-            object-fit: contain;
-        }
-
-        .logo-left {
-            text-align: left;
-        }
-
-        .logo-center {
-            text-align: center;
-        }
-
-        .logo-right {
-            text-align: right;
-        }
-
-        /* =======================================
-        BUTTONS
-        ======================================= */
-
-        .mobile-preview .btn,
-        .desktop-preview .btn {
-            display: inline-block;
-            padding: 8px 18px;
-            margin: 4px;
-            border-radius: 40px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .active-preview {
-            background-color: #0d6efd !important;
-            color: #fff !important;
-        }
-
-        /* =======================================
-        FOCUS
-        ======================================= */
-
-        #emailEditor:focus {
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
-            outline: none;
-        }
-
-        /* =======================================
-        DESKTOP CONTAINER
-        ======================================= */
-
-        .desktop-preview {
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            overflow-wrap: break-word;
-        }
-
-        /* =======================================
-        MOBILE CONTAINER
-        ======================================= */
-
-        .mobile-preview {
-            width: 100%;
-            max-width: 420px;
-            margin: 0 auto;
-            overflow-wrap: break-word;
-        }
-    </style>
 
     <script>
         let currentEditor = document.getElementById('emailEditor');
@@ -507,9 +514,8 @@
             }
             // Set existing links and logo position
             document.getElementById('whatsappLink').value = '{{ $sequence->whatsapp_link }}';
-            document.getElementById('telegramLink').value = '{{ $sequence->telegram_link }}';
-            document.getElementById('businessLink').value = '{{ $sequence->business_link }}';
             document.getElementById('logoPosition').value = '{{ $sequence->logo_position ?? 'center' }}';
+            initializeActionLinks();
             updatePreview();
         });
 
@@ -519,6 +525,120 @@
             updatePreview();
             currentEditor.focus();
         }
+
+        let selectedActionLinks = [];
+
+        // Initialize action links from sequence data
+        function initializeActionLinks() {
+            @php
+                $actionLinks = is_array($sequence->action_links) ? $sequence->action_links : [];
+            @endphp
+
+            selectedActionLinks = @json($actionLinks);
+
+            let html = '';
+            if (selectedActionLinks && selectedActionLinks.length > 0) {
+                selectedActionLinks.forEach(function(link, index) {
+                    html += `
+                <div class="col-md-4 action-link-item mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light small" style="min-width: 80px; justify-content: center;">
+                            <i class="fas fa-link me-1"></i> ${link.platform_name || 'Link'}
+                        </span>
+                        <input type="text"
+                            class="form-control form-control-sm"
+                            name="action_links[${index}][platform_url]"
+                            value="${link.platform_url || ''}"
+                            placeholder="Enter URL">
+                        <button type="button"
+                            class="btn btn-danger btn-sm remove-action-link"
+                            data-id="${link.id || index}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <input type="hidden"
+                        name="action_links[${index}][platform_name]"
+                        value="${link.platform_name || ''}">
+                    <input type="hidden"
+                        name="action_links[${index}][id]"
+                        value="${link.id || ''}">
+                </div>
+            `;
+                });
+            } else {
+                html =
+                    `<div class="text-muted small text-center py-2">No action links added. Click "Add Link" to add one.</div>`;
+            }
+            $('#dynamicActionLinks').html(html);
+            updatePreview();
+        }
+
+        // Add new action link
+        function addActionLink() {
+            const platformName = prompt('Enter platform name (e.g., Facebook, Instagram, LinkedIn):');
+            if (!platformName) return;
+
+            const platformUrl = prompt('Enter URL (e.g., https://facebook.com/yourpage):');
+            if (!platformUrl) return;
+
+            const newLink = {
+                id: Date.now(),
+                platform_name: platformName,
+                platform_url: platformUrl
+            };
+
+            selectedActionLinks.push(newLink);
+
+            if ($('#dynamicActionLinks').find('.text-muted').length) {
+                $('#dynamicActionLinks').html('');
+            }
+
+            const index = selectedActionLinks.length - 1;
+            const html = `
+        <div class="col-md-12 action-link-item mb-2">
+            <div class="input-group">
+                <span class="input-group-text bg-light small" style="min-width: 80px; justify-content: center;">
+                    <i class="fas fa-link me-1"></i> ${newLink.platform_name}
+                </span>
+                <input type="text"
+                    class="form-control form-control-sm"
+                    name="action_links[${index}][platform_url]"
+                    value="${newLink.platform_url}"
+                    placeholder="Enter URL">
+                <button type="button"
+                    class="btn btn-danger btn-sm remove-action-link"
+                    data-id="${newLink.id}">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <input type="hidden"
+                name="action_links[${index}][platform_name]"
+                value="${newLink.platform_name}">
+            <input type="hidden"
+                name="action_links[${index}][id]"
+                value="${newLink.id}">
+        </div>
+    `;
+            $('#dynamicActionLinks').append(html);
+            updatePreview();
+        }
+
+        // Remove action link
+        $(document).on('click', '.remove-action-link', function() {
+            const linkId = $(this).data('id');
+            $(this).closest('.action-link-item').remove();
+            selectedActionLinks = selectedActionLinks.filter(function(link) {
+                return link.id != linkId;
+            });
+
+            if (selectedActionLinks.length === 0) {
+                $('#dynamicActionLinks').html(
+                    `<div class="text-muted small text-center py-2">No action links added. Click "Add Link" to add one.</div>`
+                    );
+            }
+
+            updatePreview();
+        });
 
         function changeFontSize(size) {
             document.execCommand('fontSize', false, '7');
@@ -626,20 +746,25 @@
                 attachmentHtml =
                     `<div class="alert alert-secondary mt-3 p-2 rounded-3"><i class="bi bi-paperclip"></i> <strong>Attachment:</strong> ${currentAttachment.name} (${currentAttachment.size})<br><a href="#" class="small">Download file →</a></div>`;
             }
-            let linksHtml = '';
+            let linksHtml = `<div class="d-flex flex-wrap gap-2 justify-content-center mt-4 pt-2">`;
             const whatsapp = document.getElementById('whatsappLink').value;
-            const telegram = document.getElementById('telegramLink').value;
-            const business = document.getElementById('businessLink').value;
-            if (whatsapp || telegram || business) {
-                linksHtml = '<div class="d-flex flex-wrap gap-2 justify-content-center mt-4 pt-2">';
-                if (whatsapp) linksHtml +=
-                    `<a href="${whatsapp}" class="btn btn-success rounded-pill" target="_blank" style="background:#25D366;">📱 WhatsApp</a>`;
-                if (telegram) linksHtml +=
-                    `<a href="${telegram}" class="btn btn-info rounded-pill text-white" target="_blank" style="background:#0088cc;">📨 Telegram</a>`;
-                if (business) linksHtml +=
-                    `<a href="${business}" class="btn btn-primary rounded-pill" target="_blank">💼 Website</a>`;
-                linksHtml += '</div>';
+            if (whatsapp) {
+                linksHtml +=
+                    `<a href="${whatsapp}" class="btn btn-success rounded-pill btn-sm" target="_blank" style="background:#007bff;">WhatsApp</a>`;
             }
+
+            if (selectedActionLinks && selectedActionLinks.length > 0) {
+                selectedActionLinks.forEach(function(link) {
+                    let url = link.platform_url || '';
+                    if (!url) return;
+                    linksHtml += `
+                <a href="${url}" class="btn btn-primary rounded-pill btn-sm" target="_blank" style="background: #007bff;">
+                    ${link.platform_name}
+                </a>
+            `;
+                });
+            }
+            linksHtml += `</div>`;
             return logoHtml + heroHtml + content + attachmentHtml + linksHtml;
         }
 
@@ -655,8 +780,6 @@
         // Event listeners
         document.getElementById('subject').addEventListener('input', updatePreview);
         document.getElementById('whatsappLink').addEventListener('input', updatePreview);
-        document.getElementById('telegramLink').addEventListener('input', updatePreview);
-        document.getElementById('businessLink').addEventListener('input', updatePreview);
         document.getElementById('logoPosition').addEventListener('change', updatePreview);
         currentEditor.addEventListener('input', updatePreview);
         currentEditor.addEventListener('keyup', updatePreview);
@@ -719,8 +842,22 @@
                 }
 
                 const formData = new FormData(this);
+
                 if ($('#removeLogoCheck').length && $('#removeLogoCheck').is(':checked')) {
                     formData.append('remove_logo', '1');
+                }
+
+                // Append action links to form data
+                if (selectedActionLinks && selectedActionLinks.length > 0) {
+                    selectedActionLinks.forEach((link, index) => {
+                        const urlInput = $(`input[name="action_links[${index}][platform_url]"]`);
+                        const currentUrl = urlInput.length ? urlInput.val() : link.platform_url;
+
+                        formData.append(`action_links[${index}][id]`, link.id || '');
+                        formData.append(`action_links[${index}][platform_name]`, link
+                            .platform_name || '');
+                        formData.append(`action_links[${index}][platform_url]`, currentUrl || '');
+                    });
                 }
 
                 $.ajax({

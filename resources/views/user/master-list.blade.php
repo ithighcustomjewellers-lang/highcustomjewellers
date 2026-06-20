@@ -1,3 +1,5 @@
+{{-- resources/views/user/sequences/index.blade.php --}}
+
 @extends('user.dashboard')
 @section('content')
 <div class="container-fluid py-4">
@@ -14,11 +16,13 @@
                 Manage your automated email campaign sequences
             </p>
         </div>
+
         <a href="{{ route('master-view-page') }}" class="btn add-sequence-btn">
             <i class="fa fa-plus-circle me-2"></i>
             Add New Sequence
         </a>
     </div>
+
     <!-- ======================= -->
     <!-- MAIN CARD -->
     <!-- ======================= -->
@@ -28,7 +32,6 @@
         <!-- ======================= -->
         <div class="table-responsive">
             <table id="sequencesTable" class="table align-middle sequence-table">
-
                 <thead>
                     <tr>
                         <th>Edit</th>
@@ -49,6 +52,7 @@
     </div>
 </div>
 @endsection
+
 <style>
 body{
     background:#f4f7fb;
@@ -225,6 +229,7 @@ body{
     font-size:13px;
     font-weight:700;
 }
+
 /* ======================= */
 /* EDIT BUTTON */
 /* ======================= */
@@ -362,93 +367,221 @@ body{
     }
 }
 
+
+.first-updated-row td {
+    background-color: #A6A6A6 !important;
+    color: #000 !important;
+}
+
+/* =======================
+/* ADMIN UPDATE HIGHLIGHTING */
+/* ======================= */
+
+/* .admin-updated-row {
+    background-color: #fff3cd !important;
+    border-left: 4px solid #ffc107 !important;
+    animation: highlightPulse 2s ease-in-out;
+    transition: all 0.3s ease;
+}
+
+.admin-updated-row:hover {
+    background-color: #ffe69c !important;
+}
+
+.first-updated-row {
+    background-color: #f8d7da !important;
+    border-left: 4px solid #dc3545 !important;
+    font-weight: 600;
+    animation: highlightPulse 1.5s ease-in-out 3;
+}
+
+.first-updated-row:hover {
+    background-color: #f5c6cb !important;
+} */
+
+/* @keyframes highlightPulse {
+    0% {
+        background-color: #ffeeba;
+        transform: scale(1);
+    }
+    50% {
+        background-color: #ffc107;
+        transform: scale(1.01);
+    }
+    100% {
+        background-color: #fff3cd;
+        transform: scale(1);
+    }
+}
+
+.new-badge {
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    animation: pulseBadge 0.8s ease-in-out infinite;
+}
+
+@keyframes pulseBadge {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.editable-input {
+    width: 100% !important;
+    border: 1px solid #ffc107 !important;
+    background-color: #fff !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    box-shadow: 0 0 5px rgba(255, 193, 7, 0.3) !important;
+}
+
+.editable-cell {
+    cursor: pointer;
+    position: relative;
+}
+
+.editable-cell:hover {
+    background-color: #f8f9fa !important;
+}
+
+.editable-cell:hover::after {
+    content: '✏️';
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    opacity: 0.5; */
+/* }  */
 </style>
+
 <script src="{{ asset('js/jquery.min.js') }}"></script>
 <script>
 $(document).ready(function() {
 
     var table = $('#sequencesTable').DataTable({
-        processing:true,
-        serverSide:true,
-        responsive:true,
-        ajax:{
-            url:"{{ route('getSequences-data') }}",
-            type:'POST',
-            headers:{
-                'X-CSRF-TOKEN':'{{ csrf_token() }}'
+        processing: true,
+        serverSide: true,
+        responsive: true,
+        ajax: {
+            url: "{{ route('getSequences-data') }}",
+            type: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            dataSrc: function(json) {
+                // Store admin updated IDs for highlighting
+                if (json.data && json.data.length > 0) {
+                    window.adminUpdatedIds = [];
+                    json.data.forEach(function(row) {
+                        if (row.is_admin_updated == 1) {
+                            window.adminUpdatedIds.push(row.id);
+                        }
+                    });
+                }
+                return json.data;
             }
         },
-        columns:[
+        columns: [
             {
-                data:'edit',
-                name:'edit',
-                orderable:false,
-                searchable:false
+                data: 'edit',
+                name: 'edit',
+                orderable: false,
+                searchable: false
             },
-
             {
-                data:'step',
-                name:'step'
+                data: 'step',
+                name: 'step'
             },
-
             {
-                data:'gap_days',
-                name:'gap_days'
+                data: 'gap_days',
+                name: 'gap_days'
             },
-
             {
-                data:'variant',
-                name:'variant'
+                data: 'variant',
+                name: 'variant'
             },
-
             {
-                data:'message',
-                name:'message'
+                data: 'message',
+                name: 'message'
             },
-
             {
-                data:'subject',
-                name:'subject'
+                data: 'subject',
+                name: 'subject'
             },
-
             {
-                data:'type',
-                name:'type'
+                data: 'type',
+                name: 'type'
             },
-
             {
-                data:'whatsapp_link',
-                name:'whatsapp_link'
+                data: 'whatsapp_link',
+                name: 'whatsapp_link',
+                orderable: false,
+                searchable: false
             },
-
             {
-                data:'created_at',
-                name:'created_at'
+                data: 'created_at',
+                name: 'created_at'
             },
-
             {
-                data:'updated_at',
-                name:'updated_at'
+                data: 'updated_at',
+                name: 'updated_at'
             },
-
             {
-                data:'delete',
-                orderable:false,
-                searchable:false
+                data: 'delete',
+                orderable: false,
+                searchable: false
             }
-
         ],
-        order:[[1,'asc']],
-        pageLength:10,
-        language:{
-            paginate:{
-                previous:'← Previous',
-                next:'Next →'
+        order: [
+            [9, 'desc']
+        ],
+        pageLength: 10,
+        language: {
+            paginate: {
+                previous: '← Previous',
+                next: 'Next →'
             },
-            searchPlaceholder:"Search sequence..."
+            searchPlaceholder: "Search sequence..."
+        },
+        drawCallback: function(settings) {
+            applyAdminUpdateHighlighting();
         }
     });
 
+    // =======================
+    // ADMIN UPDATE HIGHLIGHTING
+    // =======================
+
+    function applyAdminUpdateHighlighting() {
+        var rows = $('#sequencesTable tbody tr');
+        var firstUpdatedRow = null;
+
+        rows.each(function(index) {
+            var row = $(this);
+            var rowData = table.row(row).data();
+
+            row.removeClass('admin-updated-row first-updated-row');
+
+            if (rowData && rowData.is_admin_updated == 1) {
+                row.addClass('admin-updated-row');
+
+                if (!firstUpdatedRow) {
+                    firstUpdatedRow = row;
+                }
+            }
+        });
+
+        if (firstUpdatedRow) {
+            firstUpdatedRow.addClass('first-updated-row');
+
+            var stepCell = firstUpdatedRow.find('td:eq(4)');
+            if (stepCell.length && !stepCell.find('.new-badge').length) {
+                stepCell.prepend('<span class="badge bg-danger new-badge me-1">🔥 NEW</span>');
+            }
+        }
+    }
 
     // =======================
     // INLINE EDIT
@@ -459,19 +592,19 @@ $(document).ready(function() {
 
         let td = $(this);
         let currentValue = td.text().trim();
+        currentValue = currentValue.replace(/🔥/g, '').trim();
         let field = td.data('field');
         let id = td.data('id');
 
         let input = $('<input>', {
             type: 'text',
             value: currentValue,
-            class: 'editable-input'
+            class: 'editable-input form-control form-control-sm'
         });
 
         td.html(input);
         input.focus();
 
-        // Optional: force uppercase while typing
         input.on('input', function() {
             if (field === 'variant') {
                 let start = this.selectionStart;
@@ -498,58 +631,50 @@ $(document).ready(function() {
         });
     });
 
-
-    function saveInlineEdit(td,id,field,newValue){
+    function saveInlineEdit(td, id, field, newValue) {
         $.ajax({
-            url:"{{ route('master-list-sequences-inlineUpdate') }}",
-            type:"POST",
-            data:{
-                _token:'{{ csrf_token() }}',
-                id:id,
-                field:field,
-                value:newValue
+            url: "{{ route('master-list-sequences-inlineUpdate') }}",
+            type: "POST",
+            data: {
+                _token: '{{ csrf_token() }}',
+                id: id,
+                field: field,
+                value: newValue
             },
-            success:function(response){
+            success: function(response) {
                 td.text(newValue);
+                table.ajax.reload(null, false);
             },
-            error:function(xhr){
+            error: function(xhr) {
                 alert(xhr.responseJSON?.message || 'Validation error');
-                table.ajax.reload(null,false);
+                table.ajax.reload(null, false);
             }
         });
     }
 
-
     // =======================
-    // EDITABLE CELLS
+    // POLLING FOR ADMIN UPDATES (Every 30 seconds)
     // =======================
 
-    table.on('draw',function(){
-        $('#sequencesTable tbody tr').each(function(){
-            let rowData = table.row(this).data();
-            if(rowData && rowData.id){
-                $(this).find('td:eq(1)')
-                    .addClass('editable-cell')
-                    .attr('data-field','step')
-                    .attr('data-id',rowData.id);
-                $(this).find('td:eq(2)')
-                    .addClass('editable-cell')
-                    .attr('data-field','gap_days')
-                    .attr('data-id',rowData.id);
-                $(this).find('td:eq(3)')
-                    .addClass('editable-cell')
-                    .attr('data-field','variant')
-                    .attr('data-id',rowData.id);
+    setInterval(function() {
+        $.ajax({
+            url: "{{ route('check-admin-sequences-updates') }}",
+            type: "GET",
+            success: function(response) {
+                if (response.has_updates) {
+                    table.ajax.reload(null, false);
+                }
             }
-
         });
-
-    });
+    }, 30000);
 
 });
 
-function deleteList(id)
-{
+// =======================
+// DELETE FUNCTION
+// =======================
+
+function deleteList(id) {
     Swal.fire({
         title: 'Delete Sequence?',
         text: "You won't be able to revert this!",
@@ -559,9 +684,7 @@ function deleteList(id)
         cancelButtonColor: '#6c757d',
         confirmButtonText: 'Yes Delete'
     }).then((result) => {
-
-        if(result.isConfirmed)
-        {
+        if (result.isConfirmed) {
             $.ajax({
                 url: "{{ route('sequence-delete') }}",
                 type: "POST",
@@ -569,23 +692,18 @@ function deleteList(id)
                     id: id,
                     _token: "{{ csrf_token() }}"
                 },
-                success: function(response)
-                {
-                    if(response.success)
-                    {
+                success: function(response) {
+                    if (response.success) {
                         Swal.fire(
                             'Deleted!',
                             response.message,
                             'success'
                         );
-
                         $('#sequencesTable')
                             .DataTable()
                             .ajax
-                            .reload(null,false);
-                    }
-                    else
-                    {
+                            .reload(null, false);
+                    } else {
                         Swal.fire(
                             'Error',
                             response.message,
@@ -593,8 +711,7 @@ function deleteList(id)
                         );
                     }
                 },
-                error: function()
-                {
+                error: function() {
                     Swal.fire(
                         'Error',
                         'Something went wrong',
@@ -603,8 +720,6 @@ function deleteList(id)
                 }
             });
         }
-
     });
 }
-
 </script>

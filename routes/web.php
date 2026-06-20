@@ -59,8 +59,9 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::post('BusinessLinks', [MasterController::class, 'submitBusinessLinks'])->name('submit-business-links');
     Route::get('admin/business-links', [MasterController::class, 'getBusinessLinks'])->name('user-business-links');
     Route::post('sequences/store', [MasterController::class, 'sequencesStore'])->name('user-sequences-store');
-        Route::post('/sequence/delete', [MasterController::class, 'deleteSequence'])
-    ->name('sequence-delete');
+    // Route::post('/sequence/delete', [MasterController::class, 'deleteSequence'])->name('sequence-delete');
+
+    Route::post('/sequence/delete', [SocialLinksController::class, 'deleteSequence'])->name('sequence-delete');
 
 
     Route::get('Leads', [LeadsController::class, 'index'])->name('leads-index');
@@ -91,28 +92,7 @@ Route::middleware(['auth', 'user'])->group(function () {
 
     Route::delete('user-social-links-destroy/{id}', [SocialLinksController::class, 'userSocialLinksDestroy'])->name('user-social-links-destroy');
 
-
-
-
-
-
-
-
-//     Route::get('/track/open/{token}', [TrackingController::class, 'trackOpen'])->name('track.open');
-// Route::get('/track/click/{token}', [TrackingController::class, 'trackClick'])->name('track.click');
-// Route::get('/response/{campaignLog}/interested', [TrackingController::class, 'interested'])->name('response.interested');
-// Route::get('/response/{campaignLog}/not-interested', [TrackingController::class, 'notInterested'])->name('response.not_interested');
-
-
-//     Route::get('/reports/campaign', [ReportController::class, 'index'])->name('report.index');
-//     Route::get('/reports/data', [ReportController::class, 'getData'])->name('report.data');
-//     Route::get('/reports/analytics', [ReportController::class, 'analytics'])->name('report.analytics');
-
-//     Route::post('/campaigns/schedule', [CampaignController::class, 'schedule'])->name('campaigns.schedule');
-
-
-
-
+    Route::get('/user/sequences', [MasterController::class, 'getUserSequences']);
 
     Route::get('/reports/campaign', [ReportController::class, 'index'])->name('report.campaign');
     Route::post('/reports/campaign-data', [ReportController::class, 'getCampaignLogsData'])->name('report.campaign.data');
@@ -120,19 +100,15 @@ Route::middleware(['auth', 'user'])->group(function () {
     // Route::get('/reports/campaign-details/{id}', [ReportController::class, 'getDetails'])->name('report.campaign.details');
 
 
-
-
-
-
-
-
+    // Check admin updates (polling)
+    Route::get('check-admin-updates', [MasterController::class, 'checkAdminUpdates'])
+        ->name('check-admin-sequences-updates');
 
 
 });
 
 Route::get('multi-qr/{user}/{qrId}', [SocialLinksController::class, 'showMultiQR'])->name('show-multi-qr');
 Route::get('track-multi-qr-click', [SocialLinksController::class, 'trackMultiQRClick'])->name('track-multi-qr-click');
-
 Route::get('/track/click/{token}', [ReportController::class, 'trackClick'])->name('track.click');
 
 // admin info
@@ -153,8 +129,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('users', [UserController::class, 'index'])->name('admin-users-index');
 
     // Route::post('/social/update/{id}', [SocialLinksController::class, 'update'])->name('social-links-update');
-
-
     Route::get('/social-links', [SocialLinksController::class, 'index'])->name('social.links');
     Route::post('social/links', [SocialLinksController::class, 'store'])->name('admin.social.links.store');
     Route::post('/social/quick/update', [SocialLinksController::class, 'updateQuickLink'])->name('admin.social.quick.update');
@@ -171,6 +145,16 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
     Route::get('userSequenceList', [AdminMasterController::class, 'userSequenceList'])->name('user-sequence-list');
     Route::post('userSequenceData', [AdminMasterController::class, 'userSequenceData'])->name('user-sequence-data-list');
+
+    // user master
+    Route::get('master-List', [AdminMasterController::class, 'userMasterList'])->name('admin-usersMaster-index');
+    Route::post('masterDataList', [AdminMasterController::class, 'userMasterDataList'])->name('admin-master-data-list');
+    Route::post('sequences/inline-update', [AdminMasterController::class, 'userMasterinlineUpdate'])->name('user-master-list-sequences-inlineUpdate');
+    Route::get('userMastersequencesListEdit/edit/{id}', [AdminMasterController::class, 'userMastersequencesListEdit'])->name('user-master-sequences-list-edit');
+    Route::post('sequences/{id}/update', [AdminMasterController::class, 'userMasterSequencesListUpdate'])->name('user-master-sequences-list-update');
+    Route::post('userMasterSequence/delete', [AdminMasterController::class, 'userMasterSequenceDelete'])->name('user-master-sequence-delete');
+
+
 });
 
 Route::get('lead-response/{log}/{status}',[CampaignController::class, 'leadResponse'])->name('lead-response');

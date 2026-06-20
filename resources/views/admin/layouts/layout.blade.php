@@ -69,6 +69,7 @@
             <h4>Admin Panel</h4>
             <a href="{{ route('admin-dashboard') }}">Dashboard</a>
             <a href="{{ route('admin-users-index') }}">Users</a>
+            <a href="{{ route('admin-usersMaster-index') }}">Users Master</a>
             <a href="{{ route('social.links') }}">Social Links</a>
             <a href="{{ route('user-sequence-list') }}">All tracking</a>
         </div>

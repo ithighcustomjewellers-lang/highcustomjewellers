@@ -229,7 +229,7 @@
                             <div class="d-flex gap-3 mt-4">
                                 <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">💾 Save
                                     Sequence</button>
-                                <a href="{{ route('master-view-page') }}"
+                                <a href="{{ route('master-data-list') }}"
                                     class="btn btn-outline-secondary btn-lg px-4 rounded-pill">← Back</a>
                             </div>
                         </form>
