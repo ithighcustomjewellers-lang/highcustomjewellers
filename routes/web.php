@@ -59,8 +59,6 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::post('BusinessLinks', [MasterController::class, 'submitBusinessLinks'])->name('submit-business-links');
     Route::get('admin/business-links', [MasterController::class, 'getBusinessLinks'])->name('user-business-links');
     Route::post('sequences/store', [MasterController::class, 'sequencesStore'])->name('user-sequences-store');
-    // Route::post('/sequence/delete', [MasterController::class, 'deleteSequence'])->name('sequence-delete');
-
     Route::post('/sequence/delete', [SocialLinksController::class, 'deleteSequence'])->name('sequence-delete');
 
 
@@ -80,30 +78,19 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::post('social/update-secondary', [SocialLinksController::class, 'updateSecondary'])->name('user-social-links-update-secondary');
     Route::get('social/print', [SocialLinksController::class, 'printBusinessCard'])->name('user.social.print');
 
-    // Route::delete('social/delete/{id}', [SocialLinksController::class, 'destroy'])->name('user.social.delete');
-
     //tracking QR generation
     Route::post('save-multiple-qr', [SocialLinksController::class, 'saveMultipleQR'])->name('save.multiple.qr');
     Route::post('update-multi-qr', [SocialLinksController::class, 'updateMultiQR'])->name('update-multi-qr');
     Route::post('multi-qr/update-title', [SocialLinksController::class, 'updateMultiQRTitle'])->name('update-multi-qr-title');
-
     Route::delete('multi-qr/{id}', [SocialLinksController::class, 'multiQrDestroy'])->name('multi-qr-destroy');
     Route::get('/multi-qr/list', [SocialLinksController::class, 'getMultiQrCodes'])->name('get-multi-qr-codes');
-
     Route::delete('user-social-links-destroy/{id}', [SocialLinksController::class, 'userSocialLinksDestroy'])->name('user-social-links-destroy');
-
-    Route::get('/user/sequences', [MasterController::class, 'getUserSequences']);
-
     Route::get('/reports/campaign', [ReportController::class, 'index'])->name('report.campaign');
     Route::post('/reports/campaign-data', [ReportController::class, 'getCampaignLogsData'])->name('report.campaign.data');
-    // Route::get('/reports/analytics', [ReportController::class, 'getAnalytics'])->name('report.analytics');
-    // Route::get('/reports/campaign-details/{id}', [ReportController::class, 'getDetails'])->name('report.campaign.details');
-
 
     // Check admin updates (polling)
-    Route::get('check-admin-updates', [MasterController::class, 'checkAdminUpdates'])
-        ->name('check-admin-sequences-updates');
-
+    Route::get('check-admin-updates', [MasterController::class, 'checkAdminUpdates'])->name('check-admin-sequences-updates');
+    Route::get('/user/sequences', [MasterController::class, 'getUserSequences']);
 
 });
 
@@ -154,6 +141,33 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::post('sequences/{id}/update', [AdminMasterController::class, 'userMasterSequencesListUpdate'])->name('user-master-sequences-list-update');
     Route::post('userMasterSequence/delete', [AdminMasterController::class, 'userMasterSequenceDelete'])->name('user-master-sequence-delete');
 
+    // admin BusinessLinks page
+    Route::get('Link', [MasterController::class, 'masterLinkDocument'])->name('admin-master-link-document');
+    Route::post('BusinessLinks', [MasterController::class, 'submitBusinessLinks'])->name('admin-submit-business-links');
+
+    // master
+    Route::get('MasterSequence', [AdminMasterController::class, 'MasterSequence'])->name('admin-Master-index');
+    Route::get('admin/business-links', [AdminMasterController::class, 'getAdminBusinessLinks'])->name('admin-user-business-links');
+    Route::post('sequences/store', [AdminMasterController::class, 'adminSequencesStore'])->name('admin-user-sequences-store');
+
+    // master list
+    Route::get('masterList', [MasterController::class, 'masterDataList'])->name('admin-sequenceTable-index');
+    Route::post('sequences/data', [AdminMasterController::class, 'adminaGetSequencesList'])->name('admin-getSequences-data');
+    Route::post('master-sequences/inline-update', [MasterController::class, 'inlineUpdate'])->name('admin-master-list-sequences-inlineUpdate');
+    Route::post('/sequence/delete', [SocialLinksController::class, 'deleteSequence'])->name('admin-sequence-delete');
+    Route::get('sequenceslist/edit/{id}', [MasterController::class, 'sequencesListEdit'])->name('admin-sequences-list-edit');
+    Route::post('master-sequences/{id}/update', [MasterController::class, 'sequencesListUpdate'])->name('admin-sequences-list-update');
+
+    // admin leads
+    Route::get('Leads', [LeadsController::class, 'index'])->name('admin-leads-index');
+    Route::post('leads/store', [LeadsController::class, 'leadStore'])->name('admin-lead-store');
+    Route::PUT('leads/{id}', [LeadsController::class, 'leadsUpdate'])->name('admin-leads-update');
+    Route::get('leads/list', [LeadsController::class, 'leadList'])->name('admin-lead-list');
+    Route::delete('leads/{id}', [LeadsController::class, 'destroy'])->name('admin-leads-destroy');
+
+    // admin tracking
+    Route::get('/reports/campaign', [ReportController::class, 'index'])->name('admin-report.campaign');
+    Route::post('/reports/campaign-data', [ReportController::class, 'getCampaignLogsData'])->name('admin-report.campaign.data');
 
 });
 

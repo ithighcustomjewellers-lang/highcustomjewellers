@@ -33,6 +33,9 @@ class MasterController extends Controller
             ->get();
 
         $business = BusinessLink::where('user_id', $userId)->first();
+        if (Auth::user()->is_admin == 1) {
+            return view('admin.social.link-document', compact('business', 'sociallinks'));
+        }
         return view('user.link-document', compact('business', 'sociallinks'));
     }
 
@@ -69,7 +72,6 @@ class MasterController extends Controller
 
         // UPDATE DATA
         $business->whatsapp_link = $request->whatsapp_link;
-
         $selectedLinks = [];
 
         // Check if social_link_ids exists and is not null/empty
@@ -111,6 +113,7 @@ class MasterController extends Controller
     public function getBusinessLinks()
     {
         $userId = Auth::id();
+
         $businessLinks = DB::table('business_links')
             ->where('user_id', $userId)
             ->first();
@@ -142,6 +145,7 @@ class MasterController extends Controller
 
     public function sequencesStore(Request $request)
     {
+
         Log::info('Store sequence request received', [
             'data' => $request->all()
         ]);
@@ -351,13 +355,13 @@ class MasterController extends Controller
 
     public function masterDataList()
     {
+        if (Auth::user()->is_admin == 1) {
+            return view('admin.master.master-list');
+        }
         return view('user.master-list');
     }
 
-
-
-
-     public function inlineUpdate(Request $request)
+    public function inlineUpdate(Request $request)
     {
         try {
             $id = $request->id;
@@ -515,6 +519,10 @@ class MasterController extends Controller
         if (!is_null($sequence->admin_updated_at)) {
             $sequence->admin_updated_at = null;
             $sequence->save();
+        }
+
+        if (Auth::user()->is_admin == 1) {
+            return view('admin.master.sequences-edit', compact('sequence'));
         }
 
         return view('user.sequences-edit', compact('sequence'));
@@ -712,7 +720,6 @@ class MasterController extends Controller
             'admin_updated_sequence_id' => $sequences->where('admin_updated', true)->first()?->id
         ]);
     }
-
 
 
 

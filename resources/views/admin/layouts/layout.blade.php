@@ -68,10 +68,14 @@
         <div class="sidebar">
             <h4>Admin Panel</h4>
             <a href="{{ route('admin-dashboard') }}">Dashboard</a>
+            <a href="{{ route('admin-sequenceTable-index') }}">Master</a>
             <a href="{{ route('admin-users-index') }}">Users</a>
             <a href="{{ route('admin-usersMaster-index') }}">Users Master</a>
+            <a href="{{ route('admin-master-link-document') }}">Link</a>
+            <a href="{{ route('admin-leads-index') }}">Leads</a>
             <a href="{{ route('social.links') }}">Social Links</a>
             <a href="{{ route('user-sequence-list') }}">All tracking</a>
+            <a href="{{ route('admin-report.campaign') }}">Admin Tracking</a>
         </div>
 
         <!-- Content -->

@@ -1,4 +1,4 @@
-@extends('user.dashboard')
+@extends('admin.layouts.layout')
 
  <!-- Additional Styles -->
     <style>
@@ -188,7 +188,7 @@
                         <p class="text-muted small mt-1">Design engaging emails with our drag & drop editor</p>
                     </div>
                     <div class="card-body p-4">
-                        <form id="emailForm" method="POST" enctype="multipart/form-data">
+                        <form id="adminEmailForm" method="POST" enctype="multipart/form-data">
                             @csrf
                             <!-- Basic Info Row -->
                             <div class="row g-4 mb-4">
@@ -205,7 +205,7 @@
                                 <div class="col-md-3">
                                     <label class="form-label fw-semibold small text-uppercase text-muted">Variant</label>
                                     <input type="text" name="variant" id="variant"
-                                        class="form-control form-control-lg rounded-3 text-uppercase" placeholder="A"
+                                        class="form-control form-control-lg rounded-3 text-uppercase" placeholder="A/B/C"
                                         maxlength="1">
                                 </div>
                                 <div class="col-md-3">
@@ -224,8 +224,6 @@
                                     class="form-control form-control-lg rounded-3"
                                     placeholder="✉️ Write an engaging subject line...">
                             </div>
-
-
 
 
                             <!-- Branding Section (Logo/Banner) -->
@@ -377,10 +375,8 @@
                             </div>
 
                             <div class="d-flex gap-3 mt-4">
-                                <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">💾 Save
-                                    Sequence</button>
-                                <a href="{{ route('master-data-list') }}"
-                                    class="btn btn-outline-secondary btn-lg px-4 rounded-pill">← Back</a>
+                                <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">💾 Save Sequence</button>
+                                <a href="{{ route('admin-sequenceTable-index') }}" class="btn btn-outline-secondary btn-lg px-4 rounded-pill">← Back</a>
                             </div>
                         </form>
                     </div>
@@ -439,8 +435,6 @@
         </div>
     </div>
 
-
-
     <script src="{{ asset('js/jquery.min.js') }}"></script>
     <script>
         // DOM Elements
@@ -458,7 +452,7 @@
         });
 
         function loadBusinessLinks() {
-            fetch('{{ route('user-business-links') }}')
+            fetch('{{ route('admin-user-business-links') }}')
                 .then(response => response.json())
                 .then(data => {
                     if (data.company_logo) {
@@ -740,26 +734,8 @@
 
         // AJAX Submit
         $(document).ready(function() {
-            $('#emailForm').submit(function(e) {
+            $('#adminEmailForm').submit(function(e) {
                 e.preventDefault();
-                // $('#message').val(currentEditor.innerHTML);
-
-                // let html = currentEditor.innerHTML;
-
-                // // completely empty paragraphs remove
-                // html = html.replace(
-                //     /<p[^>]*>\s*<\/p>/gi,
-                //     ''
-                // );
-
-                // // 4+ empty line ko max 2 empty line tak limit
-                // html = html.replace(
-                //     /(<p[^>]*>\s*(?:&nbsp;|<br\s*\/?>)?\s*<\/p>\s*){4,}/gi,
-                //     '<p><br></p><p><br></p>'
-                // );
-
-                // $('#message').val(html);
-
                 let html = currentEditor.innerHTML;
                 // tags ke beech extra newlines remove
                 html = html.replace(/>\s+\</g, '><');
@@ -806,14 +782,14 @@
 
                 const formData = new FormData(this);
                 $.ajax({
-                    url: '{{ route('user-sequences-store') }}',
+                    url: '{{ route('admin-user-sequences-store') }}',
                     method: 'POST',
                     data: formData,
                     processData: false,
                     contentType: false,
                     success: function(resp) {
                         toastr.success(resp.message);
-                        $('#emailForm')[0].reset();
+                        $('#adminEmailForm')[0].reset();
                         currentEditor.innerHTML = '<p>Start typing your email here...</p>';
                         currentHeroImage = null;
                         currentAttachment = null;

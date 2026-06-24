@@ -15,6 +15,10 @@ class ReportController extends Controller
 {
     public function index()
     {
+
+        if (Auth::user()->is_admin == 1) {
+            return view('admin.reports.campaign');
+        }
         return view('reports.campaign');
     }
 

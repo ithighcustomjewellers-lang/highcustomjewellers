@@ -19,6 +19,10 @@ class LeadsController extends Controller
 {
     public function index()
     {
+        if (Auth::user()->is_admin == 1) {
+            return view('admin.Leads.index');
+        }
+
         return view('user.Leads.index');
     }
 
@@ -100,8 +104,6 @@ class LeadsController extends Controller
         $leadIds = collect($leads->items())->pluck('id')->toArray();
 
         $campaignLogs = CampaignLog::whereIn('lead_id', $leadIds)->orderBy('id', 'asc')->get()->groupBy('lead_id');
-
-    //  $campaignLogs = CampaignLog::whereIn('lead_id', $leadIds)->latest('id')->get()->groupBy('lead_id');
 
         $formattedData = collect($leads->items())->map(function ($lead) use ($campaignLogs) {
             $tracking = 'pending';

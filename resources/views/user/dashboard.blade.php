@@ -134,23 +134,12 @@
                     <strong>{{ auth()->user()->name }} {{ auth()->user()->lastname }}</strong>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="{{ route('user-profile') }}">Profile</a></li>
-                    {{-- <li>
-                        <a class="dropdown-item" href="{{ url('/connect-gmail') }}">Connect Gmail</a>
-                    </li> --}}
-
-
-                    @if(auth()->user()->gmail_token && auth()->user()->gmail_refresh_token)
-                        <a href="{{ url('connect-gmail') }}" class="btn btn-primary">
-                           Connect Gmail
-                        </a>
-                    @else
-                        <span class="text-success">
-                            Gmail Already Connected
-                        </span>
-                    @endif
-
-
+                    <li>
+                        <a class="dropdown-item" href="{{ route('user-profile') }}">Profile</a>
+                    </li>
+                   <a href="{{ url('connect-gmail') }}" class="btn btn-primary">
+                        Connect Gmail
+                    </a>
                     <li>
                         <hr class="dropdown-divider">
                     </li>
@@ -162,9 +151,10 @@
         </div>
     </nav>
 
-   <div class="main-content">
-    @yield('content')
-</div>
+    <div class="main-content">
+        @yield('content')
+    </div>
+
     <script>
         $(document).ready(function() {
             $('#logoutBtn').click(function(e) {

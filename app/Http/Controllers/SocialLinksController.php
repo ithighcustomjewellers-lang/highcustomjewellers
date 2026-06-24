@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Models\SocialLink;
 use App\Models\UserSetting;
 use App\Models\AnalyticsTracking;
+use App\Models\Sequence;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -641,6 +642,27 @@ class SocialLinksController extends Controller
             'success' => true
         ]);
 
+    }
+
+    public function deleteSequence(Request $request)
+    {
+        $sequence = Sequence::where('id', $request->id)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$sequence) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sequence not found'
+            ]);
+        }
+
+        $sequence->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Sequence deleted successfully'
+        ]);
     }
 
 
