@@ -104,112 +104,6 @@ class SocialLinksController extends Controller
         }
     }
 
-
-    // public function index()
-    // {
-    //     $user = Auth::user();
-    //     $quickLinkPlatforms = ['whatsapp', 'telegram', 'facebook', 'youtube', 'linkedin', 'instagram', 'x', 'threads', 'snapchat', 'reddit', 'discord', 'pinterest', 'quora', 'messenger', 'twitch', 'rumble', 'viber'];
-
-    //     if ($user->is_admin == 1) {
-    //         $socialLinks = SocialLink::where('user_id', $user->id)
-    //             ->whereNotIn(DB::raw('LOWER(platform_name)'), $quickLinkPlatforms)
-    //             ->orderBy('sort_order')
-    //             ->get();
-    //     } else {
-    //         $admin = User::where('is_admin', 1)->first();
-    //         $adminLinks = collect();
-    //         if ($admin) {
-    //             $adminLinks = SocialLink::where('user_id', $admin->id)
-    //                 ->whereRaw('LOWER(platform_name) != ?', ['whatsapp'])
-    //                 ->orderBy('sort_order')
-    //                 ->get();
-    //         }
-
-    //         $userLinks = SocialLink::where('user_id', $user->id)
-    //             ->orderBy('sort_order')
-    //             ->get();
-
-    //         $socialLinks = $adminLinks->map(function ($adminLink) use ($userLinks) {
-    //             $userLink = $userLinks->first(function ($item) use ($adminLink) {
-    //                 return strtolower(trim($item->platform_name)) == strtolower(trim($adminLink->platform_name));
-    //             });
-    //             return $userLink ? $userLink : $adminLink;
-    //         });
-
-    //         $adminPlatformNames = $adminLinks->map(function ($item) {
-    //             return strtolower(trim($item->platform_name));
-    //         })->toArray();
-
-    //         $extraUserLinks = $userLinks->filter(function ($link) use ($adminPlatformNames, $quickLinkPlatforms) {
-    //             // Skip if platform is in quick links
-    //             if (in_array(strtolower(trim($link->platform_name)), $quickLinkPlatforms)) {
-    //                 return false;
-    //             }
-    //             return !in_array(strtolower(trim($link->platform_name)), $adminPlatformNames);
-    //         });
-
-    //         $socialLinks = $socialLinks->merge($extraUserLinks);
-    //         $socialLinks = $socialLinks->unique(function ($item) {
-    //             return strtolower(trim($item->platform_name));
-    //         })->filter(function ($link) use ($quickLinkPlatforms) {
-    //             return !in_array(strtolower(trim($link->platform_name)), $quickLinkPlatforms);
-    //         });
-    //     }
-
-    //     if ($user->is_admin == 1) {
-    //         $quickLinks = UserSetting::getValue($user->id,'quick_links',[]);
-    //     } else {
-    //         $admin = User::where('is_admin', 1)->first();
-    //         $adminQuickLinks = [];
-    //         if ($admin) {
-    //             $adminQuickLinks = UserSetting::getValue($admin->id, 'quick_links', []);
-    //         }
-    //         $userQuickLinks = UserSetting::getValue($user->id, 'quick_links',[]);
-    //         unset($adminQuickLinks['whatsapp_url']);
-    //         $quickLinks = array_merge(
-    //             $adminQuickLinks,
-    //             $userQuickLinks
-    //         );
-    //     }
-
-    //     $profileSlug = UserSetting::getValue(
-    //         $user->id,
-    //         'profile_slug'
-    //     );
-
-    //     if (!$profileSlug) {
-    //         $profileSlug = Str::slug($user->name) . '-' . $user->id;
-    //         UserSetting::setValue($user->id, 'profile_slug', $profileSlug);
-    //     }
-
-    //     $profileUrl = url('/profile/' . $profileSlug);
-    //     $multiQrs = UserSetting::getValue($user->id, 'multi_qr_codes', []);
-
-    //     foreach ($multiQrs as &$qr) {
-    //         $trackingSlug = $qr['tracking_slug'] ?? $qr['id'];
-    //         $qr['qr_scans'] = AnalyticsTracking::getQRWiseScans(
-    //             $trackingSlug
-    //         );
-    //         $qr['button_clicks'] = AnalyticsTracking::getQRWiseClicks(
-    //             $trackingSlug
-    //         );
-    //     }
-
-    //     $qrScans = AnalyticsTracking::getQRScansCount(
-    //         $profileSlug
-    //     );
-
-    //     $btnClicks = AnalyticsTracking::getButtonClicksCount(
-    //         $profileSlug
-    //     );
-
-    //     if ($user->is_admin == 1) {
-    //         return view('admin.social.index', compact('socialLinks', 'quickLinks', 'profileUrl', 'qrScans', 'btnClicks', 'profileSlug','multiQrs'));
-    //     } else {
-    //         return view('user.user-social.index', compact('socialLinks', 'quickLinks', 'profileUrl', 'qrScans', 'btnClicks', 'profileSlug','multiQrs'));
-    //     }
-    // }
-
     public function store(Request $request)
     {
         $request->validate([
@@ -599,9 +493,7 @@ class SocialLinksController extends Controller
         );
 
         foreach ($qrs as &$qr) {
-
             $trackingSlug = $qr['tracking_slug'] ?? $qr['id'];
-
             $qr['qr_scans'] = AnalyticsTracking::getQRWiseScans(
                 $trackingSlug
             );

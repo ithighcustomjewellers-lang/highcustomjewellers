@@ -36,6 +36,8 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', 'user'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'Dashboard'])->name('dashboard');
+    Route::get('/dashboard/chart-data', [DashboardController::class, 'chartData'])->name('dashboard-chart-data');
+    Route::get('/dashboard/platform-click-chart', [DashboardController::class, 'platformClickChart'])->name('dashboard-platform-click-chart');
 
     // profile page
     Route::get('user-profile', [DashboardController::class, 'UserProfile'])->name('user-profile');

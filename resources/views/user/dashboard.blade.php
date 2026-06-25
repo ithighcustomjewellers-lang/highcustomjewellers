@@ -111,7 +111,7 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <h4 class="text-white text-center">My Dashboard</h4>
-        <a href="#">Dashboard</a>
+        <a href="{{ route('dashboard') }}">Dashboard</a>
         <a href="{{ route('master-data-list') }}">Master</a>
         <a href="{{ route('master-link-document') }}">Link</a>
         <a href="{{ route('leads-index') }}">Leads</a>
