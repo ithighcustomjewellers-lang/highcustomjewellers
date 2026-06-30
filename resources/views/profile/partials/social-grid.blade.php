@@ -239,6 +239,8 @@
          gap: 18px;
      }
 
+
+
      /* =========================================================
         SOCIAL CARD
         ========================================================= */
@@ -412,6 +414,146 @@
          color: #B92B27;
      }
 
+     /* ----- ECOMMERCE ----- */
+     .fa-ebay {
+         color: #E53238;
+     }
+
+     .fa-amazon {
+         color: #FF9900;
+     }
+
+     .fa-etsy {
+         color: #F16521;
+     }
+
+     .fa-shopify {
+         color: #7AB55C;
+     }
+
+     .fa-store {
+         color: #2874F0;
+     }
+
+     /* Flipkart */
+     .fa-globe {
+         color: #E6272E;
+     }
+
+     /* AliExpress */
+     .fa-shopping-bag {
+         color: #F4337C;
+     }
+
+     /* Meesho */
+     .fa-paint-brush {
+         color: #DD1F5D;
+     }
+
+     /* Nykaa */
+     .fa-tshirt {
+         color: #FF5722;
+     }
+
+     /* Ajio */
+     .fa-globe-asia {
+         color: #FF6A00;
+     }
+
+     /* Alibaba */
+     .fa-building {
+         color: #E65100;
+     }
+
+     /* IndiaMart */
+     .fa-handshake {
+         color: #FF6A00;
+     }
+
+     /* TradeIndia */
+     .fa-shopping-cart {
+         color: #EF524C;
+     }
+
+     /* Snapdeal */
+
+     /* ----- PAYMENT GATEWAYS ----- */
+     .fa-paypal {
+         color: #003087;
+     }
+
+     .fa-stripe {
+         color: #008CDD;
+     }
+
+     .fa-apple-pay {
+         color: #000000;
+     }
+
+     .fa-amazon-pay {
+         color: #FF9900;
+     }
+
+     .fa-google-pay {
+         color: #4285F4;
+     }
+
+     .fa-mobile-alt {
+         color: #00BFA5;
+     }
+
+     /* UPI, SamsungPay, Paytm */
+     .fa-exchange-alt {
+         color: #6C1D45;
+     }
+
+     /* Zelle */
+     .fa-hand-holding-usd {
+         color: #3D95CE;
+     }
+
+     /* Venmo, Western Union */
+     .fa-bitcoin {
+         color: #F7931A;
+     }
+
+     /* Crypto BTC */
+     .fa-ethereum {
+         color: #627EEA;
+     }
+
+     /* Crypto ETH */
+     .fa-coins {
+         color: #26A17B;
+     }
+
+     /* Crypto USDT, Cashfree */
+     .fa-university {
+         color: #1A237E;
+     }
+
+     /* Bank, PayU */
+     .fa-credit-card {
+         color: #0C4A6E;
+     }
+
+     /* Razorpay */
+     .fa-plane-departure {
+         color: #0055FF;
+     }
+
+     /* Airwallex */
+     .fa-cloud-sun {
+         color: #3B82F6;
+     }
+
+     /* Skydo */
+     .fa-phone {
+         color: #5F259F;
+     }
+
+     /* PhonePe */
+
      /* =========================================================
         FOOTER
         ========================================================= */
@@ -581,7 +723,7 @@
          }
      }
 
-/* =========================================================
+     /* =========================================================
    SMALL MOBILE
 ========================================================= */
 

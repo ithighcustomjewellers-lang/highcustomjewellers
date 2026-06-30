@@ -13,13 +13,14 @@ use Carbon\Carbon;
 
 class ReportController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $status = $request->status;
 
         if (Auth::user()->is_admin == 1) {
             return view('admin.reports.campaign');
         }
-        return view('reports.campaign');
+        return view('reports.campaign', compact('status'));
     }
 
     public function getCampaignLogsData(Request $request)
@@ -48,6 +49,12 @@ class ReportController extends Controller
                 'sequences.step as step',
                 'sequences.subject as subject',
             ]);
+
+
+            if ($request->filled('status')) {
+                $status = $request->status;
+                $query->where('campaign_logs.status', $status);
+            }
 
         // Total Records
         $totalData = (clone $query)->count();
@@ -286,58 +293,58 @@ class ReportController extends Controller
 
 
     /**
- * ✅ TRACK LINK CLICK - Sirf tab count karega jab user actually click kare
- */
-public function trackClick($token)
-{
-    // Find the click record by token
-    $click = EmailLinkClick::where('click_token', $token)->first();
+     * ✅ TRACK LINK CLICK - Sirf tab count karega jab user actually click kare
+     */
+    public function trackClick($token)
+    {
+        // Find the click record by token
+        $click = EmailLinkClick::where('click_token', $token)->first();
 
-    if (!$click) {
-        Log::warning('Invalid tracking token', ['token' => $token]);
-        abort(404, 'Invalid tracking link');
-    }
+        if (!$click) {
+            Log::warning('Invalid tracking token', ['token' => $token]);
+            abort(404, 'Invalid tracking link');
+        }
 
-    // ✅ IMPORTANT: Sirf tab update karo jab user ne click kiya ho
-    // Clicked_at NULL hai matlab user ne abhi click kiya hai
-    if (is_null($click->clicked_at)) {
-        // First time click - Update with click details
-        $click->update([
-            'clicked_at' => now(),           // ✅ Click ka time
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'click_count' => 1               // ✅ Pehla click - count = 1
-        ]);
+        // ✅ IMPORTANT: Sirf tab update karo jab user ne click kiya ho
+        // Clicked_at NULL hai matlab user ne abhi click kiya hai
+        if (is_null($click->clicked_at)) {
+            // First time click - Update with click details
+            $click->update([
+                'clicked_at' => now(),           // ✅ Click ka time
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'click_count' => 1               // ✅ Pehla click - count = 1
+            ]);
 
-        // Update campaign_log total clicks
-        if ($click->campaignLog) {
-            $currentTotal = $click->campaignLog->total_clicks ?? 0;
-            $click->campaignLog->update([
-                'total_clicks' => $currentTotal + 1
+            // Update campaign_log total clicks
+            if ($click->campaignLog) {
+                $currentTotal = $click->campaignLog->total_clicks ?? 0;
+                $click->campaignLog->update([
+                    'total_clicks' => $currentTotal + 1
+                ]);
+            }
+
+            Log::info('✅ First Time Click Recorded', [
+                'click_id' => $click->id,
+                'platform' => $click->platform_name,
+                'campaign_log_id' => $click->campaign_log_id,
+                'lead_id' => $click->lead_id,
+                'click_count' => 1,
+                'ip' => request()->ip()
+            ]);
+        } else {
+            // ✅ User ne dobara click kiya (duplicate click)
+            $click->increment('click_count');
+
+            Log::info('🔄 Duplicate Click Recorded', [
+                'click_id' => $click->id,
+                'platform' => $click->platform_name,
+                'new_click_count' => $click->click_count,
+                'ip' => request()->ip()
             ]);
         }
 
-        Log::info('✅ First Time Click Recorded', [
-            'click_id' => $click->id,
-            'platform' => $click->platform_name,
-            'campaign_log_id' => $click->campaign_log_id,
-            'lead_id' => $click->lead_id,
-            'click_count' => 1,
-            'ip' => request()->ip()
-        ]);
-    } else {
-        // ✅ User ne dobara click kiya (duplicate click)
-        $click->increment('click_count');
-
-        Log::info('🔄 Duplicate Click Recorded', [
-            'click_id' => $click->id,
-            'platform' => $click->platform_name,
-            'new_click_count' => $click->click_count,
-            'ip' => request()->ip()
-        ]);
+        // Redirect to original destination URL
+        return redirect($click->destination_url);
     }
-
-    // Redirect to original destination URL
-    return redirect($click->destination_url);
-}
 }

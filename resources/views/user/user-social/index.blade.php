@@ -1,5 +1,5 @@
 @extends('user.dashboard')
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 @section('title', 'Social Links Manager')
 @section('content')
 
@@ -9,40 +9,66 @@
     {
         // Predefined platforms icon mapping (for Font Awesome)
         $iconMap = [
+            // ===== SOCIAL MEDIA =====
             'whatsapp' => 'fab fa-whatsapp',
             'telegram' => 'fab fa-telegram',
-            'instagram' => 'fab fa-instagram',
             'facebook' => 'fab fa-facebook',
             'youtube' => 'fab fa-youtube',
             'linkedin' => 'fab fa-linkedin',
-            'twitter' => 'fab fa-twitter',
+            'instagram' => 'fab fa-instagram',
             'x' => 'fab fa-x-twitter',
-            'tiktok' => 'fab fa-tiktok',
+            'twitter' => 'fab fa-twitter',
+            'threads' => 'fab fa-threads',
             'snapchat' => 'fab fa-snapchat',
             'reddit' => 'fab fa-reddit',
             'discord' => 'fab fa-discord',
             'pinterest' => 'fab fa-pinterest',
             'twitch' => 'fab fa-twitch',
             'quora' => 'fab fa-quora',
-            'github' => 'fab fa-github',
-            'spotify' => 'fab fa-spotify',
+            'messenger' => 'fab fa-facebook-messenger',
+            'rumble' => 'fas fa-video',
+            'viber' => 'fab fa-viber',
+            'tiktok' => 'fab fa-tiktok',
+            'skype' => 'fab fa-skype',
+            'slack' => 'fab fa-slack',
             'medium' => 'fab fa-medium',
-            'stackoverflow' => 'fab fa-stack-overflow',
-            'behance' => 'fab fa-behance',
-            'dribbble' => 'fab fa-dribbble',
+            'tumblr' => 'fab fa-tumblr',
             'flickr' => 'fab fa-flickr',
             'soundcloud' => 'fab fa-soundcloud',
             'vimeo' => 'fab fa-vimeo',
-            'vk' => 'fab fa-vk',
-            'weibo' => 'fab fa-weibo',
-            'tumblr' => 'fab fa-tumblr',
-            'foursquare' => 'fab fa-foursquare',
-            'slack' => 'fab fa-slack',
-            'skype' => 'fab fa-skype',
-            'viber' => 'fab fa-viber',
-            'messenger' => 'fab fa-facebook-messenger',
-            'threads' => 'fab fa-threads',
-            'rumble' => 'fas fa-video',
+            'spotify' => 'fab fa-spotify',
+            'github' => 'fab fa-github',
+            'stackoverflow' => 'fab fa-stack-overflow',
+            'behance' => 'fab fa-behance',
+            'dribbble' => 'fab fa-dribbble',
+
+            // ===== ECOMMERCE =====
+            'ebay' => 'fab fa-ebay',
+            'amazon' => 'fab fa-amazon',
+            'etsy' => 'fab fa-etsy',
+            'shopify' => 'fab fa-shopify',
+            'flipkart' => 'fas fa-store',
+            'walmart' => 'fas fa-store',
+            'aliexpress' => 'fas fa-globe',
+            'meesho' => 'fas fa-shopping-bag',
+            'nykaa' => 'fas fa-paint-brush',
+            'myntra' => 'fas fa-shopping-bag',
+            'snapdeal' => 'fas fa-shopping-cart',
+            'ajio' => 'fas fa-tshirt',
+
+            // ===== PAYMENT GATEWAYS =====
+            'paypal' => 'fab fa-paypal',
+            'stripe' => 'fab fa-stripe',
+            'applepay' => 'fab fa-apple-pay',
+            'amazonpay' => 'fab fa-amazon-pay',
+            'googlepay' => 'fab fa-google-pay',
+            'upi' => 'fas fa-mobile-alt',
+            'zelle' => 'fas fa-exchange-alt',
+            'venmo' => 'fas fa-hand-holding-usd',
+            'cryptobtc' => 'fab fa-bitcoin',
+            'crypto_eth' => 'fab fa-ethereum',
+            'cryptousdt' => 'fas fa-coins',
+            'bank' => 'fas fa-university',
         ];
 
         $platformName = strtolower($platform->platform_name);
@@ -433,11 +459,11 @@
         }
 
         /* .share-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-        } */
+                                display: flex;
+                                justify-content: center;
+                                gap: 15px;
+                                margin: 20px 0;
+                            } */
 
         .share-btn {
             width: 45px;
@@ -524,18 +550,18 @@
             animation: spin 1s linear infinite;
         }
 
-        .QR_name{
+        .QR_name {
             width: 120px;
-            max-width:90%;
-            text-align:center;
-            font-size:16px;
-            font-weight:700;
-            padding:10px 15px;
-            border:2px solid #667eea;
-            border-radius:12px;
-            outline:none;
-            background:#fff;
-            box-shadow:0 4px 10px rgba(0,0,0,.08);
+            max-width: 90%;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 10px 15px;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            outline: none;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
         }
 
 
@@ -609,36 +635,36 @@
             margin-bottom: 20px;
         }
 
-        .btn-action{
-            width:100%;
-            height:42px;
-            border:none;
-            border-radius:10px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            transition:all .3s ease;
-            font-size:14px;
+        .btn-action {
+            width: 100%;
+            height: 42px;
+            border: none;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .3s ease;
+            font-size: 14px;
         }
 
-        .btn-remove{
-            background:#fee2e2;
-            color:#dc2626;
+        .btn-remove {
+            background: #fee2e2;
+            color: #dc2626;
         }
 
-        .btn-remove:hover{
-            background:#dc2626;
-            color:#fff;
+        .btn-remove:hover {
+            background: #dc2626;
+            color: #fff;
         }
 
-        .btn-copy{
-            background:#e0e7ff;
-            color:#4f46e5;
+        .btn-copy {
+            background: #e0e7ff;
+            color: #4f46e5;
         }
 
-        .btn-copy:hover{
-            background:#4f46e5;
-            color:#fff;
+        .btn-copy:hover {
+            background: #4f46e5;
+            color: #fff;
         }
 
         .modal-backdrop.show {
@@ -706,6 +732,57 @@
                 opacity: 1;
             }
         }
+
+        /* 29/09 */
+
+        /* Add to your existing <style> section */
+        .accordion-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px !important;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .accordion-button {
+            background: white;
+            color: #1a1a1a;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background: #f8f9fa;
+            color: #667eea;
+            box-shadow: none;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: #667eea;
+        }
+
+        .accordion-button .badge {
+            background: #667eea !important;
+            font-size: 12px;
+            padding: 4px 10px;
+        }
+
+        .accordion-body {
+            padding: 15px 20px;
+            background: #fafafa;
+        }
+
+        .accordion-body .app-link {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .accordion-body .app-link:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
     </style>
 
     <div class="main-container">
@@ -739,336 +816,678 @@
 
                 <!-- Editable App Links Section -->
                 <div style="margin-top: 20px;">
-                    <div class="section-title">
-                        <i class="fas fa-star"></i> QUICK LINKS
+
+                    <!-- ==================== ACCORDION 1: SOCIAL MEDIA LINKS ==================== -->
+                    <div class="accordion" id="socialAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#socialCollapse" aria-expanded="false">
+                                    <i class="fas fa-share-alt me-2" style="color: #667eea;"></i>
+                                    <strong>Social Media Links</strong>
+                                    <span class="badge bg-primary ms-2">10</span>
+                                </button>
+                            </h2>
+                            <div id="socialCollapse" class="accordion-collapse collapse" data-bs-parent="#socialAccordion">
+                                <div class="accordion-body">
+                                    {{-- WhatsApp --}}
+                                    @php
+                                        $user = Auth::user();
+                                        $message =
+                                            "Hi {$user->name},\n" .
+                                            "I came across your jewelry collection and I'm interested in learning more about it. " .
+                                            "Could you please share some details about your products and offerings?\n" .
+                                            'Thank you.';
+                                        $defaultWhatsappUrl =
+                                            'https://wa.me/' .
+                                            preg_replace('/\D/', '', $user->mobile) .
+                                            '?text=' .
+                                            urlencode($message);
+                                    @endphp
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="WhatsApp"
+                                            data-input="whatsapp_url">
+                                        <i class="fab fa-whatsapp" style="color: #25D366;"></i>
+                                        <strong>WhatsApp:</strong>
+                                        <input type="url" id="whatsapp_url" placeholder="https://wa.me/yournumber"
+                                            class="link-input"
+                                            value="{{ $quickLinks['whatsapp_url'] ?? $defaultWhatsappUrl }}">
+                                        <button onclick="saveQuickLink('whatsapp_url', 'WhatsApp')" class="save-btn-sm">
+                                            <i class="fas fa-save"></i> Save
+                                        </button>
+                                        <button onclick="copyToClipboard(document.getElementById('whatsapp_url').value)"
+                                            class="copy-btn-sm">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+
+                                    {{-- Telegram --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Telegram"
+                                            data-input="telegram_url">
+                                        <i class="fab fa-telegram" style="color: #0088cc;"></i>
+                                        <strong>Telegram:</strong>
+                                        <input type="url" id="telegram_url" placeholder="https://t.me/username"
+                                            class="link-input"
+                                            value="{{ $quickLinks['telegram_url'] ?? ($adminQuickLinks['telegram_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('telegram_url', 'Telegram')" class="save-btn-sm">
+                                            <i class="fas fa-save"></i> Save
+                                        </button>
+                                        <button onclick="copyToClipboard(document.getElementById('telegram_url').value)"
+                                            class="copy-btn-sm">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+
+                                    {{-- Facebook --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Facebook"
+                                            data-input="facebook_url">
+                                        <i class="fab fa-facebook" style="color: #1877f2;"></i>
+                                        <strong>Facebook:</strong>
+                                        <input type="url" id="facebook_url" placeholder="https://facebook.com/username"
+                                            class="link-input"
+                                            value="{{ $quickLinks['facebook_url'] ?? ($adminQuickLinks['facebook_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('facebook_url', 'Facebook')" class="save-btn-sm">
+                                            <i class="fas fa-save"></i> Save
+                                        </button>
+                                        <button onclick="copyToClipboard(document.getElementById('facebook_url').value)"
+                                            class="copy-btn-sm">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+
+                                    {{-- YouTube --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="YouTube"
+                                            data-input="youtube_url">
+                                        <i class="fab fa-youtube" style="color: #ff0000;"></i>
+                                        <strong>YouTube:</strong>
+                                        <input type="url" id="youtube_url" placeholder="https://youtube.com/@username"
+                                            class="link-input"
+                                            value="{{ $quickLinks['youtube_url'] ?? ($adminQuickLinks['youtube_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('youtube_url', 'YouTube')" class="save-btn-sm">
+                                            <i class="fas fa-save"></i> Save
+                                        </button>
+                                        <button onclick="copyToClipboard(document.getElementById('youtube_url').value)"
+                                            class="copy-btn-sm">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+
+                                    {{-- LinkedIn --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="LinkedIn"
+                                            data-input="linkedin_url">
+                                        <i class="fab fa-linkedin" style="color: #0077b5;"></i>
+                                        <strong>LinkedIn:</strong>
+                                        <input type="url" id="linkedin_url"
+                                            placeholder="https://linkedin.com/in/username" class="link-input"
+                                            value="{{ $quickLinks['linkedin_url'] ?? ($adminQuickLinks['linkedin_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('linkedin_url', 'LinkedIn')" class="save-btn-sm">
+                                            <i class="fas fa-save"></i> Save
+                                        </button>
+                                        <button onclick="copyToClipboard(document.getElementById('linkedin_url').value)"
+                                            class="copy-btn-sm">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+
+                                    {{-- Instagram --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Instagram"
+                                            data-input="instagram_url">
+                                        <i class="fab fa-instagram" style="color: #E4405F;"></i>
+                                        <strong>Instagram:</strong>
+                                        <input type="url" id="instagram_url"
+                                            placeholder="https://instagram.com/username" class="link-input"
+                                            value="{{ $quickLinks['instagram_url'] ?? ($adminQuickLinks['instagram_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('instagram_url', 'Instagram')" class="save-btn-sm">
+                                            <i class="fas fa-save"></i> Save
+                                        </button>
+                                        <button onclick="copyToClipboard(document.getElementById('instagram_url').value)"
+                                            class="copy-btn-sm">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+
+                                    {{-- X --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="X"
+                                            data-input="x_url">
+                                        <i class="fab fa-x-twitter" style="color: #000;"></i>
+                                        <strong>X:</strong>
+                                        <input type="url" id="x_url" placeholder="https://x.com/username"
+                                            class="link-input"
+                                            value="{{ $quickLinks['x_url'] ?? ($adminQuickLinks['x_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('x_url', 'X')" class="save-btn-sm">
+                                            <i class="fas fa-save"></i> Save
+                                        </button>
+                                        <button onclick="copyToClipboard(document.getElementById('x_url').value)"
+                                            class="copy-btn-sm">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+
+                                    {{-- Threads --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Threads"
+                                            data-input="threads_url">
+                                        <i class="fab fa-threads" style="color: #000;"></i>
+                                        <strong>Threads:</strong>
+                                        <input type="url" id="threads_url"
+                                            placeholder="https://threads.net/@username" class="link-input"
+                                            value="{{ $quickLinks['threads_url'] ?? ($adminQuickLinks['threads_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('threads_url', 'Threads')" class="save-btn-sm">
+                                            <i class="fas fa-save"></i> Save
+                                        </button>
+                                        <button onclick="copyToClipboard(document.getElementById('threads_url').value)"
+                                            class="copy-btn-sm">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+
+                                    {{-- Snapchat --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Snapchat"
+                                            data-input="snapchat_url">
+                                        <i class="fab fa-snapchat" style="color: #FFFC00;"></i>
+                                        <strong>Snapchat:</strong>
+                                        <input type="url" id="snapchat_url"
+                                            placeholder="https://snapchat.com/add/username" class="link-input"
+                                            value="{{ $quickLinks['snapchat_url'] ?? ($adminQuickLinks['snapchat_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('snapchat_url', 'Snapchat')" class="save-btn-sm">
+                                            <i class="fas fa-save"></i> Save
+                                        </button>
+                                        <button onclick="copyToClipboard(document.getElementById('snapchat_url').value)"
+                                            class="copy-btn-sm">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+
+                                    {{-- Messenger --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Messenger"
+                                            data-input="messenger_url">
+                                        <i class="fab fa-facebook-messenger" style="color: #0084FF;"></i>
+                                        <strong>Messenger:</strong>
+                                        <input type="url" id="messenger_url" placeholder="https://m.me/username"
+                                            class="link-input"
+                                            value="{{ $quickLinks['messenger_url'] ?? ($adminQuickLinks['messenger_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('messenger_url', 'Messenger')" class="save-btn-sm">
+                                            <i class="fas fa-save"></i> Save
+                                        </button>
+                                        <button onclick="copyToClipboard(document.getElementById('messenger_url').value)"
+                                            class="copy-btn-sm">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    {{-- WhatsApp --}}
+                    <br>
 
-                    @php
-                        $user = Auth::user();
-                        $message = "Hi {$user->name},\n"
-                            . "I came across your jewelry collection and I'm interested in learning more about it. "
-                            . "Could you please share some details about your products and offerings?\n"
-                            . "Thank you.";
-                        $defaultWhatsappUrl = 'https://wa.me/' . preg_replace('/\D/', '', $user->mobile). '?text=' . urlencode($message);
-                    @endphp
+                    <!-- ==================== ACCORDION 2: ECOMMERCE LINKS ==================== -->
+                    <div class="accordion" id="ecommerceAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#ecommerceCollapse" aria-expanded="false"
+                                    aria-controls="ecommerceCollapse">
 
+                                    <i class="fas fa-shopping-cart me-2" style="color:#667eea;"></i>
+                                    <strong>Ecommerce Links</strong>
+                                    <span class="badge bg-primary ms-2">8</span>
 
-                    <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="WhatsApp"
-                            data-input="whatsapp_url">
-                        <i class="fab fa-whatsapp" style="color: #25D366;"></i>
-                        <strong>WhatsApp:</strong>
-                        <!--<input type="url" id="whatsapp_url" placeholder="https://wa.me/yournumber" class="link-input"-->
-                        <!--    value="{{ $quickLinks['whatsapp_url'] ?? '' }}">-->
+                                </button>
+                            </h2>
+                            <div id="ecommerceCollapse" class="accordion-collapse collapse"
+                                data-bs-parent="#ecommerceAccordion">
+                                <div class="accordion-body">
 
-                        <input type="url" id="whatsapp_url" placeholder="https://wa.me/yournumber"  class="link-input" value="{{ $quickLinks['whatsapp_url'] ?? $defaultWhatsappUrl }}">
-                        <button onclick="saveQuickLink('whatsapp_url', 'WhatsApp')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('whatsapp_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
+                                    {{-- eBay --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="eBay"
+                                            data-input="ebay_url">
+                                        <i class="fab fa-ebay" style="color: #e53238; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">eBay:</strong>
+                                        <input type="url" id="ebay_url"
+                                            placeholder="https://www.ebay.com/usr/username" class="link-input"
+                                            value="{{ $quickLinks['ebay_url'] ?? ($adminQuickLinks['ebay_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('ebay_url','eBay')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('ebay_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Alibaba --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Alibaba"
+                                            data-input="alibaba_url">
+                                        <i class="fas fa-globe-asia"
+                                            style="color: #FF6A00; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Alibaba:</strong>
+                                        <input type="url" id="alibaba_url"
+                                            placeholder="https://www.alibaba.com/member/username.html" class="link-input"
+                                            value="{{ $quickLinks['alibaba_url'] ?? ($adminQuickLinks['alibaba_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('alibaba_url','Alibaba')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('alibaba_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- IndiaMart --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="IndiaMart"
+                                            data-input="indiamart_url">
+                                        <i class="fas fa-building"
+                                            style="color: #E65100; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">IndiaMart:</strong>
+                                        <input type="url" id="indiamart_url"
+                                            placeholder="https://www.indiamart.com/username" class="link-input"
+                                            value="{{ $quickLinks['indiamart_url'] ?? ($adminQuickLinks['indiamart_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('indiamart_url','IndiaMart')"
+                                            class="save-btn-sm"><i class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('indiamart_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Etsy --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Etsy"
+                                            data-input="etsy_url">
+                                        <i class="fab fa-etsy" style="color: #f16521; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Etsy:</strong>
+                                        <input type="url" id="etsy_url"
+                                            placeholder="https://www.etsy.com/shop/username" class="link-input"
+                                            value="{{ $quickLinks['etsy_url'] ?? ($adminQuickLinks['etsy_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('etsy_url','Etsy')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('etsy_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- TradeIndia --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="TradeIndia"
+                                            data-input="tradeindia_url">
+                                        <i class="fas fa-handshake"
+                                            style="color: #FF6A00; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">TradeIndia:</strong>
+                                        <input type="url" id="tradeindia_url"
+                                            placeholder="https://www.tradeindia.com/username" class="link-input"
+                                            value="{{ $quickLinks['tradeindia_url'] ?? ($adminQuickLinks['tradeindia_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('tradeindia_url','TradeIndia')"
+                                            class="save-btn-sm"><i class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('tradeindia_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Amazon --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Amazon"
+                                            data-input="amazon_url">
+                                        <i class="fab fa-amazon"
+                                            style="color: #ff9900; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Amazon:</strong>
+                                        <input type="url" id="amazon_url"
+                                            placeholder="https://www.amazon.com/shop/username" class="link-input"
+                                            value="{{ $quickLinks['amazon_url'] ?? ($adminQuickLinks['amazon_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('amazon_url','Amazon')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('amazon_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Flipkart --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Flipkart"
+                                            data-input="flipkart_url">
+                                        <i class="fas fa-store" style="color: #2874f0; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Flipkart:</strong>
+                                        <input type="url" id="flipkart_url"
+                                            placeholder="https://www.flipkart.com/username" class="link-input"
+                                            value="{{ $quickLinks['flipkart_url'] ?? ($adminQuickLinks['flipkart_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('flipkart_url','Flipkart')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('flipkart_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Shopify --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Shopify"
+                                            data-input="shopify_url">
+                                        <i class="fab fa-shopify"
+                                            style="color: #7ab55c; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Shopify:</strong>
+                                        <input type="url" id="shopify_url"
+                                            placeholder="https://username.myshopify.com" class="link-input"
+                                            value="{{ $quickLinks['shopify_url'] ?? ($adminQuickLinks['shopify_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('shopify_url','Shopify')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('shopify_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    {{-- Telegram --}}
-                    <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Telegram"
-                            data-input="telegram_url">
-                        <i class="fab fa-telegram" style="color: #0088cc;"></i>
-                        <strong>Telegram:</strong>
-                        <input type="url" id="telegram_url" placeholder="https://t.me/username" class="link-input"
-                            value="{{ $quickLinks['telegram_url'] ?? ($adminQuickLinks['telegram_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('telegram_url', 'Telegram')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('telegram_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
+                    <br>
+
+                    <!-- ==================== ACCORDION 3: PAYMENT GATEWAYS ==================== -->
+                    <div class="accordion" id="paymentAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#paymentCollapse" aria-expanded="false">
+                                    <i class="fas fa-credit-card me-2" style="color: #667eea;"></i>
+                                    <strong>Payment Gateways</strong>
+                                    <span class="badge bg-primary ms-2">17</span>
+                                </button>
+                            </h2>
+                            <div id="paymentCollapse" class="accordion-collapse collapse"
+                                data-bs-parent="#paymentAccordion">
+                                <div class="accordion-body">
+
+                                    {{-- PayPal --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="PayPal"
+                                            data-input="paypal_url">
+                                        <i class="fab fa-paypal"
+                                            style="color: #003087; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">PayPal:</strong>
+                                        <input type="url" id="paypal_url" placeholder="https://paypal.me/username"
+                                            class="link-input"
+                                            value="{{ $quickLinks['paypal_url'] ?? ($adminQuickLinks['paypal_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('paypal_url','PayPal')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('paypal_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Stripe --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Stripe"
+                                            data-input="stripe_url">
+                                        <i class="fab fa-stripe"
+                                            style="color: #008CDD; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Stripe:</strong>
+                                        <input type="url" id="stripe_url" placeholder="https://stripe.com/username"
+                                            class="link-input"
+                                            value="{{ $quickLinks['stripe_url'] ?? ($adminQuickLinks['stripe_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('stripe_url','Stripe')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('stripe_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+
+                                    {{-- Razorpay --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Razorpay"
+                                            data-input="razorpay_url">
+                                        <i class="fas fa-credit-card"
+                                            style="color: #0C4A6E; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Razorpay:</strong>
+                                        <input type="url" id="razorpay_url"
+                                            placeholder="https://razorpay.com/username" class="link-input"
+                                            value="{{ $quickLinks['razorpay_url'] ?? ($adminQuickLinks['razorpay_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('razorpay_url','Razorpay')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('razorpay_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Payoneer --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Payoneer"
+                                            data-input="payoneer_url">
+                                        <i class="fas fa-globe" style="color: #FF4800; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Payoneer:</strong>
+                                        <input type="url" id="payoneer_url"
+                                            placeholder="https://payoneer.com/username" class="link-input"
+                                            value="{{ $quickLinks['payoneer_url'] ?? ($adminQuickLinks['payoneer_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('payoneer_url','Payoneer')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('payoneer_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Wise --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Wise"
+                                            data-input="wise_url">
+                                        <i class="fas fa-exchange-alt"
+                                            style="color: #00BFA5; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Wise:</strong>
+                                        <input type="url" id="wise_url" placeholder="https://wise.com/username"
+                                            class="link-input"
+                                            value="{{ $quickLinks['wise_url'] ?? ($adminQuickLinks['wise_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('wise_url','Wise')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('wise_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Airwallex --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Airwallex"
+                                            data-input="airwallex_url">
+                                        <i class="fas fa-plane" style="color: #0055FF; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Airwallex:</strong>
+                                        <input type="url" id="airwallex_url"
+                                            placeholder="https://airwallex.com/username" class="link-input"
+                                            value="{{ $quickLinks['airwallex_url'] ?? ($adminQuickLinks['airwallex_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('airwallex_url','Airwallex')"
+                                            class="save-btn-sm"><i class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('airwallex_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Skydo --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Skydo"
+                                            data-input="skydo_url">
+                                        <i class="fas fa-cloud-sun"
+                                            style="color: #3B82F6; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Skydo:</strong>
+                                        <input type="url" id="skydo_url" placeholder="https://skydo.com/username"
+                                            class="link-input"
+                                            value="{{ $quickLinks['skydo_url'] ?? ($adminQuickLinks['skydo_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('skydo_url','Skydo')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('skydo_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Cashfree --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Cashfree"
+                                            data-input="cashfree_url">
+                                        <i class="fas fa-coins" style="color: #00ff91; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Cashfree:</strong>
+                                        <input type="url" id="cashfree_url"
+                                            placeholder="https://cashfree.com/username" class="link-input"
+                                            value="{{ $quickLinks['cashfree_url'] ?? ($adminQuickLinks['cashfree_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('cashfree_url','Cashfree')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('cashfree_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Instamojo --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Instamojo"
+                                            data-input="instamojo_url">
+                                        <i class="fas fa-hand-holding-heart"
+                                            style="color: #FF6A00; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Instamojo:</strong>
+                                        <input type="url" id="instamojo_url"
+                                            placeholder="https://instamojo.com/username" class="link-input"
+                                            value="{{ $quickLinks['instamojo_url'] ?? ($adminQuickLinks['instamojo_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('instamojo_url','Instamojo')"
+                                            class="save-btn-sm"><i class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('instamojo_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- PayU India --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="PayU"
+                                            data-input="payu_url">
+                                        <i class="fas fa-university"
+                                            style="color: #0057B8; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">PayU India:</strong>
+                                        <input type="url" id="payu_url" placeholder="https://payu.in/username"
+                                            class="link-input"
+                                            value="{{ $quickLinks['payu_url'] ?? ($adminQuickLinks['payu_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('payu_url','PayU')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('payu_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Western Union --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="WesternUnion"
+                                            data-input="westernunion_url">
+                                        <i class="fas fa-hand-holding-usd"
+                                            style="color: #FFD700; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Western Union:</strong>
+                                        <input type="url" id="westernunion_url"
+                                            placeholder="https://westernunion.com/username" class="link-input"
+                                            value="{{ $quickLinks['westernunion_url'] ?? ($adminQuickLinks['westernunion_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('westernunion_url','WesternUnion')"
+                                            class="save-btn-sm"><i class="fas fa-save"></i> Save</button>
+                                        <button
+                                            onclick="copyToClipboard(document.getElementById('westernunion_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Google Pay --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="GooglePay"
+                                            data-input="googlepay_url">
+                                        <i class="fab fa-google-pay"
+                                            style="color: #4285F4; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Google Pay:</strong>
+                                        <input type="url" id="googlepay_url" placeholder="Enter Google Pay UPI"
+                                            class="link-input"
+                                            value="{{ $quickLinks['googlepay_url'] ?? ($adminQuickLinks['googlepay_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('googlepay_url','GooglePay')"
+                                            class="save-btn-sm"><i class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('googlepay_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- UPI --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="UPI"
+                                            data-input="upi_url">
+                                        <i class="fas fa-mobile-alt"
+                                            style="color: #00BFA5; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">UPI:</strong>
+                                        <input type="text" id="upi_url" placeholder="example@upi"
+                                            class="link-input"
+                                            value="{{ $quickLinks['upi_url'] ?? ($adminQuickLinks['upi_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('upi_url','UPI')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('upi_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Zelle --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Zelle"
+                                            data-input="zelle_url">
+                                        <i class="fas fa-exchange-alt"
+                                            style="color: #6C1D45; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Zelle:</strong>
+                                        <input type="text" id="zelle_url" placeholder="Enter Zelle email/phone"
+                                            class="link-input"
+                                            value="{{ $quickLinks['zelle_url'] ?? ($adminQuickLinks['zelle_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('zelle_url','Zelle')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('zelle_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Crypto BTC --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="CryptoBTC"
+                                            data-input="crypto_btc_url">
+                                        <i class="fab fa-bitcoin"
+                                            style="color: #F7931A; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Crypto (BTC):</strong>
+                                        <input type="text" id="crypto_btc_url" placeholder="Enter BTC Address"
+                                            class="link-input"
+                                            value="{{ $quickLinks['crypto_btc_url'] ?? ($adminQuickLinks['crypto_btc_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('crypto_btc_url','CryptoBTC')"
+                                            class="save-btn-sm"><i class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('crypto_btc_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Crypto USDT --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="CryptoUSDT"
+                                            data-input="crypto_usdt_url">
+                                        <i class="fas fa-coins" style="color: #26A17B; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Crypto (USDT):</strong>
+                                        <input type="text" id="crypto_usdt_url" placeholder="Enter USDT Address"
+                                            class="link-input"
+                                            value="{{ $quickLinks['crypto_usdt_url'] ?? ($adminQuickLinks['crypto_usdt_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('crypto_usdt_url','CryptoUSDT')"
+                                            class="save-btn-sm"><i class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('crypto_usdt_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                    {{-- Bank Details --}}
+                                    <div class="app-link quick-link-item">
+                                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Bank"
+                                            data-input="bank_url">
+                                        <i class="fas fa-university"
+                                            style="color: #1a237e; font-size: 20px; width: 30px;"></i>
+                                        <strong style="min-width: 80px;">Bank Details:</strong>
+                                        <input type="text" id="bank_url" placeholder="Enter Bank Account Details"
+                                            class="link-input"
+                                            value="{{ $quickLinks['bank_url'] ?? ($adminQuickLinks['bank_url'] ?? '') }}">
+                                        <button onclick="saveQuickLink('bank_url','Bank')" class="save-btn-sm"><i
+                                                class="fas fa-save"></i> Save</button>
+                                        <button onclick="copyToClipboard(document.getElementById('bank_url').value)"
+                                            class="copy-btn-sm"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    {{-- Facebook --}}
-                    <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Facebook"
-                            data-input="facebook_url">
-                        <i class="fab fa-facebook" style="color: #1877f2;"></i>
-                        <strong>Facebook:</strong>
-                        <input type="url" id="facebook_url" placeholder="https://facebook.com/username"
-                            class="link-input"
-                            value="{{ $quickLinks['facebook_url'] ?? ($adminQuickLinks['facebook_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('facebook_url', 'Facebook')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('facebook_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
-                    {{-- YouTube --}}
-                    <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="YouTube"
-                            data-input="youtube_url">
-                        <i class="fab fa-youtube" style="color: #ff0000;"></i>
-                        <strong>YouTube:</strong>
-                        <input type="url" id="youtube_url" placeholder="https://youtube.com/@username"
-                            class="link-input"
-                            value="{{ $quickLinks['youtube_url'] ?? ($adminQuickLinks['youtube_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('youtube_url', 'YouTube')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('youtube_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
-                    {{-- LinkedIn --}}
-                    <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="LinkedIn"
-                            data-input="linkedin_url">
-                        <i class="fab fa-linkedin" style="color: #0077b5;"></i>
-                        <strong>LinkedIn:</strong>
-                        <input type="url" id="linkedin_url" placeholder="https://linkedin.com/in/username"
-                            class="link-input"
-                            value="{{ $quickLinks['linkedin_url'] ?? ($adminQuickLinks['linkedin_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('linkedin_url', 'LinkedIn')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('linkedin_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
-                    {{-- Instagram --}}
-                    <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Instagram"
-                            data-input="instagram_url">
-                        <i class="fab fa-instagram" style="color: #E4405F;"></i>
-                        <strong>Instagram:</strong>
-                        <input type="url" id="instagram_url" placeholder="https://instagram.com/username"
-                            class="link-input"
-                            value="{{ $quickLinks['instagram_url'] ?? ($adminQuickLinks['instagram_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('instagram_url', 'Instagram')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('instagram_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
-                    {{-- X --}}
-                    <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="X" data-input="x_url">
-                        <i class="fab fa-x-twitter" style="color: #000;"></i>
-                        <strong>X:</strong>
-                        <input type="url" id="x_url" placeholder="https://x.com/username" class="link-input"
-                            value="{{ $quickLinks['x_url'] ?? ($adminQuickLinks['x_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('x_url', 'X')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('x_url').value)" class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
-                    {{-- Threads --}}
-                    <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Threads"
-                            data-input="threads_url">
-                        <i class="fab fa-threads" style="color: #000;"></i>
-                        <strong>Threads:</strong>
-                        <input type="url" id="threads_url" placeholder="https://threads.net/@username"
-                            class="link-input"
-                            value="{{ $quickLinks['threads_url'] ?? ($adminQuickLinks['threads_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('threads_url', 'Threads')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('threads_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
-                    {{-- Snapchat --}}
-                    <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Snapchat"
-                            data-input="snapchat_url">
-                        <i class="fab fa-snapchat" style="color: #FFFC00;"></i>
-                        <strong>Snapchat:</strong>
-                        <input type="url" id="snapchat_url" placeholder="https://snapchat.com/add/username"
-                            class="link-input"
-                            value="{{ $quickLinks['snapchat_url'] ?? ($adminQuickLinks['snapchat_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('snapchat_url', 'Snapchat')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('snapchat_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
-                    {{-- Messenger --}}
-                    <div class="app-link quick-link-item">
-                        <input type="checkbox" class="qr-platform-checkbox" data-platform="Messenger"
-                            data-input="messenger_url">
-                        <i class="fab fa-facebook-messenger" style="color: #0084FF;"></i>
-                        <strong>Messenger:</strong>
-                        <input type="url" id="messenger_url" placeholder="https://m.me/username" class="link-input"
-                            value="{{ $quickLinks['messenger_url'] ?? ($adminQuickLinks['messenger_url'] ?? '') }}">
-                        <button onclick="saveQuickLink('messenger_url', 'Messenger')" class="save-btn-sm">
-                            <i class="fas fa-save"></i> Save
-                        </button>
-                        <button onclick="copyToClipboard(document.getElementById('messenger_url').value)"
-                            class="copy-btn-sm">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-
-                    {{-- Reddit --}}
-                    <!--<div class="app-link quick-link-item">-->
-                    <!--    <input type="checkbox" class="qr-platform-checkbox" data-platform="Reddit"-->
-                    <!--        data-input="reddit_url">-->
-                    <!--    <i class="fab fa-reddit" style="color: #FF4500;"></i>-->
-                    <!--    <strong>Reddit:</strong>-->
-                    <!--    <input type="url" id="reddit_url" placeholder="https://reddit.com/user/username"-->
-                    <!--        class="link-input"-->
-                    <!--        value="{{ $quickLinks['reddit_url'] ?? ($adminQuickLinks['reddit_url'] ?? '') }}">-->
-                    <!--    <button onclick="saveQuickLink('reddit_url', 'Reddit')" class="save-btn-sm">-->
-                    <!--        <i class="fas fa-save"></i> Save-->
-                    <!--    </button>-->
-                    <!--    <button onclick="copyToClipboard(document.getElementById('reddit_url').value)"-->
-                    <!--        class="copy-btn-sm">-->
-                    <!--        <i class="fas fa-copy"></i> Copy-->
-                    <!--    </button>-->
-                    <!--</div>-->
-
-                    {{-- Discord --}}
-                    <!--<div class="app-link quick-link-item">-->
-                    <!--    <input type="checkbox" class="qr-platform-checkbox" data-platform="Discord"-->
-                    <!--        data-input="discord_url">-->
-                    <!--    <i class="fab fa-discord" style="color: #5865F2;"></i>-->
-                    <!--    <strong>Discord:</strong>-->
-                    <!--    <input type="url" id="discord_url" placeholder="https://discord.gg/yourserver"-->
-                    <!--        class="link-input"-->
-                    <!--        value="{{ $quickLinks['discord_url'] ?? ($adminQuickLinks['discord_url'] ?? '') }}">-->
-                    <!--    <button onclick="saveQuickLink('discord_url', 'Discord')" class="save-btn-sm">-->
-                    <!--        <i class="fas fa-save"></i> Save-->
-                    <!--    </button>-->
-                    <!--    <button onclick="copyToClipboard(document.getElementById('discord_url').value)"-->
-                    <!--        class="copy-btn-sm">-->
-                    <!--        <i class="fas fa-copy"></i> Copy-->
-                    <!--    </button>-->
-                    <!--</div>-->
-
-                    {{-- Pinterest --}}
-                    <!--<div class="app-link quick-link-item">-->
-                    <!--    <input type="checkbox" class="qr-platform-checkbox" data-platform="Pinterest"-->
-                    <!--        data-input="pinterest_url">-->
-                    <!--    <i class="fab fa-pinterest" style="color: #E60023;"></i>-->
-                    <!--    <strong>Pinterest:</strong>-->
-                    <!--    <input type="url" id="pinterest_url" placeholder="https://pinterest.com/username"-->
-                    <!--        class="link-input"-->
-                    <!--        value="{{ $quickLinks['pinterest_url'] ?? ($adminQuickLinks['pinterest_url'] ?? '') }}">-->
-                    <!--    <button onclick="saveQuickLink('pinterest_url', 'Pinterest')" class="save-btn-sm">-->
-                    <!--        <i class="fas fa-save"></i> Save-->
-                    <!--    </button>-->
-                    <!--    <button onclick="copyToClipboard(document.getElementById('pinterest_url').value)"-->
-                    <!--        class="copy-btn-sm">-->
-                    <!--        <i class="fas fa-copy"></i> Copy-->
-                    <!--    </button>-->
-                    <!--</div>-->
-
-                    {{-- Quora --}}
-                    <!--<div class="app-link quick-link-item">-->
-                    <!--    <input type="checkbox" class="qr-platform-checkbox" data-platform="Quora"-->
-                    <!--        data-input="quora_url">-->
-                    <!--    <i class="fab fa-quora" style="color: #B92B27;"></i>-->
-                    <!--    <strong>Quora:</strong>-->
-                    <!--    <input type="url" id="quora_url" placeholder="https://quora.com/profile/username"-->
-                    <!--        class="link-input"-->
-                    <!--        value="{{ $quickLinks['quora_url'] ?? ($adminQuickLinks['quora_url'] ?? '') }}">-->
-                    <!--    <button onclick="saveQuickLink('quora_url', 'Quora')" class="save-btn-sm">-->
-                    <!--        <i class="fas fa-save"></i> Save-->
-                    <!--    </button>-->
-                    <!--    <button onclick="copyToClipboard(document.getElementById('quora_url').value)" class="copy-btn-sm">-->
-                    <!--        <i class="fas fa-copy"></i> Copy-->
-                    <!--    </button>-->
-                    <!--</div>-->
-
-                    {{-- Twitch --}}
-                    <!--<div class="app-link quick-link-item">-->
-                    <!--    <input type="checkbox" class="qr-platform-checkbox" data-platform="Twitch"-->
-                    <!--        data-input="twitch_url">-->
-                    <!--    <i class="fab fa-twitch" style="color: #9146FF;"></i>-->
-                    <!--    <strong>Twitch:</strong>-->
-                    <!--    <input type="url" id="twitch_url" placeholder="https://twitch.tv/username"-->
-                    <!--        class="link-input"-->
-                    <!--        value="{{ $quickLinks['twitch_url'] ?? ($adminQuickLinks['twitch_url'] ?? '') }}">-->
-                    <!--    <button onclick="saveQuickLink('twitch_url', 'Twitch')" class="save-btn-sm">-->
-                    <!--        <i class="fas fa-save"></i> Save-->
-                    <!--    </button>-->
-                    <!--    <button onclick="copyToClipboard(document.getElementById('twitch_url').value)"-->
-                    <!--        class="copy-btn-sm">-->
-                    <!--        <i class="fas fa-copy"></i> Copy-->
-                    <!--    </button>-->
-                    <!--</div>-->
-
-                    {{-- Rumble --}}
-                    <!--<div class="app-link quick-link-item">-->
-                    <!--    <input type="checkbox" class="qr-platform-checkbox" data-platform="Rumble"-->
-                    <!--        data-input="rumble_url">-->
-                    <!--    <i class="fas fa-video" style="color: #85C742;"></i>-->
-                    <!--    <strong>Rumble:</strong>-->
-                    <!--    <input type="url" id="rumble_url" placeholder="https://rumble.com/user/username"-->
-                    <!--        class="link-input"-->
-                    <!--        value="{{ $quickLinks['rumble_url'] ?? ($adminQuickLinks['rumble_url'] ?? '') }}">-->
-                    <!--    <button onclick="saveQuickLink('rumble_url', 'Rumble')" class="save-btn-sm">-->
-                    <!--        <i class="fas fa-save"></i> Save-->
-                    <!--    </button>-->
-                    <!--    <button onclick="copyToClipboard(document.getElementById('rumble_url').value)"-->
-                    <!--        class="copy-btn-sm">-->
-                    <!--        <i class="fas fa-copy"></i> Copy-->
-                    <!--    </button>-->
-                    <!--</div>-->
-
-                    {{-- Viber --}}
-                    <!--<div class="app-link quick-link-item">-->
-                    <!--    <input type="checkbox" class="qr-platform-checkbox" data-platform="Viber"-->
-                    <!--        data-input="viber_url">-->
-                    <!--    <i class="fab fa-viber" style="color: #7360F2;"></i>-->
-                    <!--    <strong>Viber:</strong>-->
-                    <!--    <input type="url" id="viber_url" placeholder="https://invite.viber.com/?g=group"-->
-                    <!--        class="link-input"-->
-                    <!--        value="{{ $quickLinks['viber_url'] ?? ($adminQuickLinks['viber_url'] ?? '') }}">-->
-                    <!--    <button onclick="saveQuickLink('viber_url', 'Viber')" class="save-btn-sm">-->
-                    <!--        <i class="fas fa-save"></i> Save-->
-                    <!--    </button>-->
-                    <!--    <button onclick="copyToClipboard(document.getElementById('viber_url').value)" class="copy-btn-sm">-->
-                    <!--        <i class="fas fa-copy"></i> Copy-->
-                    <!--    </button>-->
-                    <!--</div>-->
                 </div>
 
+
                 <!-- Custom Social Links Section - Dynamic Links -->
-                <div style="margin-top: 20px;">
+                {{-- <div style="margin-top: 20px;">
                     <div id="customLinksContainer">
                         @foreach ($socialLinks as $link)
                             <div class="app-link quick-link-item" id="link-row-{{ $link->id }}"
                                 data-icon-type="{{ $link->icon_type }}">
                                 <input type="checkbox" class="qr-platform-checkbox"
                                     data-platform="{{ $link->platform_name }}" data-input="url_{{ $link->id }}">
+
                                 <div class="platform-icon">
                                     {!! getPlatformIconHtml($link) !!}
                                 </div>
-                                <!--<strong>{{ $link->platform_name }}:</strong>-->
 
-                                <input type="text" id="platform_name_{{ $link->id }}" class="link-input platform-name-input" value="{{ $link->platform_name }}" placeholder="Platform Name" style="max-width:180px;">
+                                <input type="text" id="platform_name_{{ $link->id }}"
+                                    class="link-input platform-name-input" value="{{ $link->platform_name }}"
+                                    placeholder="Platform Name" style="max-width:180px;">
                                 <input type="url" id="url_{{ $link->id }}" class="link-input"
                                     value="{{ $link->platform_url }}" placeholder="https://...">
                                 <button onclick="saveCustomLink({{ $link->id }}, '{{ $link->platform_name }}')"
@@ -1080,7 +1499,126 @@
                                     class="copy-btn-sm">
                                     <i class="fas fa-copy"></i> Copy
                                 </button>
-                                <button onclick="deleteCustomLink({{ $link->id }})" class="save-btn-sm" style="background:#dc3545;">
+                                <button onclick="deleteCustomLink({{ $link->id }})" class="save-btn-sm"
+                                    style="background:#dc3545;">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        @endforeach
+
+                    </div>
+                </div> --}}
+
+                <!-- Custom Social Links Section - Dynamic Links -->
+                <div style="margin-top: 20px;">
+                    <div id="customLinksContainer">
+                        @php
+                            $allPredefined = [
+                                // Social
+                                'whatsapp',
+                                'telegram',
+                                'facebook',
+                                'youtube',
+                                'linkedin',
+                                'instagram',
+                                'x',
+                                'threads',
+                                'snapchat',
+                                'messenger',
+                                'reddit',
+                                'discord',
+                                'pinterest',
+                                'twitch',
+                                'quora',
+                                'rumble',
+                                'viber',
+                                'tiktok',
+                                'twitter',
+                                'skype',
+                                'slack',
+                                'medium',
+                                'tumblr',
+                                'flickr',
+                                'soundcloud',
+                                'vimeo',
+                                'spotify',
+                                'github',
+                                'stackoverflow',
+                                'behance',
+                                'dribbble',
+                                // Ecommerce
+                                'ebay',
+                                'amazon',
+                                'alibaba',
+                                'indiamart',
+                                'tradeindia',
+                                'etsy',
+                                'flipkart',
+                                'shopify',
+                                'walmart',
+                                'aliexpress',
+                                'meesho',
+                                'nykaa',
+                                'myntra',
+                                'snapdeal',
+                                'ajio',
+                                // Payment
+                                'paypal',
+                                'stripe',
+                                'razorpay',
+                                'payoneer',
+                                'wise',
+                                'airwallex',
+                                'skydo',
+                                'cashfree',
+                                'instamojo',
+                                'payu',
+                                'westernunion',
+                                'googlepay',
+                                'applepay',
+                                'samsungpay',
+                                'phonepe',
+                                'paytm',
+                                'amazonpay',
+                                'upi',
+                                'zelle',
+                                'venmo',
+                                'cryptobtc',
+                                'cryptousdt',
+                                'crypto_eth',
+                                'bank',
+                            ];
+                            $customLinks = $socialLinks->filter(
+                                fn($link) => !in_array(strtolower($link->platform_name), $allPredefined),
+                            );
+                        @endphp
+
+                        @foreach ($customLinks as $link)
+                            <div class="app-link quick-link-item" id="link-row-{{ $link->id }}"
+                                data-icon-type="{{ $link->icon_type }}">
+                                <input type="checkbox" class="qr-platform-checkbox"
+                                    data-platform="{{ $link->platform_name }}" data-input="url_{{ $link->id }}">
+
+                                <div class="platform-icon">
+                                    {!! getPlatformIconHtml($link) !!}
+                                </div>
+
+                                <input type="text" id="platform_name_{{ $link->id }}"
+                                    class="link-input platform-name-input" value="{{ $link->platform_name }}"
+                                    placeholder="Platform Name" style="max-width:180px;">
+                                <input type="url" id="url_{{ $link->id }}" class="link-input"
+                                    value="{{ $link->platform_url }}" placeholder="https://...">
+                                <button onclick="saveCustomLink({{ $link->id }}, '{{ $link->platform_name }}')"
+                                    class="save-btn-sm">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button
+                                    onclick="copyToClipboard(document.getElementById('url_{{ $link->id }}').value)"
+                                    class="copy-btn-sm">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button onclick="deleteCustomLink({{ $link->id }})" class="save-btn-sm"
+                                    style="background:#dc3545;">
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
                             </div>
@@ -1138,17 +1676,87 @@
                                 <label class="form-label small fw-semibold">Platform Dropdown</label>
                                 <select class="form-select" id="platformDropdown">
                                     <option value="">-- Select Platform --</option>
-                                    <option class="form-select" value="WhatsApp">🟢 WhatsApp</option>
-                                    <option class="form-select" value="Instagram">📸 Instagram</option>
-                                    <option class="form-select" value="Facebook">🔵 Facebook</option>
-                                    <option class="form-select" value="Telegram">✈️ Telegram</option>
-                                    <option class="form-select" value="LinkedIn">💼 LinkedIn</option>
-                                    <option class="form-select" value="YouTube">▶️ YouTube</option>
-                                    <option class="form-select" value="Website">🌐 Website</option>
-                                    <option class="form-select" value="Twitter/X">𝕏 Twitter/X</option>
-                                    <option class="form-select" value="Pinterest">📌 Pinterest</option>
-                                    <option class="form-select" value="Snapchat">👻 Snapchat</option>
-                                    <option class="form-select" value="Messenger">💬 Messenger</option>
+
+                                    <!-- ===== SOCIAL MEDIA PLATFORMS ===== -->
+                                    <optgroup label="Social Media">
+                                        <option value="WhatsApp">🟢 WhatsApp</option>
+                                        <option value="Instagram">📸 Instagram</option>
+                                        <option value="Facebook">🔵 Facebook</option>
+                                        <option value="Telegram">✈️ Telegram</option>
+                                        <option value="LinkedIn">💼 LinkedIn</option>
+                                        <option value="YouTube">▶️ YouTube</option>
+                                        <option value="Twitter/X">𝕏 Twitter/X</option>
+                                        <option value="Threads">🧵 Threads</option>
+                                        <option value="TikTok">🎵 TikTok</option>
+                                        <option value="Snapchat">👻 Snapchat</option>
+                                        <option value="Messenger">💬 Messenger</option>
+                                        <option value="Pinterest">📌 Pinterest</option>
+                                        <option value="Reddit">🤖 Reddit</option>
+                                        <option value="Discord">🎮 Discord</option>
+                                        <option value="Twitch">🎮 Twitch</option>
+                                        <option value="Quora">❓ Quora</option>
+                                        <option value="Medium">✍️ Medium</option>
+                                        <option value="Tumblr">📝 Tumblr</option>
+                                        <option value="Viber">📱 Viber</option>
+                                        <option value="Skype">💬 Skype</option>
+                                        <option value="Slack">💼 Slack</option>
+                                        <option value="Rumble">📹 Rumble</option>
+                                        <option value="Flickr">📷 Flickr</option>
+                                        <option value="SoundCloud">🎵 SoundCloud</option>
+                                        <option value="Vimeo">🎬 Vimeo</option>
+                                        <option value="Spotify">🎶 Spotify</option>
+                                        <option value="GitHub">💻 GitHub</option>
+                                        <option value="Stack Overflow">📚 Stack Overflow</option>
+                                        <option value="Behance">🎨 Behance</option>
+                                        <option value="Dribbble">🏀 Dribbble</option>
+                                    </optgroup>
+
+                                    <!-- ===== ECOMMERCE PLATFORMS ===== -->
+                                    <optgroup label="Ecommerce">
+                                        <option value="eBay">🛒 eBay</option>
+                                        <option value="Amazon">📦 Amazon</option>
+                                        <option value="Alibaba">🌐 Alibaba</option>
+                                        <option value="IndiaMart">🇮🇳 IndiaMart</option>
+                                        <option value="TradeIndia">🇮🇳 TradeIndia</option>
+                                        <option value="Etsy">🎨 Etsy</option>
+                                        <option value="Flipkart">🛍️ Flipkart</option>
+                                        <option value="Shopify">🛒 Shopify</option>
+                                        <option value="Walmart">🛒 Walmart</option>
+                                        <option value="AliExpress">📦 AliExpress</option>
+                                        <option value="Meesho">🛍️ Meesho</option>
+                                        <option value="Nykaa">💄 Nykaa</option>
+                                        <option value="Myntra">👗 Myntra</option>
+                                        <option value="Snapdeal">🛒 Snapdeal</option>
+                                        <option value="Ajio">👕 Ajio</option>
+                                    </optgroup>
+
+                                    <!-- ===== PAYMENT GATEWAYS ===== -->
+                                    <optgroup label="Payment Gateways">
+                                        <option value="PayPal">💳 PayPal</option>
+                                        <option value="Stripe">💳 Stripe</option>
+                                        <option value="Razorpay">💳 Razorpay</option>
+                                        <option value="Payoneer">💳 Payoneer</option>
+                                        <option value="Wise">💳 Wise</option>
+                                        <option value="Airwallex">💳 Airwallex</option>
+                                        <option value="Skydo">💳 Skydo</option>
+                                        <option value="Cashfree">💳 Cashfree</option>
+                                        <option value="Instamojo">💳 Instamojo</option>
+                                        <option value="PayU">💳 PayU India</option>
+                                        <option value="WesternUnion">💳 Western Union</option>
+                                        <option value="GooglePay">📱 Google Pay</option>
+                                        <option value="ApplePay">📱 Apple Pay</option>
+                                        <option value="SamsungPay">📱 Samsung Pay</option>
+                                        <option value="PhonePe">📱 PhonePe</option>
+                                        <option value="Paytm">📱 Paytm</option>
+                                        <option value="AmazonPay">📱 Amazon Pay</option>
+                                        <option value="UPI">📱 UPI</option>
+                                        <option value="Zelle">📱 Zelle</option>
+                                        <option value="Venmo">📱 Venmo</option>
+                                        <option value="CryptoBTC">₿ Crypto (BTC)</option>
+                                        <option value="CryptoUSDT">₿ Crypto (USDT)</option>
+                                        <option value="CryptoETH">₿ Crypto (ETH)</option>
+                                        <option value="Bank">🏦 Bank Details</option>
+                                    </optgroup>
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -1223,38 +1831,64 @@
             const iconMap = {
                 'whatsapp': 'fab fa-whatsapp',
                 'telegram': 'fab fa-telegram',
-                'instagram': 'fab fa-instagram',
                 'facebook': 'fab fa-facebook',
                 'youtube': 'fab fa-youtube',
                 'linkedin': 'fab fa-linkedin',
-                'twitter': 'fab fa-twitter',
+                'instagram': 'fab fa-instagram',
                 'x': 'fab fa-x-twitter',
-                'tiktok': 'fab fa-tiktok',
+                'twitter': 'fab fa-twitter',
+                'threads': 'fab fa-threads',
                 'snapchat': 'fab fa-snapchat',
                 'reddit': 'fab fa-reddit',
                 'discord': 'fab fa-discord',
                 'pinterest': 'fab fa-pinterest',
                 'twitch': 'fab fa-twitch',
                 'quora': 'fab fa-quora',
-                'github': 'fab fa-github',
-                'spotify': 'fab fa-spotify',
+                'messenger': 'fab fa-facebook-messenger',
+                'rumble': 'fas fa-video',
+                'viber': 'fab fa-viber',
+                'tiktok': 'fab fa-tiktok',
+                'skype': 'fab fa-skype',
+                'slack': 'fab fa-slack',
                 'medium': 'fab fa-medium',
-                'stackoverflow': 'fab fa-stack-overflow',
-                'behance': 'fab fa-behance',
-                'dribbble': 'fab fa-dribbble',
+                'tumblr': 'fab fa-tumblr',
                 'flickr': 'fab fa-flickr',
                 'soundcloud': 'fab fa-soundcloud',
                 'vimeo': 'fab fa-vimeo',
-                'vk': 'fab fa-vk',
-                'weibo': 'fab fa-weibo',
-                'tumblr': 'fab fa-tumblr',
-                'foursquare': 'fab fa-foursquare',
-                'slack': 'fab fa-slack',
-                'skype': 'fab fa-skype',
-                'viber': 'fab fa-viber',
-                'messenger': 'fab fa-facebook-messenger',
-                'threads': 'fab fa-threads',
-                'rumble': 'fas fa-video'
+                'spotify': 'fab fa-spotify',
+                'github': 'fab fa-github',
+                'stackoverflow': 'fab fa-stack-overflow',
+                'behance': 'fab fa-behance',
+                'dribbble': 'fab fa-dribbble',
+
+                // Ecommerce
+                'ebay': 'fab fa-ebay',
+                'amazon': 'fab fa-amazon',
+                'etsy': 'fab fa-etsy',
+                'shopify': 'fab fa-shopify',
+                'flipkart': 'fas fa-store',
+                'walmart': 'fas fa-store',
+                'aliexpress': 'fas fa-globe',
+                'meesho': 'fas fa-shopping-bag',
+                'nykaa': 'fas fa-paint-brush',
+                'myntra': 'fas fa-shopping-bag',
+                'snapdeal': 'fas fa-shopping-cart',
+                'ajio': 'fas fa-tshirt',
+
+                // Payment Gateways
+                'paypal': 'fab fa-paypal',
+                'stripe': 'fab fa-stripe',
+                'googlepay': 'fab fa-google-pay',
+                'applepay': 'fab fa-apple-pay',
+                'amazonpay': 'fab fa-amazon-pay',
+                'upi': 'fas fa-mobile-alt',
+                'zelle': 'fas fa-exchange-alt',
+                'venmo': 'fas fa-hand-holding-usd',
+                'cryptobtc': 'fab fa-bitcoin',
+                'crypto_eth': 'fab fa-ethereum',
+                'cryptousdt': 'fas fa-coins',
+                'bank': 'fas fa-university',
+
             };
             const platformLower = platformName.toLowerCase();
             if (iconType === 'custom') {
@@ -1510,24 +2144,82 @@
         }
 
         const qrPlatformIcons = {
+            // ===== SOCIAL MEDIA =====
             whatsapp: 'fab fa-whatsapp',
             telegram: 'fab fa-telegram',
-            instagram: 'fab fa-instagram',
             facebook: 'fab fa-facebook',
             youtube: 'fab fa-youtube',
             linkedin: 'fab fa-linkedin',
+            instagram: 'fab fa-instagram',
             x: 'fab fa-x-twitter',
             twitter: 'fab fa-twitter',
+            threads: 'fab fa-threads',
             snapchat: 'fab fa-snapchat',
             reddit: 'fab fa-reddit',
             discord: 'fab fa-discord',
             pinterest: 'fab fa-pinterest',
+            twitch: 'fab fa-twitch',
             quora: 'fab fa-quora',
             messenger: 'fab fa-facebook-messenger',
-            twitch: 'fab fa-twitch',
             rumble: 'fas fa-video',
             viber: 'fab fa-viber',
-            threads: 'fab fa-threads'
+            tiktok: 'fab fa-tiktok',
+            skype: 'fab fa-skype',
+            slack: 'fab fa-slack',
+            medium: 'fab fa-medium',
+            tumblr: 'fab fa-tumblr',
+            flickr: 'fab fa-flickr',
+            soundcloud: 'fab fa-soundcloud',
+            vimeo: 'fab fa-vimeo',
+            spotify: 'fab fa-spotify',
+            github: 'fab fa-github',
+            stackoverflow: 'fab fa-stack-overflow',
+            behance: 'fab fa-behance',
+            dribbble: 'fab fa-dribbble',
+
+            // ===== ECOMMERCE =====
+            ebay: 'fab fa-ebay',
+            amazon: 'fab fa-amazon',
+            etsy: 'fab fa-etsy',
+            shopify: 'fab fa-shopify',
+            flipkart: 'fas fa-store',
+            walmart: 'fas fa-store',
+            aliexpress: 'fas fa-globe',
+            meesho: 'fas fa-shopping-bag',
+            nykaa: 'fas fa-paint-brush',
+            myntra: 'fas fa-shopping-bag',
+            snapdeal: 'fas fa-shopping-cart',
+            ajio: 'fas fa-tshirt',
+            // For platforms without FA icons, use generic equivalents
+            alibaba: 'fas fa-globe-asia',
+            indiamart: 'fas fa-building',
+            tradeindia: 'fas fa-handshake',
+
+            // ===== PAYMENT GATEWAYS =====
+            paypal: 'fab fa-paypal',
+            stripe: 'fab fa-stripe',
+            applepay: 'fab fa-apple-pay',
+            amazonpay: 'fab fa-amazon-pay',
+            googlepay: 'fab fa-google-pay',
+            upi: 'fas fa-mobile-alt',
+            zelle: 'fas fa-exchange-alt',
+            venmo: 'fas fa-hand-holding-usd',
+            cryptobtc: 'fab fa-bitcoin',
+            crypto_eth: 'fab fa-ethereum',
+            cryptousdt: 'fas fa-coins',
+            bank: 'fas fa-university',
+            razorpay: 'fas fa-credit-card',
+            payoneer: 'fas fa-globe',
+            wise: 'fas fa-exchange-alt',
+            airwallex: 'fas fa-plane',
+            skydo: 'fas fa-cloud-sun',
+            cashfree: 'fas fa-coins',
+            instamojo: 'fas fa-hand-holding-heart',
+            payu: 'fas fa-university',
+            westernunion: 'fas fa-hand-holding-usd',
+            samsungpay: 'fas fa-mobile-alt',
+            phonepe: 'fas fa-phone',
+            paytm: 'fas fa-mobile-alt'
         };
         const customPlatformLogo = '/images/cm_logo.png';
 
@@ -1546,8 +2238,6 @@
             }
 
             qrs.forEach(function(qr) {
-                console.log('QR Object:', qr);
-                console.log('QR ID:', qr.id);
                 let platformIconsHtml = '';
                 if (qr.links) {
                     qr.links.forEach(function(link) {
@@ -1663,27 +2353,28 @@
             button.closest('tr').remove();
         }
 
-        function copyQrLink(element){
+        function copyQrLink(element) {
             const link = element.dataset.link;
             navigator.clipboard.writeText(link)
-            .then(() => {
-                showToast('Link copied successfully');
-                // optional visual feedback
-                const original = element.innerHTML;
-                element.innerHTML =
-                    '<i class="fas fa-check text-success"></i> Copied!';
-                setTimeout(() => {
-                    element.innerHTML = original;
-                }, 10);
-            })
-            .catch(() => {
-                alert('Failed to copy link');
-            });
+                .then(() => {
+                    showToast('Link copied successfully');
+                    // optional visual feedback
+                    const original = element.innerHTML;
+                    element.innerHTML =
+                        '<i class="fas fa-check text-success"></i> Copied!';
+                    setTimeout(() => {
+                        element.innerHTML = original;
+                    }, 10);
+                })
+                .catch(() => {
+                    alert('Failed to copy link');
+                });
         }
 
         function getPlatformIcon(platform) {
             platform = platform.toLowerCase();
             const icons = {
+                // ===== SOCIAL MEDIA =====
                 whatsapp: '<i class="fab fa-whatsapp"></i>',
                 telegram: '<i class="fab fa-telegram"></i>',
                 instagram: '<i class="fab fa-instagram"></i>',
@@ -1717,7 +2408,51 @@
                 viber: '<i class="fab fa-viber"></i>',
                 messenger: '<i class="fab fa-facebook-messenger"></i>',
                 threads: '<i class="fab fa-threads"></i>',
-                rumble: '<i class="fas fa-video"></i>'
+                rumble: '<i class="fas fa-video"></i>',
+
+                // ===== ECOMMERCE =====
+                ebay: '<i class="fab fa-ebay"></i>',
+                amazon: '<i class="fab fa-amazon"></i>',
+                etsy: '<i class="fab fa-etsy"></i>',
+                shopify: '<i class="fab fa-shopify"></i>',
+                flipkart: '<i class="fas fa-store"></i>',
+                walmart: '<i class="fas fa-store"></i>',
+                aliexpress: '<i class="fas fa-globe"></i>',
+                meesho: '<i class="fas fa-shopping-bag"></i>',
+                nykaa: '<i class="fas fa-paint-brush"></i>',
+                myntra: '<i class="fas fa-shopping-bag"></i>',
+                snapdeal: '<i class="fas fa-shopping-cart"></i>',
+                ajio: '<i class="fas fa-tshirt"></i>',
+                alibaba: '<i class="fas fa-globe-asia"></i>',
+                indiamart: '<i class="fas fa-building"></i>',
+                tradeindia: '<i class="fas fa-handshake"></i>',
+
+                // ===== PAYMENT GATEWAYS =====
+                paypal: '<i class="fab fa-paypal"></i>',
+                stripe: '<i class="fab fa-stripe"></i>',
+                applepay: '<i class="fab fa-apple-pay"></i>',
+                amazonpay: '<i class="fab fa-amazon-pay"></i>',
+                googlepay: '<i class="fab fa-google-pay"></i>',
+                upi: '<i class="fas fa-mobile-alt"></i>',
+                zelle: '<i class="fas fa-exchange-alt"></i>',
+                venmo: '<i class="fas fa-hand-holding-usd"></i>',
+                // Generic icons for payment gateways without dedicated FA icons
+                cryptobtc: '<i class="fab fa-bitcoin"></i>',
+                crypto_eth: '<i class="fab fa-ethereum"></i>',
+                cryptousdt: '<i class="fas fa-coins"></i>',
+                bank: '<i class="fas fa-university"></i>',
+                razorpay: '<i class="fas fa-credit-card"></i>',
+                payoneer: '<i class="fas fa-globe"></i>',
+                wise: '<i class="fas fa-exchange-alt"></i>',
+                airwallex: '<i class="fas fa-plane-departure"></i>',
+                skydo: '<i class="fas fa-cloud-sun"></i>',
+                cashfree: '<i class="fas fa-coins"></i>',
+                instamojo: '<i class="fas fa-hand-holding-heart"></i>',
+                payu: '<i class="fas fa-university"></i>',
+                westernunion: '<i class="fas fa-hand-holding-usd"></i>',
+                samsungpay: '<i class="fas fa-mobile-alt"></i>',
+                phonepe: '<i class="fas fa-phone"></i>',
+                paytm: '<i class="fas fa-mobile-alt"></i>',
             };
 
             return icons[platform] ?? '<img src="/images/cm_logo.png" style="width:22px;height:22px;">';
@@ -1849,28 +2584,27 @@
                 });
         }
 
-        function updateQRTitle(qrId, title)
-        {
+        function updateQRTitle(qrId, title) {
             fetch('{{ route('update-multi-qr-title') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify({
-                    qr_id: qrId,
-                    title: title
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        qr_id: qrId,
+                        title: title
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.success){
-                    console.log('QR Title Saved');
-                }
-            })
-            .catch(error => {
-                console.error(error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('QR Title Saved');
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                });
         }
 
         function deleteQR(qrId) {
@@ -1915,8 +2649,7 @@
         }
 
 
-        function loadUserQRs()
-        {
+        function loadUserQRs() {
             $.ajax({
                 url: "{{ route('get-multi-qr-codes') }}",
                 type: "GET",
@@ -1970,8 +2703,7 @@
         }
 
 
-        function saveCustomLink(linkId)
-        {
+        function saveCustomLink(linkId) {
             let platformNameInput =
                 document.getElementById('platform_name_' + linkId);
 
@@ -1987,36 +2719,32 @@
             let platformUrl = platformUrlInput.value.trim();
 
             fetch('{{ route('user-social-links-update-secondary') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify({
-                    id: linkId,
-                    platform_name: platformName,
-                    platform_url: platformUrl
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        id: linkId,
+                        platform_name: platformName,
+                        platform_url: platformUrl
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.success){
-                    showToast('Updated Successfully');
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Updated Successfully');
 
-                    // checkbox ka data-platform bhi update kar do
-                    let checkbox = document.querySelector(
-                        `#link-row-${linkId} .qr-platform-checkbox`
-                    );
+                        // checkbox ka data-platform bhi update kar do
+                        let checkbox = document.querySelector(
+                            `#link-row-${linkId} .qr-platform-checkbox`
+                        );
 
-                    if(checkbox){
-                        checkbox.dataset.platform = platformName;
+                        if (checkbox) {
+                            checkbox.dataset.platform = platformName;
+                        }
                     }
-                }
-            });
+                });
         }
-
-
     </script>
 @endsection
-
-

@@ -6,7 +6,7 @@
     <title>{{ $user->name }} - Business Card</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
+   <style>
         * {
             margin: 0;
             padding: 0;
@@ -301,8 +301,9 @@
                     ];
                 }
 
-                // Add quick links (only if not already exists)
+                // ===== COMPLETE QUICK LINKS MAPPING (including ecommerce & payment) =====
                 $quickMapping = [
+                    // Social Media
                     'whatsapp_url' => 'WhatsApp',
                     'telegram_url' => 'Telegram',
                     'instagram_url' => 'Instagram',
@@ -319,7 +320,73 @@
                     'quora_url' => 'Quora',
                     'messenger_url' => 'Messenger',
                     'rumble_url' => 'Rumble',
-                    'viber_url' => 'Viber'
+                    'viber_url' => 'Viber',
+                    'tiktok_url' => 'TikTok',
+                    'twitter_url' => 'Twitter',
+                    'skype_url' => 'Skype',
+                    'slack_url' => 'Slack',
+                    'medium_url' => 'Medium',
+                    'tumblr_url' => 'Tumblr',
+                    'flickr_url' => 'Flickr',
+                    'soundcloud_url' => 'SoundCloud',
+                    'vimeo_url' => 'Vimeo',
+                    'spotify_url' => 'Spotify',
+                    'github_url' => 'GitHub',
+                    'stackoverflow_url' => 'Stack Overflow',
+                    'behance_url' => 'Behance',
+                    'dribbble_url' => 'Dribbble',
+
+                    // Ecommerce
+                    'ebay_url' => 'eBay',
+                    'amazon_url' => 'Amazon',
+                    'alibaba_url' => 'Alibaba',
+                    'indiamart_url' => 'IndiaMart',
+                    'tradeindia_url' => 'TradeIndia',
+                    'etsy_url' => 'Etsy',
+                    'flipkart_url' => 'Flipkart',
+                    'shopify_url' => 'Shopify',
+                    'walmart_url' => 'Walmart',
+                    'aliexpress_url' => 'AliExpress',
+                    'meesho_url' => 'Meesho',
+                    'nykaa_url' => 'Nykaa',
+                    'myntra_url' => 'Myntra',
+                    'snapdeal_url' => 'Snapdeal',
+                    'ajio_url' => 'Ajio',
+
+                    // Payment Gateways
+                    'paypal_url' => 'PayPal',
+                    'stripe_url' => 'Stripe',
+                    'razorpay_url' => 'Razorpay',
+                    'payoneer_url' => 'Payoneer',
+                    'wise_url' => 'Wise',
+                    'airwallex_url' => 'Airwallex',
+                    'skydo_url' => 'Skydo',
+                    'cashfree_url' => 'Cashfree',
+                    'instamojo_url' => 'Instamojo',
+                    'payu_url' => 'PayU India',
+                    'westernunion_url' => 'Western Union',
+                    'googlepay_url' => 'Google Pay',
+                    'applepay_url' => 'Apple Pay',
+                    'samsungpay_url' => 'Samsung Pay',
+                    'phonepe_url' => 'PhonePe',
+                    'paytm_url' => 'Paytm',
+                    'amazonpay_url' => 'Amazon Pay',
+                    'upi_url' => 'UPI',
+                    'zelle_url' => 'Zelle',
+                    'venmo_url' => 'Venmo',
+                    'crypto_btc_url' => 'Crypto BTC',
+                    'crypto_usdt_url' => 'Crypto USDT',
+                    'crypto_eth_url' => 'Crypto ETH',
+                    'bank_url' => 'Bank Details',
+
+                    // Other
+                    'website_url' => 'Website',
+                    'blog_url' => 'Blog',
+                    'portfolio_url' => 'Portfolio',
+                    'podcast_url' => 'Podcast',
+                    'newsletter_url' => 'Newsletter',
+                    'linktree_url' => 'LinkTree',
+                    'beacons_url' => 'Beacons'
                 ];
 
                 foreach ($quickMapping as $key => $name) {
@@ -333,8 +400,9 @@
                     }
                 }
 
-                // Icon mapping
+                // ===== COMPLETE ICON MAPPING (Social + Ecommerce + Payment) =====
                 $iconMap = [
+                    // Social Media
                     'whatsapp' => 'fab fa-whatsapp',
                     'telegram' => 'fab fa-telegram',
                     'instagram' => 'fab fa-instagram',
@@ -356,8 +424,76 @@
                     'viber' => 'fab fa-viber',
                     'messenger' => 'fab fa-facebook-messenger',
                     'threads' => 'fab fa-threads',
-                    'rumble' => 'fas fa-video'
+                    'rumble' => 'fas fa-video',
+                    'skype' => 'fab fa-skype',
+                    'slack' => 'fab fa-slack',
+                    'tumblr' => 'fab fa-tumblr',
+                    'flickr' => 'fab fa-flickr',
+                    'soundcloud' => 'fab fa-soundcloud',
+                    'vimeo' => 'fab fa-vimeo',
+                    'behance' => 'fab fa-behance',
+                    'dribbble' => 'fab fa-dribbble',
+                    'stackoverflow' => 'fab fa-stack-overflow',
+
+                    // Ecommerce
+                    'ebay' => 'fab fa-ebay',
+                    'amazon' => 'fab fa-amazon',
+                    'etsy' => 'fab fa-etsy',
+                    'shopify' => 'fab fa-shopify',
+                    'flipkart' => 'fas fa-store',
+                    'walmart' => 'fas fa-store',
+                    'aliexpress' => 'fas fa-globe',
+                    'meesho' => 'fas fa-shopping-bag',
+                    'nykaa' => 'fas fa-paint-brush',
+                    'myntra' => 'fas fa-shopping-bag',
+                    'snapdeal' => 'fas fa-shopping-cart',
+                    'ajio' => 'fas fa-tshirt',
+                    // For platforms without dedicated icons, use generic
+                    'alibaba' => 'fas fa-globe-asia',
+                    'indiamart' => 'fas fa-building',
+                    'tradeindia' => 'fas fa-handshake',
+
+                    // Payment Gateways
+                    'paypal' => 'fab fa-paypal',
+                    'stripe' => 'fab fa-stripe',
+                    'applepay' => 'fab fa-apple-pay',
+                    'amazonpay' => 'fab fa-amazon-pay',
+                    'googlepay' => 'fab fa-google-pay',
+                    'upi' => 'fas fa-mobile-alt',
+                    'zelle' => 'fas fa-exchange-alt',
+                    'venmo' => 'fas fa-hand-holding-usd',
+                    'crypto_btc' => 'fab fa-bitcoin',
+                    'crypto_eth' => 'fab fa-ethereum',
+                    'crypto_usdt' => 'fas fa-coins',
+                    'bank' => 'fas fa-university',
+                    'razorpay' => 'fas fa-credit-card',
+                    'payoneer' => 'fas fa-globe',
+                    'wise' => 'fas fa-exchange-alt',
+                    'airwallex' => 'fas fa-plane-departure',
+                    'skydo' => 'fas fa-cloud-sun',
+                    'cashfree' => 'fas fa-coins',
+                    'instamojo' => 'fas fa-hand-holding-heart',
+                    'payu' => 'fas fa-university',
+                    'westernunion' => 'fas fa-hand-holding-usd',
+                    'samsungpay' => 'fas fa-mobile-alt',
+                    'phonepe' => 'fas fa-phone',
+                    'paytm' => 'fas fa-mobile-alt',
+
+                    // Other
+                    'website' => 'fas fa-globe',
+                    'blog' => 'fas fa-blog',
+                    'portfolio' => 'fas fa-briefcase',
+                    'podcast' => 'fas fa-podcast',
+                    'newsletter' => 'fas fa-envelope',
+                    'linktree' => 'fas fa-tree',
+                    'beacons' => 'fas fa-flag'
                 ];
+
+                // Helper: normalize platform name for icon lookup
+                function getIconClass($name, $iconMap) {
+                    $key = str_replace(' ', '_', strtolower($name));
+                    return $iconMap[$key] ?? null;
+                }
             @endphp
 
             @foreach($allLinks as $platform)
@@ -367,7 +503,7 @@
                         <img src="{{ asset('images/cm_logo.png') }}" alt="{{ $platform['name'] }}">
                     @else
                         @php
-                            $iconClass = $iconMap[strtolower($platform['name'])] ?? 'fas fa-link';
+                            $iconClass = getIconClass($platform['name'], $iconMap) ?? 'fas fa-link';
                         @endphp
                         <i class="{{ $iconClass }}"></i>
                     @endif
@@ -413,11 +549,6 @@
             correctLevel: QRCode.CorrectLevel.H
         });
     }
-
-    // Optional: Auto-print when page loads (uncomment if needed)
-    // window.addEventListener('load', function() {
-    //     window.print();
-    // });
 </script>
 
 </body>

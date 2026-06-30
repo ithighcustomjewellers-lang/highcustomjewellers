@@ -16,10 +16,6 @@ use App\Http\Controllers\SocialLinksController;
 use App\Http\Controllers\SocialQrController;
 use App\Http\Controllers\Users\MasterController;
 use Illuminate\Support\Facades\Route;
-
-
-
-use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\ReportController;
 
 // user info
@@ -170,7 +166,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     // admin tracking
     Route::get('/reports/campaign', [ReportController::class, 'index'])->name('admin-report.campaign');
     Route::post('/reports/campaign-data', [ReportController::class, 'getCampaignLogsData'])->name('admin-report.campaign.data');
-
 });
 
 Route::get('lead-response/{log}/{status}',[CampaignController::class, 'leadResponse'])->name('lead-response');

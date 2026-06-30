@@ -160,6 +160,11 @@ $(document).ready(function () {
             type: "POST",
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+
+            data: function(d){
+                d._token = "{{ csrf_token() }}";
+                d.status = "{{ request('status') }}";
             }
         },
 
@@ -187,8 +192,6 @@ $(document).ready(function () {
             { data: 'other_clicks', orderable: false, searchable: false },
             { data: 'total_clicks', orderable: false, searchable: false }
         ],
-
-
         order: [
             [0, 'desc']
         ],

@@ -511,21 +511,49 @@ class MasterController extends Controller
     }
 
 
+    // public function sequencesListEdit($id)
+    // {
+    //     $sequence = Sequence::where('id', $id)
+    //         ->firstOrFail();
+
+    //     if (!is_null($sequence->admin_updated_at)) {
+    //         $sequence->admin_updated_at = null;
+    //         $sequence->save();
+    //     }
+
+    //     if (Auth::user()->is_admin == 1) {
+    //         return view('admin.master.sequences-edit', compact('sequence'));
+    //     }
+
+    //     return view('user.sequences-edit', compact('sequence'));
+    // }
+
     public function sequencesListEdit($id)
     {
-        $sequence = Sequence::where('id', $id)
-            ->firstOrFail();
+        $sequence = Sequence::findOrFail($id);
 
         if (!is_null($sequence->admin_updated_at)) {
             $sequence->admin_updated_at = null;
             $sequence->save();
         }
 
-        if (Auth::user()->is_admin == 1) {
-            return view('admin.master.sequences-edit', compact('sequence'));
+        $businessLinks = BusinessLink::where('user_id', Auth::id())->first();
+
+        $allActionLinks = [];
+
+        if ($businessLinks && !empty($businessLinks->action_links)) {
+
+            $allActionLinks = is_array($businessLinks->action_links)
+                ? $businessLinks->action_links
+                : json_decode($businessLinks->action_links, true);
+
+            $allActionLinks = $allActionLinks ?? [];
         }
 
-        return view('user.sequences-edit', compact('sequence'));
+        if (Auth::user()->is_admin) {
+            return view('admin.master.sequences-edit', compact('sequence', 'allActionLinks'));
+        }
+        return view('user.sequences-edit', compact('sequence','allActionLinks'));
     }
 
     /**
@@ -581,6 +609,32 @@ class MasterController extends Controller
                     'errors' => ['step' => ['Sequence already exists ❌']]
                 ], 422);
             }
+
+                //  $actionLinks = [];
+                // $exists = [];
+
+                // foreach ($request->action_links as $link) {
+
+                //     if (empty($link['platform_url'])) {
+                //         continue;
+                //     }
+
+                //     $id = $link['id'] ?? null;
+
+                //     if ($id && isset($exists[$id])) {
+                //         continue;
+                //     }
+
+                //     if ($id) {
+                //         $exists[$id] = true;
+                //     }
+
+                //     $actionLinks[] = [
+                //         'id' => $id,
+                //         'platform_name' => $link['platform_name'] ?? '',
+                //         'platform_url' => trim($link['platform_url']),
+                //     ];
+                // }
 
             $actionLinks = [];
             if ($request->filled('action_links')) {

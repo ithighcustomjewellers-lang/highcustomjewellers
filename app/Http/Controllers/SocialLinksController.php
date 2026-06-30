@@ -22,8 +22,16 @@ class SocialLinksController extends Controller
 
         // Define platform whitelist for users
         $quickLinkPlatforms = [
-            'whatsapp', 'telegram', 'facebook', 'youtube', 'linkedin',
-            'instagram', 'x', 'threads', 'snapchat', 'messenger'
+            'whatsapp',
+            'telegram',
+            'facebook',
+            'youtube',
+            'linkedin',
+            'instagram',
+            'x',
+            'threads',
+            'snapchat',
+            'messenger'
         ];
 
         if ($user->is_admin == 1) {
@@ -35,7 +43,6 @@ class SocialLinksController extends Controller
 
             // Quick links for admin
             $quickLinks = UserSetting::getValue($user->id, 'quick_links', []);
-
         } else {
             // USER: Should ONLY see predefined platforms and their OWN custom links
             // NOT admin's custom links
@@ -93,13 +100,23 @@ class SocialLinksController extends Controller
         // Return appropriate view
         if ($user->is_admin == 1) {
             return view('admin.social.index', compact(
-                'socialLinks', 'quickLinks', 'profileUrl', 'qrScans',
-                'btnClicks', 'profileSlug', 'multiQrs'
+                'socialLinks',
+                'quickLinks',
+                'profileUrl',
+                'qrScans',
+                'btnClicks',
+                'profileSlug',
+                'multiQrs'
             ));
         } else {
             return view('user.user-social.index', compact(
-                'socialLinks', 'quickLinks', 'profileUrl', 'qrScans',
-                'btnClicks', 'profileSlug', 'multiQrs'
+                'socialLinks',
+                'quickLinks',
+                'profileUrl',
+                'qrScans',
+                'btnClicks',
+                'profileSlug',
+                'multiQrs'
             ));
         }
     }
@@ -114,8 +131,18 @@ class SocialLinksController extends Controller
         $user = Auth::user();
 
         // Check if platform is predefined
-        $predefinedPlatforms = ['whatsapp', 'telegram', 'facebook', 'youtube', 'linkedin', 'instagram', 'twitter',
-         'x', 'tiktok', 'snapchat', 'reddit', 'discord', 'pinterest', 'twitch', 'quora', 'github', 'spotify', 'medium'
+        $predefinedPlatforms = [
+            'whatsapp','telegram','facebook','youtube','linkedin','instagram','x','threads','snapchat','reddit','discord','pinterest',
+            'twitch','quora','messenger','rumble','viber','tiktok','twitter','skype','slack','medium','tumblr','flickr', 'soundcloud',
+            'vimeo', 'spotify','github', 'stackoverflow','behance','dribbble',
+            // Ecommerce
+            'ebay','amazon','alibaba','indiamart','tradeindia','etsy','flipkart','shopify','walmart','aliexpress','meesho','nykaa','myntra','snapdeal','ajio',
+            // Payment Gateways
+            'paypal', 'stripe', 'razorpay', 'payoneer','wise',
+            'airwallex', 'skydo', 'cashfree','instamojo',
+            'payu','westernunion', 'googlepay', 'applepay', 'samsungpay',
+            'phonepe','paytm','amazonpay','upi','zelle', 'venmo', 'crypto_btc', 'crypto_usdt',
+            'crypto_eth','bank',
         ];
 
         $isPredefined = in_array(strtolower($request->platform_name), $predefinedPlatforms);
@@ -183,6 +210,8 @@ class SocialLinksController extends Controller
 
     public function updateQuickLink(Request $request)
     {
+
+
         $request->validate([
             'platform_key' => 'required|string',
             'platform_url' => 'required|url|max:500',
@@ -195,7 +224,24 @@ class SocialLinksController extends Controller
         UserSetting::setValue($user->id, 'quick_links', $quickLinks);
 
         // Determine icon type for quick link
-        $predefinedPlatforms = ['whatsapp', 'telegram', 'facebook', 'youtube', 'linkedin', 'instagram', 'x', 'threads', 'snapchat', 'reddit', 'discord', 'pinterest', 'twitch', 'quora', 'messenger', 'rumble', 'viber'];
+        // $predefinedPlatforms = ['whatsapp', 'telegram', 'facebook', 'youtube', 'linkedin', 'instagram', 'x', 'threads', 'snapchat', 'reddit', 'discord', 'pinterest', 'twitch', 'quora', 'messenger', 'rumble', 'viber'];
+        $predefinedPlatforms = [
+            // ===== SOCIAL MEDIA =====
+            'whatsapp','telegram','facebook','youtube','linkedin','instagram','x','threads','snapchat','reddit','discord','pinterest',
+            'twitch','quora','messenger','rumble','viber','tiktok','twitter','skype','slack','medium','tumblr','flickr', 'soundcloud',
+            'vimeo', 'spotify','github', 'stackoverflow','behance','dribbble',
+
+            // ===== ECOMMERCE =====
+            'ebay','amazon','alibaba','indiamart','tradeindia','etsy','flipkart','shopify','walmart','aliexpress','meesho','nykaa','myntra','snapdeal','ajio',
+
+            // ===== PAYMENT GATEWAYS =====
+            'paypal', 'stripe', 'razorpay', 'payoneer','wise',
+            'airwallex', 'skydo', 'cashfree','instamojo',
+            'payu','westernunion', 'googlepay', 'applepay', 'samsungpay',
+            'phonepe','paytm','amazonpay','upi','zelle', 'venmo', 'crypto_btc', 'crypto_usdt',
+            'crypto_eth','bank',
+
+        ];
         $isPredefined = in_array(strtolower($request->platform_name), $predefinedPlatforms);
         $iconType = $isPredefined ? 'fa' : 'custom';
 
@@ -459,7 +505,7 @@ class SocialLinksController extends Controller
             ->values()
             ->toArray();
 
-            UserSetting::setValue($user->id,'multi_qr_codes', $multiQrCodes);
+        UserSetting::setValue($user->id, 'multi_qr_codes', $multiQrCodes);
 
         return response()->json([
             'success' => true,
@@ -533,7 +579,6 @@ class SocialLinksController extends Controller
         return response()->json([
             'success' => true
         ]);
-
     }
 
     public function deleteSequence(Request $request)
@@ -556,6 +601,4 @@ class SocialLinksController extends Controller
             'message' => 'Sequence deleted successfully'
         ]);
     }
-
-
 }
