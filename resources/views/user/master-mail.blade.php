@@ -225,9 +225,6 @@
                                     placeholder="✉️ Write an engaging subject line...">
                             </div>
 
-
-
-
                             <!-- Branding Section (Logo/Banner) -->
                             <div class="card bg-light border-0 rounded-4 mb-4 overflow-hidden">
                                 <div class="card-body p-4">
@@ -457,6 +454,134 @@
             updatePreview();
         });
 
+        // LIVE 01/07
+
+         // function loadBusinessLinks() {
+        //     fetch('{{ route('admin-user-business-links') }}')
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             if (data.company_logo) {
+
+        //                     currentCompanyLogo = data.company_logo;
+        //                     document.getElementById('companyLogoPreviewImg').src = data.company_logo;
+        //                     document.getElementById('companyLogoPreview').style.display = 'block';
+        //                     let logoPath = data.company_logo;
+        //                     if (logoPath.startsWith('http')) {
+        //                         logoPath = new URL(logoPath).pathname.substring(1);
+        //                     }
+
+        //                     document.getElementById('existingCompanyLogo').value = logoPath;
+        //                     document.getElementById('imageType').value = data.image_type || 'logo';
+        //                 }
+        //             document.getElementById('whatsappLink').value = data.whatsapp_link || '';
+        //             window.selectedActionLinks = data.action_links || [];
+
+        //             let html = '';
+        //                 window.selectedActionLinks.forEach(function(link, index) {
+
+        //                     html += `
+        //                         <div class="col-md-4 action-link-item mb-2">
+
+        //                             <label class="small fw-semibold mb-1 d-block">
+        //                                 ${link.platform_name}
+        //                             </label>
+
+        //                             <div class="input-group">
+
+        //                                 <input type="text"
+        //                                     class="form-control"
+        //                                     name="action_links[${index}][platform_url]"
+        //                                     value="${link.platform_url}">
+
+        //                                 <button type="button"
+        //                                     class="btn btn-danger remove-action-link"
+        //                                     data-id="${link.id}">
+        //                                     <i class="fas fa-times"></i>
+        //                                 </button>
+
+        //                             </div>
+
+        //                             <input type="hidden"
+        //                                 name="action_links[${index}][platform_name]"
+        //                                 value="${link.platform_name}">
+
+        //                             <input type="hidden"
+        //                                 name="action_links[${index}][id]"
+        //                                 value="${link.id}">
+
+        //                         </div>
+        //                     `;
+        //                 });
+        //             $('#dynamicActionLinks').html(html);
+
+        //             document.getElementById('logoPosition').value = data.logo_position || 'center';
+        //             updatePreview();
+        //         })
+        //         .catch(err => console.error(err));
+        // }
+
+
+        // END 10\07
+
+        // function loadBusinessLinks() {
+        //     fetch('{{ route('user-business-links') }}')
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             if (data.company_logo) {
+        //                 currentCompanyLogo = data.company_logo;
+        //                 currentImageType = data.image_type || 'logo';
+        //                 document.getElementById('companyLogoPreviewImg').src = data.company_logo;
+        //                 document.getElementById('companyLogoPreview').style.display = 'block';
+        //                 document.getElementById('existingCompanyLogo').value = data.company_logo;
+        //                 document.getElementById('imageType').value = currentImageType;
+        //             }
+        //             document.getElementById('whatsappLink').value = data.whatsapp_link || '';
+        //             window.selectedActionLinks = data.action_links || [];
+
+        //             let html = '';
+        //                 window.selectedActionLinks.forEach(function(link, index) {
+
+        //                     html += `
+        //                         <div class="col-md-4 action-link-item mb-2">
+
+        //                             <label class="small fw-semibold mb-1 d-block">
+        //                                 ${link.platform_name}
+        //                             </label>
+
+        //                             <div class="input-group">
+
+        //                                 <input type="text"
+        //                                     class="form-control"
+        //                                     name="action_links[${index}][platform_url]"
+        //                                     value="${link.platform_url}">
+
+        //                                 <button type="button"
+        //                                     class="btn btn-danger remove-action-link"
+        //                                     data-id="${link.id}">
+        //                                     <i class="fas fa-times"></i>
+        //                                 </button>
+
+        //                             </div>
+
+        //                             <input type="hidden"
+        //                                 name="action_links[${index}][platform_name]"
+        //                                 value="${link.platform_name}">
+
+        //                             <input type="hidden"
+        //                                 name="action_links[${index}][id]"
+        //                                 value="${link.id}">
+
+        //                         </div>
+        //                     `;
+        //                 });
+        //             $('#dynamicActionLinks').html(html);
+
+        //             document.getElementById('logoPosition').value = data.logo_position || 'center';
+        //             updatePreview();
+        //         })
+        //         .catch(err => console.error(err));
+        // }
+
         function loadBusinessLinks() {
             fetch('{{ route('user-business-links') }}')
                 .then(response => response.json())
@@ -471,85 +596,39 @@
                     }
                     document.getElementById('whatsappLink').value = data.whatsapp_link || '';
                     window.selectedActionLinks = data.action_links || [];
-
-                    let html = '';
-                        window.selectedActionLinks.forEach(function(link, index) {
-
-                            html += `
-                                <div class="col-md-4 action-link-item mb-2">
-
-                                    <label class="small fw-semibold mb-1 d-block">
-                                        ${link.platform_name}
-                                    </label>
-
-                                    <div class="input-group">
-
-                                        <input type="text"
-                                            class="form-control"
-                                            name="action_links[${index}][platform_url]"
-                                            value="${link.platform_url}">
-
-                                        <button type="button"
-                                            class="btn btn-danger remove-action-link"
-                                            data-id="${link.id}">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-
-                                    </div>
-
-                                    <input type="hidden"
-                                        name="action_links[${index}][platform_name]"
-                                        value="${link.platform_name}">
-
-                                    <input type="hidden"
-                                        name="action_links[${index}][id]"
-                                        value="${link.id}">
-
-                                </div>
-                            `;
-                        });
-                    $('#dynamicActionLinks').html(html);
-
-                    document.getElementById('logoPosition').value = data.logo_position || 'center';
-                    updatePreview();
+                    renderActionLinks(window.selectedActionLinks);
                 })
                 .catch(err => console.error(err));
         }
 
-        // Logo upload with dimension detection
-        document.getElementById('companyLogoInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                currentCompanyLogoFile = file;
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    const img = new Image();
-                    img.onload = () => {
-                        const aspectRatio = img.width / img.height;
-                        currentImageType = (img.width > 400 || aspectRatio > 2) ? 'banner' : 'logo';
-                        document.getElementById('imageType').value = currentImageType;
-                        currentCompanyLogo = ev.target.result;
-                        document.getElementById('companyLogoPreviewImg').src = currentCompanyLogo;
-                        document.getElementById('companyLogoPreview').style.display = 'block';
-                        document.getElementById('existingCompanyLogo').value = '';
-                        updatePreview();
-                    };
-                    img.src = ev.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
 
+        function renderActionLinks(links) {
+            let html = '';
+            links.forEach(function(link, index) {
+                html += `
+                    <div class="col-md-4 action-link-item mb-2">
+                        <label class="small fw-semibold mb-1 d-block">${link.platform_name}</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="action_links[${index}][platform_url]" value="${link.platform_url}">
+                            <button type="button" class="btn btn-danger remove-action-link" data-id="${link.id}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <input type="hidden" name="action_links[${index}][platform_name]" value="${link.platform_name}">
+                        <input type="hidden" name="action_links[${index}][id]" value="${link.id}">
+                    </div>
+                `;
+            });
+            $('#dynamicActionLinks').html(html);
+        }
 
         $(document).on('click', '.remove-action-link', function() {
             const linkId = $(this).data('id');
-            // UI se remove
-            $(this).closest('.action-link-item').remove();
-            // Array se remove
-            window.selectedActionLinks =
-                window.selectedActionLinks.filter(function(link) {
-                    return link.id != linkId;
-                });
+            window.selectedActionLinks = window.selectedActionLinks.filter(function(link) {
+                return link.id != linkId;
+            });
+            renderActionLinks(window.selectedActionLinks);
+            updatePreview();   // <-- Refresh the live preview
             console.log(window.selectedActionLinks);
         });
 
@@ -742,24 +821,6 @@
         $(document).ready(function() {
             $('#emailForm').submit(function(e) {
                 e.preventDefault();
-                // $('#message').val(currentEditor.innerHTML);
-
-                // let html = currentEditor.innerHTML;
-
-                // // completely empty paragraphs remove
-                // html = html.replace(
-                //     /<p[^>]*>\s*<\/p>/gi,
-                //     ''
-                // );
-
-                // // 4+ empty line ko max 2 empty line tak limit
-                // html = html.replace(
-                //     /(<p[^>]*>\s*(?:&nbsp;|<br\s*\/?>)?\s*<\/p>\s*){4,}/gi,
-                //     '<p><br></p><p><br></p>'
-                // );
-
-                // $('#message').val(html);
-
                 let html = currentEditor.innerHTML;
                 // tags ke beech extra newlines remove
                 html = html.replace(/>\s+\</g, '><');

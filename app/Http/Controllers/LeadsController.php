@@ -10,6 +10,7 @@ use App\Jobs\StartCampaignJob;
 use App\Models\CampaignLog;
 use Illuminate\Support\Facades\DB;
 use App\Models\Lead;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -77,81 +78,216 @@ class LeadsController extends Controller
         }
     }
 
+    // public function leadList(Request $request)
+    // {
+    //     $userId = Auth::id();
+
+    //     // =========================
+    //     // ✅ AUTH WISE DATA
+    //     // =========================
+    //     $query = Lead::query()->where('user_id', $userId)->select('id', 'user_id', 'email', 'name', 'lastname', 'company_name', 'type', 'is_unsubscribed', 'created_at');
+
+    //     // =========================
+    //     // ✅ DATE FILTER
+    //     // =========================
+    //     if ($request->filled('start_date') && $request->filled('end_date')) {
+    //         $query->whereBetween('created_at', [
+    //             $request->start_date . ' 00:00:00',
+    //             $request->end_date . ' 23:59:59'
+    //         ]);
+    //     } elseif ($request->filled('today_only') || !$request->filled('start_date')) {
+    //         $today = now()->format('Y-m-d');
+    //         $query->whereDate('created_at', $today);
+    //     }
+
+    //     $todayCount = Lead::where('user_id', $userId)->whereDate('created_at', now()->format('Y-m-d'))->count();
+    //     $leads = $query->latest('created_at')->paginate(10);
+    //     $leadIds = collect($leads->items())->pluck('id')->toArray();
+
+    //     $campaignLogs = CampaignLog::whereIn('lead_id', $leadIds)->orderBy('id', 'asc')->get()->groupBy('lead_id');
+
+    //     $formattedData = collect($leads->items())->map(function ($lead) use ($campaignLogs) {
+    //         $tracking = 'pending';
+    //         // latest log
+    //         $firstLog = null;
+    //         if (isset($campaignLogs[$lead->id])) {
+    //             //  $firstLog = $campaignLogs[$lead->id]->first();
+    //             $firstLog = $campaignLogs[$lead->id]->first() ?? null;
+    //         }
+    //         if ($lead->is_unsubscribed) {
+    //             $tracking = 'Not Interested';
+    //         } elseif ($firstLog) {
+    //             switch ($firstLog->status) {
+    //                 case 'pending':
+    //                     $tracking = ' <span class="badge bg-warning">
+    //                      Pending
+    //                     </span>';
+    //                     break;
+    //                 case 'send':
+    //                     $tracking = ' <span class="badge bg-success">
+    //                         Sent
+    //                     </span>';
+    //                     break;
+    //                 case 'seen':
+    //                     $tracking = ' <span class="badge bg-info">
+    //                         Seen
+    //                     </span>';
+    //                     break;
+    //                 case 'failed':
+    //                     $tracking = ' <span class="badge bg-secondary">
+    //                         Failed
+    //                     </span>';
+    //                     break;
+    //                 case 'interested':
+    //                     $tracking = ' <span class="badge bg-primary">
+    //                         Interested
+    //                     </span>';
+    //                     break;
+    //                 case 'Not Interested':
+    //                     $tracking = ' <span class="badge bg-danger">
+    //                         Not Interested
+    //                     </span>';
+    //                     break;
+    //                 default:
+    //                     $tracking = ucfirst($firstLog->status);
+    //                     break;
+    //             }
+    //         }
+    //         return [
+    //             'id' => $lead->id,
+    //             'user_id' => $lead->user_id,
+    //             'email' => $lead->email,
+    //             'name' => $lead->name,
+    //             'lastname' => $lead->lastname,
+    //             'company_name' => $lead->company_name,
+    //             'type' => $lead->type,
+    //             'tracking' => $tracking,
+    //             'created_at' => $lead->created_at,
+    //         ];
+    //     });
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => $formattedData->values(),
+    //         'today_count' => $todayCount,
+    //         'pagination' => [
+    //             'current_page' => $leads->currentPage(),
+    //             'last_page' => $leads->lastPage(),
+    //             'per_page' => $leads->perPage(),
+    //             'total' => $leads->total(),
+    //             'from' => $leads->firstItem(),
+    //             'to' => $leads->lastItem(),
+    //             'has_more_pages' => $leads->hasMorePages(),
+    //             'prev_page_url' => $leads->previousPageUrl(),
+    //             'next_page_url' => $leads->nextPageUrl(),
+    //         ]
+    //     ]);
+    // }
+
     public function leadList(Request $request)
     {
+
+
+
         $userId = Auth::id();
 
-        // =========================
-        // ✅ AUTH WISE DATA
-        // =========================
-        $query = Lead::query()->where('user_id', $userId)->select('id', 'user_id', 'email', 'name', 'lastname', 'company_name', 'type', 'is_unsubscribed', 'created_at');
+        // Get filter parameters
+        $filter = $request->input('filter', 'today');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        // dd($filter);
+
+        // Base query
+        $query = Lead::query()
+            ->where('user_id', $userId)
+            ->select('id', 'user_id', 'email', 'name', 'lastname', 'company_name', 'type', 'is_unsubscribed', 'created_at');
 
         // =========================
-        // ✅ DATE FILTER
+        // ✅ DATE FILTER (Carbon)
         // =========================
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('created_at', [
-                $request->start_date . ' 00:00:00',
-                $request->end_date . ' 23:59:59'
-            ]);
-        } elseif ($request->filled('today_only') || !$request->filled('start_date')) {
-            $today = now()->format('Y-m-d');
-            $query->whereDate('created_at', $today);
+        switch ($filter) {
+            case 'today':
+                $query->whereDate('created_at', Carbon::today());
+                break;
+            case 'weekly':
+                $query->whereBetween('created_at', [
+                    Carbon::now()->startOfWeek(),
+                    Carbon::now()->endOfWeek()
+                ]);
+                break;
+            case 'monthly':
+                $query->whereMonth('created_at', Carbon::now()->month)
+                      ->whereYear('created_at', Carbon::now()->year);
+                break;
+            case 'yearly':
+                $query->whereYear('created_at', Carbon::now()->year);
+                break;
+            case 'custom':
+                if ($startDate && $endDate) {
+                    $start = Carbon::parse($startDate)->startOfDay();
+                    $end = Carbon::parse($endDate)->endOfDay();
+                    $query->whereBetween('created_at', [$start, $end]);
+                } else {
+                    // fallback to today if invalid custom
+                    $query->whereDate('created_at', Carbon::today());
+                }
+                break;
+            default:
+                $query->whereDate('created_at', Carbon::today());
         }
 
-        $todayCount = Lead::where('user_id', $userId)->whereDate('created_at', now()->format('Y-m-d'))->count();
+        // Clone for total count (filtered)
+        $countQuery = clone $query;
+        $totalCount = $countQuery->count();
+
+        // Paginate
         $leads = $query->latest('created_at')->paginate(10);
+
+        // Collect lead IDs for campaign logs
         $leadIds = collect($leads->items())->pluck('id')->toArray();
 
-        $campaignLogs = CampaignLog::whereIn('lead_id', $leadIds)->orderBy('id', 'asc')->get()->groupBy('lead_id');
+        // Get campaign logs (grouped by lead_id)
+        $campaignLogs = CampaignLog::whereIn('lead_id', $leadIds)
+            ->orderBy('id', 'asc')
+            ->get()
+            ->groupBy('lead_id');
 
+        // Format data with tracking status
         $formattedData = collect($leads->items())->map(function ($lead) use ($campaignLogs) {
             $tracking = 'pending';
-            // latest log
             $firstLog = null;
             if (isset($campaignLogs[$lead->id])) {
-                //  $firstLog = $campaignLogs[$lead->id]->first();
-                $firstLog = $campaignLogs[$lead->id]->first() ?? null;
+                $firstLog = $campaignLogs[$lead->id]->first();
             }
+
             if ($lead->is_unsubscribed) {
                 $tracking = 'Not Interested';
             } elseif ($firstLog) {
                 switch ($firstLog->status) {
                     case 'pending':
-                        $tracking = ' <span class="badge bg-warning">
-                         Pending
-                        </span>';
+                        $tracking = ' <span class="badge bg-warning">Pending</span>';
                         break;
                     case 'send':
-                        $tracking = ' <span class="badge bg-success">
-                            Sent
-                        </span>';
+                        $tracking = ' <span class="badge bg-success">Sent</span>';
                         break;
                     case 'seen':
-                        $tracking = ' <span class="badge bg-info">
-                            Seen
-                        </span>';
+                        $tracking = ' <span class="badge bg-info">Seen</span>';
                         break;
                     case 'failed':
-                        $tracking = ' <span class="badge bg-secondary">
-                            Failed
-                        </span>';
+                        $tracking = ' <span class="badge bg-secondary">Failed</span>';
                         break;
                     case 'interested':
-                        $tracking = ' <span class="badge bg-primary">
-                            Interested
-                        </span>';
+                        $tracking = ' <span class="badge bg-primary">Interested</span>';
                         break;
                     case 'Not Interested':
-                        $tracking = ' <span class="badge bg-danger">
-                            Not Interested
-                        </span>';
+                        $tracking = ' <span class="badge bg-danger">Not Interested</span>';
                         break;
                     default:
                         $tracking = ucfirst($firstLog->status);
                         break;
                 }
             }
+
             return [
                 'id' => $lead->id,
                 'user_id' => $lead->user_id,
@@ -164,10 +300,12 @@ class LeadsController extends Controller
                 'created_at' => $lead->created_at,
             ];
         });
+
+        // Return JSON with the same structure
         return response()->json([
             'status' => true,
             'data' => $formattedData->values(),
-            'today_count' => $todayCount,
+            'today_count' => $totalCount,  // count for the selected period
             'pagination' => [
                 'current_page' => $leads->currentPage(),
                 'last_page' => $leads->lastPage(),

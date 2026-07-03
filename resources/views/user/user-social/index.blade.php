@@ -1,5 +1,4 @@
 @extends('user.dashboard')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 @section('title', 'Social Links Manager')
 @section('content')
 
@@ -459,11 +458,11 @@
         }
 
         /* .share-buttons {
-                                display: flex;
-                                justify-content: center;
-                                gap: 15px;
-                                margin: 20px 0;
-                            } */
+                                    display: flex;
+                                    justify-content: center;
+                                    gap: 15px;
+                                    margin: 20px 0;
+                                } */
 
         .share-btn {
             width: 45px;
@@ -813,10 +812,8 @@
                     </button>
                 </div>
 
-
                 <!-- Editable App Links Section -->
                 <div style="margin-top: 20px;">
-
                     <!-- ==================== ACCORDION 1: SOCIAL MEDIA LINKS ==================== -->
                     <div class="accordion" id="socialAccordion">
                         <div class="accordion-item">
@@ -825,7 +822,7 @@
                                     data-bs-target="#socialCollapse" aria-expanded="false">
                                     <i class="fas fa-share-alt me-2" style="color: #667eea;"></i>
                                     <strong>Social Media Links</strong>
-                                    <span class="badge bg-primary ms-2">10</span>
+                                    <span class="badge bg-primary ms-2"></span>
                                 </button>
                             </h2>
                             <div id="socialCollapse" class="accordion-collapse collapse" data-bs-parent="#socialAccordion">
@@ -1040,7 +1037,7 @@
 
                                     <i class="fas fa-shopping-cart me-2" style="color:#667eea;"></i>
                                     <strong>Ecommerce Links</strong>
-                                    <span class="badge bg-primary ms-2">8</span>
+                                    <span class="badge bg-primary ms-2"></span>
 
                                 </button>
                             </h2>
@@ -1187,7 +1184,7 @@
                                     data-bs-target="#paymentCollapse" aria-expanded="false">
                                     <i class="fas fa-credit-card me-2" style="color: #667eea;"></i>
                                     <strong>Payment Gateways</strong>
-                                    <span class="badge bg-primary ms-2">17</span>
+                                    <span class="badge bg-primary ms-2"></span>
                                 </button>
                             </h2>
                             <div id="paymentCollapse" class="accordion-collapse collapse"
@@ -1468,163 +1465,64 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
 
+                    <!-- Custom Social Links Section - Dynamic Links -->
+                    <div style="margin-top: 20px;">
+                        <div id="customLinksContainer">
+                            @php
+                                $allPredefined = [
+                                    // Social
+                                    'whatsapp', 'telegram', 'facebook', 'youtube', 'linkedin', 'instagram',  'x',
+                                    'threads','snapchat', 'messenger', 'reddit', 'discord','pinterest', 'twitch', 'quora', 'rumble','viber', 'tiktok', 'twitter','skype',
+                                    'slack','medium', 'tumblr','flickr', 'soundcloud', 'vimeo','spotify','github', 'stackoverflow', 'behance', 'dribbble',
+                                    // Ecommerce
+                                    'ebay','amazon', 'alibaba', 'indiamart',
+                                    'tradeindia','etsy', 'flipkart', 'shopify', 'walmart',
+                                    'aliexpress','meesho', 'nykaa', 'myntra', 'snapdeal', 'ajio',
+                                    // Payment
+                                    'paypal','stripe','razorpay','payoneer',
+                                    'wise', 'airwallex','skydo', 'cashfree', 'instamojo', 'payu','westernunion',
+                                    'googlepay', 'applepay', 'samsungpay', 'phonepe', 'paytm', 'amazonpay', 'upi', 'zelle',
+                                    'venmo', 'cryptobtc','cryptousdt', 'crypto_eth', 'bank',
+                                ];
+                                $customLinks = $socialLinks->filter(
+                                    fn($link) => !in_array(strtolower($link->platform_name), $allPredefined),
+                                );
+                            @endphp
 
-                <!-- Custom Social Links Section - Dynamic Links -->
-                {{-- <div style="margin-top: 20px;">
-                    <div id="customLinksContainer">
-                        @foreach ($socialLinks as $link)
-                            <div class="app-link quick-link-item" id="link-row-{{ $link->id }}"
-                                data-icon-type="{{ $link->icon_type }}">
-                                <input type="checkbox" class="qr-platform-checkbox"
-                                    data-platform="{{ $link->platform_name }}" data-input="url_{{ $link->id }}">
+                            @foreach ($customLinks as $link)
+                                <div class="app-link quick-link-item" id="link-row-{{ $link->id }}"
+                                    data-icon-type="{{ $link->icon_type }}">
+                                    <input type="checkbox" class="qr-platform-checkbox"
+                                        data-platform="{{ $link->platform_name }}" data-input="url_{{ $link->id }}">
 
-                                <div class="platform-icon">
-                                    {!! getPlatformIconHtml($link) !!}
+                                    <div class="platform-icon">
+                                        {!! getPlatformIconHtml($link) !!}
+                                    </div>
+
+                                    <input type="text" id="platform_name_{{ $link->id }}"
+                                        class="link-input platform-name-input" value="{{ $link->platform_name }}"
+                                        placeholder="Platform Name" style="max-width:180px;">
+                                    <input type="url" id="url_{{ $link->id }}" class="link-input"
+                                        value="{{ $link->platform_url }}" placeholder="https://...">
+                                    <button onclick="saveCustomLink({{ $link->id }}, '{{ $link->platform_name }}')"
+                                        class="save-btn-sm">
+                                        <i class="fas fa-save"></i> Save
+                                    </button>
+                                    <button
+                                        onclick="copyToClipboard(document.getElementById('url_{{ $link->id }}').value)"
+                                        class="copy-btn-sm">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button onclick="deleteCustomLink({{ $link->id }})" class="save-btn-sm"
+                                        style="background:#dc3545;">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
                                 </div>
-
-                                <input type="text" id="platform_name_{{ $link->id }}"
-                                    class="link-input platform-name-input" value="{{ $link->platform_name }}"
-                                    placeholder="Platform Name" style="max-width:180px;">
-                                <input type="url" id="url_{{ $link->id }}" class="link-input"
-                                    value="{{ $link->platform_url }}" placeholder="https://...">
-                                <button onclick="saveCustomLink({{ $link->id }}, '{{ $link->platform_name }}')"
-                                    class="save-btn-sm">
-                                    <i class="fas fa-save"></i> Save
-                                </button>
-                                <button
-                                    onclick="copyToClipboard(document.getElementById('url_{{ $link->id }}').value)"
-                                    class="copy-btn-sm">
-                                    <i class="fas fa-copy"></i> Copy
-                                </button>
-                                <button onclick="deleteCustomLink({{ $link->id }})" class="save-btn-sm"
-                                    style="background:#dc3545;">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </div>
-                        @endforeach
-
+                            @endforeach
+                        </div>
                     </div>
-                </div> --}}
-
-                <!-- Custom Social Links Section - Dynamic Links -->
-                <div style="margin-top: 20px;">
-                    <div id="customLinksContainer">
-                        @php
-                            $allPredefined = [
-                                // Social
-                                'whatsapp',
-                                'telegram',
-                                'facebook',
-                                'youtube',
-                                'linkedin',
-                                'instagram',
-                                'x',
-                                'threads',
-                                'snapchat',
-                                'messenger',
-                                'reddit',
-                                'discord',
-                                'pinterest',
-                                'twitch',
-                                'quora',
-                                'rumble',
-                                'viber',
-                                'tiktok',
-                                'twitter',
-                                'skype',
-                                'slack',
-                                'medium',
-                                'tumblr',
-                                'flickr',
-                                'soundcloud',
-                                'vimeo',
-                                'spotify',
-                                'github',
-                                'stackoverflow',
-                                'behance',
-                                'dribbble',
-                                // Ecommerce
-                                'ebay',
-                                'amazon',
-                                'alibaba',
-                                'indiamart',
-                                'tradeindia',
-                                'etsy',
-                                'flipkart',
-                                'shopify',
-                                'walmart',
-                                'aliexpress',
-                                'meesho',
-                                'nykaa',
-                                'myntra',
-                                'snapdeal',
-                                'ajio',
-                                // Payment
-                                'paypal',
-                                'stripe',
-                                'razorpay',
-                                'payoneer',
-                                'wise',
-                                'airwallex',
-                                'skydo',
-                                'cashfree',
-                                'instamojo',
-                                'payu',
-                                'westernunion',
-                                'googlepay',
-                                'applepay',
-                                'samsungpay',
-                                'phonepe',
-                                'paytm',
-                                'amazonpay',
-                                'upi',
-                                'zelle',
-                                'venmo',
-                                'cryptobtc',
-                                'cryptousdt',
-                                'crypto_eth',
-                                'bank',
-                            ];
-                            $customLinks = $socialLinks->filter(
-                                fn($link) => !in_array(strtolower($link->platform_name), $allPredefined),
-                            );
-                        @endphp
-
-                        @foreach ($customLinks as $link)
-                            <div class="app-link quick-link-item" id="link-row-{{ $link->id }}"
-                                data-icon-type="{{ $link->icon_type }}">
-                                <input type="checkbox" class="qr-platform-checkbox"
-                                    data-platform="{{ $link->platform_name }}" data-input="url_{{ $link->id }}">
-
-                                <div class="platform-icon">
-                                    {!! getPlatformIconHtml($link) !!}
-                                </div>
-
-                                <input type="text" id="platform_name_{{ $link->id }}"
-                                    class="link-input platform-name-input" value="{{ $link->platform_name }}"
-                                    placeholder="Platform Name" style="max-width:180px;">
-                                <input type="url" id="url_{{ $link->id }}" class="link-input"
-                                    value="{{ $link->platform_url }}" placeholder="https://...">
-                                <button onclick="saveCustomLink({{ $link->id }}, '{{ $link->platform_name }}')"
-                                    class="save-btn-sm">
-                                    <i class="fas fa-save"></i> Save
-                                </button>
-                                <button
-                                    onclick="copyToClipboard(document.getElementById('url_{{ $link->id }}').value)"
-                                    class="copy-btn-sm">
-                                    <i class="fas fa-copy"></i> Copy
-                                </button>
-                                <button onclick="deleteCustomLink({{ $link->id }})" class="save-btn-sm"
-                                    style="background:#dc3545;">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
 
                 <!-- Bottom Actions -->
                 <div class="bottom-actions">
@@ -1734,7 +1632,6 @@
                                     <optgroup label="Payment Gateways">
                                         <option value="PayPal">💳 PayPal</option>
                                         <option value="Stripe">💳 Stripe</option>
-                                        <option value="Razorpay">💳 Razorpay</option>
                                         <option value="Payoneer">💳 Payoneer</option>
                                         <option value="Wise">💳 Wise</option>
                                         <option value="Airwallex">💳 Airwallex</option>
@@ -1754,7 +1651,6 @@
                                         <option value="Venmo">📱 Venmo</option>
                                         <option value="CryptoBTC">₿ Crypto (BTC)</option>
                                         <option value="CryptoUSDT">₿ Crypto (USDT)</option>
-                                        <option value="CryptoETH">₿ Crypto (ETH)</option>
                                         <option value="Bank">🏦 Bank Details</option>
                                     </optgroup>
                                 </select>
@@ -2190,7 +2086,6 @@
             myntra: 'fas fa-shopping-bag',
             snapdeal: 'fas fa-shopping-cart',
             ajio: 'fas fa-tshirt',
-            // For platforms without FA icons, use generic equivalents
             alibaba: 'fas fa-globe-asia',
             indiamart: 'fas fa-building',
             tradeindia: 'fas fa-handshake',
@@ -2436,7 +2331,6 @@
                 upi: '<i class="fas fa-mobile-alt"></i>',
                 zelle: '<i class="fas fa-exchange-alt"></i>',
                 venmo: '<i class="fas fa-hand-holding-usd"></i>',
-                // Generic icons for payment gateways without dedicated FA icons
                 cryptobtc: '<i class="fab fa-bitcoin"></i>',
                 crypto_eth: '<i class="fab fa-ethereum"></i>',
                 cryptousdt: '<i class="fas fa-coins"></i>',

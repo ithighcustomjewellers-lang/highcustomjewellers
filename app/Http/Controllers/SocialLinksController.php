@@ -210,8 +210,6 @@ class SocialLinksController extends Controller
 
     public function updateQuickLink(Request $request)
     {
-
-
         $request->validate([
             'platform_key' => 'required|string',
             'platform_url' => 'required|url|max:500',

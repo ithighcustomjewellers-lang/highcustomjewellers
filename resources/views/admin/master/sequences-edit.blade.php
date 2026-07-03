@@ -1,187 +1,5 @@
 @extends('admin.layouts.layout')
-<style>
-    body {
-        background: #f3f6fc;
-    }
 
-    .text-gradient {
-        background: linear-gradient(135deg, #2b3b4e, #1a4d8c);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-    }
-
-    .toolbar button,
-    .toolbar select {
-        cursor: pointer;
-        transition: all 0.1s ease;
-    }
-
-    .toolbar button:hover {
-        background-color: #e9ecef;
-        transform: scale(0.96);
-    }
-
-    /* =======================================
-    EDITOR
-    ======================================= */
-
-    #emailEditor {
-        line-height: 1.4;
-        min-height: 300px;
-    }
-
-    #emailEditor p,
-    #emailEditor div {
-        margin: 0;
-        padding: 0;
-    }
-
-    #emailEditor img {
-        max-width: 100%;
-        height: auto;
-    }
-
-    /* =======================================
-    MOBILE PREVIEW
-    ======================================= */
-
-    #mobilePreviewContent {
-        line-height: 1.4;
-        word-break: break-word;
-    }
-
-    #mobilePreviewContent p,
-    #mobilePreviewContent div {
-        margin: 0;
-        padding: 0;
-    }
-
-    #mobilePreviewContent img {
-        max-width: 100%;
-        height: auto;
-    }
-
-    /* =======================================
-    DESKTOP PREVIEW
-    ======================================= */
-
-    #desktopPreviewContent {
-        line-height: 1.4;
-        word-break: break-word;
-    }
-
-    #desktopPreviewContent p,
-    #desktopPreviewContent div {
-        margin: 0;
-        padding: 0;
-    }
-
-    #desktopPreviewContent img {
-        max-width: 100%;
-        height: auto;
-    }
-
-
-
-    /* =======================================
-    EMAIL PREVIEW
-    ======================================= */
-
-    .email-preview img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 12px;
-    }
-
-    .email-preview .company-logo {
-        max-width: 140px;
-        max-height: 70px;
-        object-fit: contain;
-    }
-
-    .logo-left {
-        text-align: left;
-    }
-
-    .logo-center {
-        text-align: center;
-    }
-
-    .logo-right {
-        text-align: right;
-    }
-
-    /* =======================================
-    BUTTONS
-    ======================================= */
-
-    .mobile-preview .btn,
-    .desktop-preview .btn {
-        /* display: inline-block;
-        padding: 8px 18px;
-        margin: 4px;
-        border-radius: 40px;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 500; */
-
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        min-width: 130px;
-        height: 42px;
-
-        padding: 0 18px;
-
-        border-radius: 50px;
-        text-decoration: none;
-
-        font-size: 14px;
-        font-weight: 600;
-
-        color: #fff;
-
-        transition: all .25s ease;
-    }
-
-    .active-preview {
-        background-color: #0d6efd !important;
-        color: #fff !important;
-    }
-
-    /* =======================================
-    FOCUS
-    ======================================= */
-
-    #emailEditor:focus {
-        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
-        outline: none;
-    }
-
-    /* =======================================
-    DESKTOP CONTAINER
-    ======================================= */
-
-    .desktop-preview {
-        width: 100%;
-        max-width: 800px;
-        margin: 0 auto;
-        overflow-wrap: break-word;
-    }
-
-    /* =======================================
-    MOBILE CONTAINER
-    ======================================= */
-
-    .mobile-preview {
-        width: 100%;
-        max-width: 420px;
-        margin: 0 auto;
-        overflow-wrap: break-word;
-    }
-</style>
 @section('content')
     <div class="container-fluid mt-4 px-4">
         <div class="row g-4">
@@ -205,7 +23,7 @@
                             <!-- Basic Info Row -->
                             <div class="row g-3 mb-4">
                                 <div class="col-md-3">
-                                    <label class="form-label fw-semibold small text-uppercase text-muted">Step Order</label>
+                                    <label class="form-label fw-semibold small text-uppercase text-muted">Step</label>
                                     <input type="number" name="step" id="step"
                                         class="form-control form-control-lg rounded-3" min="1"
                                         value="{{ old('step', $sequence->step) }}">
@@ -217,15 +35,13 @@
                                         value="{{ old('gap_days', $sequence->gap_days) }}">
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label fw-semibold small text-uppercase text-muted">Variant
-                                        (A/B/C)</label>
+                                    <label class="form-label fw-semibold small text-uppercase text-muted">Variant</label>
                                     <input type="text" name="variant" id="variant"
                                         class="form-control form-control-lg rounded-3 text-uppercase"
                                         value="{{ old('variant', $sequence->variant) }}" maxlength="1">
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label fw-semibold small text-uppercase text-muted">Business
-                                        Type</label>
+                                    <label class="form-label fw-semibold small text-uppercase text-muted">Type</label>
                                     <select name="type" id="typeSelect"
                                         class="form-select form-control rounded-3 form-control-lg">
                                         <option value="B2B"
@@ -297,8 +113,6 @@
                                                 <img id="heroImagePreviewImg" class="rounded-3 border"
                                                     style="max-width: 80px; max-height: 80px;"
                                                     src="{{ asset($sequence->hero_image) }}">
-                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill"
-                                                    onclick="removeHeroImage()">Remove</button>
                                             </div>
                                         </div>
                                     @else
@@ -308,7 +122,7 @@
                                 </div>
                             </div>
 
-                            <!-- WYSIWYG Toolbar (same as create form) -->
+                            <!-- WYSIWYG Toolbar -->
                             <label class="form-label fw-semibold small text-uppercase text-muted">Email Content</label>
                             <div
                                 class="toolbar mb-2 p-2 bg-white rounded-3 border d-flex flex-wrap gap-1 align-items-center">
@@ -343,7 +157,6 @@
                                     <option value="#0000FF">Blue</option>
                                     <option value="#FFA500">Orange</option>
                                 </select>
-
                                 <button type="button" onclick="addHorizontalLine()"
                                     class="btn btn-outline-secondary">─</button>
                             </div>
@@ -376,15 +189,21 @@
                                 </div>
                             </div>
 
+                            <!-- WhatsApp Link -->
                             <div class="card bg-white border rounded-4 mb-4">
                                 <div class="card-body p-3">
-                                    <label class="form-label fw-semibold small mb-2">whatsapp</label>
+                                    <label class="form-label fw-semibold small mb-2">WhatsApp</label>
                                     <div class="row g-2">
                                         <div class="col-md-4">
                                             <input type="text" name="whatsapp_link" class="form-control"
-                                                id="whatsappLink" placeholder="WhatsApp URL">
+                                                id="whatsappLink" placeholder="WhatsApp URL"
+                                                value="{{ $sequence->whatsapp_link }}">
                                         </div>
-                                        <div class="row g-2 mt-2" id="dynamicActionLinks"></div>
+                                        <label class="form-label fw-semibold small mb-0">Action Links</label>
+
+                                        <div id="dynamicActionLinks" class="row g-2 mt-2">
+
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -392,15 +211,53 @@
                             <div class="d-flex gap-3 mt-4 flex-wrap">
                                 <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">💾
                                     Update Sequence</button>
-
+                                <button type="button" class="btn btn-primary btn-lg rounded-pill shadow-sm"
+                                    onclick="openBusinessLinkModal()">
+                                    <i class="fas fa-plus"></i> Add Business Link
+                                </button>
+                                <a href="{{ route('admin-sequenceTable-index') }}"
+                                    class="btn btn-light btn-lg px-5 rounded-pill shadow-sm back-btn">
+                                    <i class="fa fa-arrow-left me-2"></i> Back
                                 </a>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
+            <!-- ============================================ -->
+            <!-- BUSINESS LINK MODAL - PERFECT DESIGN -->
+            <!-- ============================================ -->
+            <div class="modal fade" id="businessLinkModal" tabindex="-1" aria-labelledby="businessLinkModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg rounded-4">
+                        <!-- Header -->
+                        <div class="modal-header bg-gradient-primary text-white rounded-top-4 border-0 px-4 py-3">
+                            <h5 class="modal-title fw-bold" id="businessLinkModalLabel">
+                                <i class="fas fa-link me-2"></i> Add Business Link
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
 
-            <!-- Live Email Preview (same as create form) -->
+                        <!-- Body -->
+                        <div class="modal-body p-4">
+                            <div id="businessLinksList" class="row g-3">
+                                <!-- Dynamically populated -->
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="modal-footer border-0 px-4 pb-4 pt-0">
+                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Email Preview -->
             <div class="col-lg-6">
                 <div class="card border-0 shadow-lg rounded-4" style="top: 20px;">
                     <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
@@ -453,9 +310,166 @@
         </div>
     </div>
 
-    <!-- Styles and Scripts (copy exactly from your create blade) -->
+    <!-- Include Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/jquery.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <style>
+        body {
+            background: #f3f6fc;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #2b3b4e, #1a4d8c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .toolbar button,
+        .toolbar select {
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        .toolbar button:hover {
+            background-color: #e9ecef;
+            transform: scale(0.96);
+        }
+
+        .email-preview img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+        }
+
+        .email-preview .company-logo {
+            max-width: 140px;
+            max-height: 70px;
+            object-fit: contain;
+        }
+
+        .logo-left {
+            text-align: left;
+        }
+
+        .logo-center {
+            text-align: center;
+        }
+
+        .logo-right {
+            text-align: right;
+        }
+
+        .mobile-preview .btn,
+        .desktop-preview .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-width: 130px;
+            height: 42px;
+            padding: 0 18px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            transition: all .25s ease;
+        }
+
+        .active-preview {
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+
+        #emailEditor:focus {
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+            outline: none;
+        }
+
+        #emailEditor {
+            line-height: 1.4;
+        }
+
+        #emailEditor p,
+        #emailEditor div {
+            margin: 0;
+        }
+
+        #mobilePreviewContent {
+            line-height: 1.4;
+        }
+
+        #mobilePreviewContent p,
+        #mobilePreviewContent div {
+            margin: 0;
+        }
+
+        #desktopPreviewContent {
+            line-height: 1.4;
+        }
+
+        #desktopPreviewContent p,
+        #desktopPreviewContent div {
+            margin: 0;
+        }
+
+        #mobilePreviewContent,
+        #desktopPreviewContent {
+            height: 500px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        #mobilePreviewContent::-webkit-scrollbar,
+        #desktopPreviewContent::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #mobilePreviewContent::-webkit-scrollbar-thumb,
+        #desktopPreviewContent::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        /* Action Links Styles */
+        .action-link-item .input-group-text {
+            background-color: #f8f9fa;
+            font-size: 0.85rem;
+            min-width: 100px;
+            justify-content: center;
+        }
+
+        .action-link-item .btn-danger {
+            border-radius: 0 0.375rem 0.375rem 0;
+        }
+
+        .business-link-card {
+            transition: all 0.2s ease;
+            cursor: default;
+        }
+
+        .business-link-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .business-link-card .platform-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .business-link-card .platform-url {
+            font-size: 0.85rem;
+            color: #6c757d;
+            word-break: break-all;
+        }
+    </style>
 
     <script>
         let currentEditor = document.getElementById('emailEditor');
@@ -467,14 +481,50 @@
         let existingHeroImage = '{{ $sequence->hero_image }}';
         let existingAttachment = '{{ $sequence->attachments_image }}';
 
-        // Pre-populate preview on load
-        window.addEventListener('DOMContentLoaded', () => {
+        // Store all business links available in the system
+        let allBusinessLinks = @json($allActionLinks ?? []);
+        // Store currently selected action links for this sequence
+        let selectedActionLinks = [];
+        // Bootstrap modal instance
+        let businessLinkModal = null;
+
+        // ============================================================
+        // INITIALIZATION - LOAD EXISTING SEQUENCE LINKS
+        // ============================================================
+
+        $(document).ready(function() {
+            console.log('Page loaded - Initializing...');
+
+            // Initialize Bootstrap modal
+            businessLinkModal = new bootstrap.Modal(document.getElementById('businessLinkModal'));
+
+            // Get sequence links from database
+            const sequenceLinks = @json($sequence->action_links ?? []);
+            console.log('Sequence links from DB:', sequenceLinks);
+
+            // Load into selectedActionLinks
+            if (Array.isArray(sequenceLinks) && sequenceLinks.length > 0) {
+                selectedActionLinks = sequenceLinks.map(link => ({
+                    id: link.id,
+                    platform_name: link.platform_name || link.name || 'Unknown',
+                    platform_url: link.platform_url || link.url || ''
+                }));
+            } else {
+                selectedActionLinks = [];
+            }
+
+            console.log('Selected Action Links after load:', selectedActionLinks);
+
+            // Render the action links
+            renderActionLinks();
+
             // Set existing company logo preview
             if (existingCompanyLogo) {
                 currentCompanyLogo = '{{ asset($sequence->existing_company_logo) }}';
                 document.getElementById('companyLogoPreviewImg').src = currentCompanyLogo;
                 document.getElementById('companyLogoPreview').style.display = 'block';
             }
+
             // Set existing hero image
             if (existingHeroImage) {
                 currentHeroImage = {
@@ -485,6 +535,7 @@
                 document.getElementById('heroImagePreviewImg').src = currentHeroImage.data;
                 document.getElementById('heroImagePreview').style.display = 'block';
             }
+
             // Set existing attachment
             if (existingAttachment) {
                 currentAttachment = {
@@ -497,133 +548,100 @@
                 }
                 document.getElementById('attachmentPreview').style.display = 'block';
             }
-            // Set existing links and logo position
+
+            // Set existing whatsapp link and logo position
             document.getElementById('whatsappLink').value = '{{ $sequence->whatsapp_link }}';
             document.getElementById('logoPosition').value = '{{ $sequence->logo_position ?? 'center' }}';
-            initializeActionLinks();
-            updatePreview();
+
+            // Update preview
+            setTimeout(updatePreview, 300);
         });
 
-        // All the same helper functions as your create form (copy exactly)
-        function formatText(command, value = null) {
-            document.execCommand(command, false, value);
-            updatePreview();
-            currentEditor.focus();
+        // ============================================================
+        // OPEN BUSINESS LINK MODAL
+        // ============================================================
+
+        function openBusinessLinkModal() {
+            console.log('Opening modal...');
+            // Load the links into modal
+            loadBusinessLinksModal();
+            // Show the modal
+            if (businessLinkModal) {
+                businessLinkModal.show();
+            } else {
+                // Fallback if modal not initialized
+                $('#businessLinkModal').modal('show');
+            }
         }
 
-        let selectedActionLinks = [];
+        // ============================================================
+        // RENDER ACTION LINKS
+        // ============================================================
 
-        // Initialize action links from sequence data
-        function initializeActionLinks() {
-            @php
-                $actionLinks = is_array($sequence->action_links) ? $sequence->action_links : [];
-            @endphp
-
-            selectedActionLinks = @json($actionLinks);
-
+        function renderActionLinks() {
             let html = '';
-            if (selectedActionLinks && selectedActionLinks.length > 0) {
+            console.log('Rendering action links. Count:', selectedActionLinks.length);
+
+            if (selectedActionLinks.length > 0) {
                 selectedActionLinks.forEach(function(link, index) {
                     html += `
-                <div class="col-md-4 action-link-item mb-2">
-                    <div class="input-group">
-                        <span class="input-group-text bg-light small" style="min-width: 80px; justify-content: center;">
-                            <i class="fas fa-link me-1"></i> ${link.platform_name || 'Link'}
-                        </span>
-                        <input type="text"
-                            class="form-control form-control-sm"
-                            name="action_links[${index}][platform_url]"
-                            value="${link.platform_url || ''}"
-                            placeholder="Enter URL">
-                        <button type="button"
-                            class="btn btn-danger btn-sm remove-action-link"
-                            data-id="${link.id || index}">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    <div class="col-md-6 action-link-item mb-2">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light" style="min-width: 100px; font-size: 0.85rem;">
+                                ${escapeHtml(link.platform_name)}
+                            </span>
+                            <input
+                                type="text"
+                                class="form-control"
+                                name="action_links[${index}][platform_url]"
+                                value="${escapeHtml(link.platform_url || '')}"
+                                placeholder="Enter URL"
+                            >
+                            <button
+                                class="btn btn-danger remove-action-link"
+                                data-id="${link.id}"
+                                type="button"
+                                title="Remove this link from sequence"
+                            >
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <input
+                            type="hidden"
+                            name="action_links[${index}][id]"
+                            value="${link.id}"
+                        >
+                        <input
+                            type="hidden"
+                            name="action_links[${index}][platform_name]"
+                            value="${escapeHtml(link.platform_name)}"
+                        >
                     </div>
-                    <input type="hidden"
-                        name="action_links[${index}][platform_name]"
-                        value="${link.platform_name || ''}">
-                    <input type="hidden"
-                        name="action_links[${index}][id]"
-                        value="${link.id || ''}">
-                </div>
-            `;
+                `;
                 });
             } else {
-                html =
-                    `<div class="text-muted small text-center py-2">No action links added. Click "Add Link" to add one.</div>`;
+                html = `
+                <div class="col-12">
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-link me-2"></i>
+                        No action links added. Click "Add Business Link" to add one.
+                    </div>
+                </div>
+            `;
             }
             $('#dynamicActionLinks').html(html);
             updatePreview();
         }
 
-        // Add new action link
-        function addActionLink() {
-            const platformName = prompt('Enter platform name (e.g., Facebook, Instagram, LinkedIn):');
-            if (!platformName) return;
+        // ============================================================
+        // TOOLBAR FUNCTIONS
+        // ============================================================
 
-            const platformUrl = prompt('Enter URL (e.g., https://facebook.com/yourpage):');
-            if (!platformUrl) return;
-
-            const newLink = {
-                id: Date.now(),
-                platform_name: platformName,
-                platform_url: platformUrl
-            };
-
-            selectedActionLinks.push(newLink);
-
-            if ($('#dynamicActionLinks').find('.text-muted').length) {
-                $('#dynamicActionLinks').html('');
-            }
-
-            const index = selectedActionLinks.length - 1;
-            const html = `
-        <div class="col-md-12 action-link-item mb-2">
-            <div class="input-group">
-                <span class="input-group-text bg-light small" style="min-width: 80px; justify-content: center;">
-                    <i class="fas fa-link me-1"></i> ${newLink.platform_name}
-                </span>
-                <input type="text"
-                    class="form-control form-control-sm"
-                    name="action_links[${index}][platform_url]"
-                    value="${newLink.platform_url}"
-                    placeholder="Enter URL">
-                <button type="button"
-                    class="btn btn-danger btn-sm remove-action-link"
-                    data-id="${newLink.id}">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <input type="hidden"
-                name="action_links[${index}][platform_name]"
-                value="${newLink.platform_name}">
-            <input type="hidden"
-                name="action_links[${index}][id]"
-                value="${newLink.id}">
-        </div>
-    `;
-            $('#dynamicActionLinks').append(html);
+        function formatText(command, value = null) {
+            document.execCommand(command, false, value);
             updatePreview();
+            currentEditor.focus();
         }
-
-        // Remove action link
-        $(document).on('click', '.remove-action-link', function() {
-            const linkId = $(this).data('id');
-            $(this).closest('.action-link-item').remove();
-            selectedActionLinks = selectedActionLinks.filter(function(link) {
-                return link.id != linkId;
-            });
-
-            if (selectedActionLinks.length === 0) {
-                $('#dynamicActionLinks').html(
-                    `<div class="text-muted small text-center py-2">No action links added. Click "Add Link" to add one.</div>`
-                    );
-            }
-
-            updatePreview();
-        });
 
         function changeFontSize(size) {
             document.execCommand('fontSize', false, '7');
@@ -638,6 +656,10 @@
             document.execCommand('insertHorizontalRule', false, null);
             updatePreview();
         }
+
+        // ============================================================
+        // IMAGE / ATTACHMENT FUNCTIONS
+        // ============================================================
 
         function previewHeroImage(input) {
             if (input.files && input.files[0]) {
@@ -654,13 +676,6 @@
                 };
                 reader.readAsDataURL(input.files[0]);
             }
-        }
-
-        function removeHeroImage() {
-            currentHeroImage = null;
-            document.getElementById('heroImage').value = '';
-            document.getElementById('heroImagePreview').style.display = 'none';
-            updatePreview();
         }
 
         function previewAttachment(input) {
@@ -683,9 +698,10 @@
             currentAttachment = null;
             document.getElementById('attachmentsImage').value = '';
             document.getElementById('attachmentPreview').style.display = 'none';
-            document.getElementById('attachmentName').innerHTML = ''; // clear
+            document.getElementById('attachmentName').innerHTML = '';
             updatePreview();
         }
+
         document.getElementById('companyLogoInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -699,7 +715,6 @@
                         currentCompanyLogo = ev.target.result;
                         document.getElementById('companyLogoPreviewImg').src = currentCompanyLogo;
                         document.getElementById('companyLogoPreview').style.display = 'block';
-                        // If a new file is selected, we also need to unset the "remove_logo" checkbox logic
                         document.getElementById('removeLogoCheck') && (document.getElementById(
                             'removeLogoCheck').checked = false);
                         updatePreview();
@@ -709,6 +724,136 @@
                 reader.readAsDataURL(file);
             }
         });
+
+        // ============================================================
+        // ACTION LINKS - MODAL FUNCTIONS
+        // ============================================================
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function loadBusinessLinksModal() {
+            // Get IDs of currently selected links
+            let selectedIds = selectedActionLinks.map(x => String(x.id));
+
+            // Filter out links that are already added
+            let remainingLinks = allBusinessLinks.filter(link =>
+                !selectedIds.includes(String(link.id))
+            );
+
+            console.log('Remaining links for modal:', remainingLinks);
+
+            let html = '';
+
+            if (remainingLinks.length === 0) {
+                html = `
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-check-circle me-2"></i>
+                        All available business links have been added to this sequence.
+                    </div>
+                </div>
+            `;
+            } else {
+                remainingLinks.forEach(function(link) {
+                    html += `
+                    <div class="col-md-6 mb-3">
+                        <div class="card business-link-card h-100 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="platform-name">${escapeHtml(link.platform_name)}</div>
+                                    <button
+                                        class="btn btn-success btn-sm"
+                                        onclick="addBusinessLinkById(${link.id})"
+                                    >
+                                        <i class="fas fa-plus"></i> Add
+                                    </button>
+                                </div>
+                                <div class="platform-url text-muted small">
+                                    <i class="fas fa-link me-1"></i>
+                                    ${escapeHtml(link.platform_url || 'No URL')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                });
+            }
+            $('#businessLinksList').html(html);
+        }
+
+        function addBusinessLinkById(linkId) {
+            // Find the link in allBusinessLinks
+            const linkToAdd = allBusinessLinks.find(link => String(link.id) === String(linkId));
+
+            if (!linkToAdd) {
+                toastr.error('Business link not found');
+                return;
+            }
+
+            // Check if already added
+            const alreadyAdded = selectedActionLinks.some(link => String(link.id) === String(linkId));
+            if (alreadyAdded) {
+                toastr.warning('This link is already added to the sequence');
+                return;
+            }
+
+            // Add to selected links
+            selectedActionLinks.push({
+                id: linkToAdd.id,
+                platform_name: linkToAdd.platform_name,
+                platform_url: linkToAdd.platform_url || ''
+            });
+
+            console.log('Added link. New selectedActionLinks:', selectedActionLinks);
+
+            // Re-render the display
+            renderActionLinks();
+
+            // Close modal
+            if (businessLinkModal) {
+                businessLinkModal.hide();
+            } else {
+                $('#businessLinkModal').modal('hide');
+            }
+
+            toastr.success(`${linkToAdd.platform_name} added successfully!`);
+        }
+
+        // ============================================================
+        // REMOVE ACTION LINK
+        // ============================================================
+
+        $(document).on('click', '.remove-action-link', function() {
+            const linkId = $(this).data('id');
+
+            // Find the link to show in toast
+            const removedLink = selectedActionLinks.find(link => String(link.id) === String(linkId));
+
+            // Remove from selectedActionLinks array
+            selectedActionLinks = selectedActionLinks.filter(function(link) {
+                return String(link.id) !== String(linkId);
+            });
+
+            console.log('Removed link. New selectedActionLinks:', selectedActionLinks);
+
+            // Re-render the display
+            renderActionLinks();
+
+            if (removedLink) {
+                toastr.info(`${removedLink.platform_name} removed from sequence`);
+            } else {
+                toastr.info('Link removed from sequence');
+            }
+        });
+
+        // ============================================================
+        // PREVIEW FUNCTIONS
+        // ============================================================
 
         function generatePreviewHtml() {
             let content = currentEditor.innerHTML;
@@ -735,7 +880,7 @@
             const whatsapp = document.getElementById('whatsappLink').value;
             if (whatsapp) {
                 linksHtml +=
-                    `<a href="${whatsapp}" class="btn btn-success rounded-pill btn-sm" target="_blank" style="background:#007bff;">WhatsApp</a>`;
+                    `<a href="${whatsapp}" class="btn btn-success rounded-pill btn-sm" target="_blank" style="background: linear-gradient(135deg, #2563eb, #4f46e5);">WhatsApp</a>`;
             }
 
             if (selectedActionLinks && selectedActionLinks.length > 0) {
@@ -743,10 +888,10 @@
                     let url = link.platform_url || '';
                     if (!url) return;
                     linksHtml += `
-                <a href="${url}" class="btn btn-primary rounded-pill btn-sm" target="_blank" style="background: #007bff;">
-                    ${link.platform_name}
-                </a>
-            `;
+                    <a href="${url}" class="btn btn-primary rounded-pill btn-sm" target="_blank" style="background: linear-gradient(135deg, #2563eb, #4f46e5);">
+                        ${link.platform_name}
+                    </a>
+                `;
                 });
             }
             linksHtml += `</div>`;
@@ -762,7 +907,11 @@
             document.getElementById('desktopPreviewContent').innerHTML = fullHtml;
             document.getElementById('message').value = currentEditor.innerHTML;
         }
-        // Event listeners
+
+        // ============================================================
+        // EVENT LISTENERS
+        // ============================================================
+
         document.getElementById('subject').addEventListener('input', updatePreview);
         document.getElementById('whatsappLink').addEventListener('input', updatePreview);
         document.getElementById('logoPosition').addEventListener('change', updatePreview);
@@ -774,6 +923,7 @@
             document.execCommand('insertText', false, text);
             updatePreview();
         });
+
         // Preview toggle
         document.querySelectorAll('[data-preview]').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -790,80 +940,80 @@
                 }
             });
         });
+
         // Variant limit to one uppercase letter
         $('#variant').on('input', function() {
             let val = $(this).val().replace(/[^A-Za-z]/g, '').toUpperCase().substring(0, 1);
             $(this).val(val);
         });
 
+        // ============================================================
+        // FORM SUBMISSION
+        // ============================================================
 
-        $(document).ready(function() {
-            $('#emailForm').on('submit', function(e) {
-                e.preventDefault();
-                $('#message').val(currentEditor.innerHTML);
+        $('#emailForm').on('submit', function(e) {
+            e.preventDefault();
+            $('#message').val(currentEditor.innerHTML);
 
-                // Validations
-                if (!$('#step').val()) {
-                    toastr.error('Step is required');
-                    return;
-                }
-                if (!$('#subject').val()) {
-                    toastr.error('Subject is required');
-                    return;
-                }
-                let editorEmpty = !currentEditor.innerText.trim() || currentEditor.innerHTML ===
-                    '<p><br></p>';
-                if (editorEmpty) {
-                    toastr.error('Message content is required');
-                    return;
-                }
-                if (!$('input[name="gap_days"]').val()) {
-                    toastr.error('Gap days required');
-                    return;
-                }
-                if (!$('#variant').val()) {
-                    toastr.error('Variant required');
-                    return;
-                }
+            // Validations
+            if (!$('#step').val()) {
+                toastr.error('Step is required');
+                return;
+            }
+            if (!$('#subject').val()) {
+                toastr.error('Subject is required');
+                return;
+            }
+            let editorEmpty = !currentEditor.innerText.trim() || currentEditor.innerHTML === '<p><br></p>';
+            if (editorEmpty) {
+                toastr.error('Message content is required');
+                return;
+            }
+            if (!$('input[name="gap_days"]').val()) {
+                toastr.error('Gap days required');
+                return;
+            }
+            if (!$('#variant').val()) {
+                toastr.error('Variant required');
+                return;
+            }
 
-                const formData = new FormData(this);
+            const formData = new FormData(this);
 
-                if ($('#removeLogoCheck').length && $('#removeLogoCheck').is(':checked')) {
-                    formData.append('remove_logo', '1');
-                }
+            if ($('#removeLogoCheck').length && $('#removeLogoCheck').is(':checked')) {
+                formData.append('remove_logo', '1');
+            }
 
-                // Append action links to form data
-                if (selectedActionLinks && selectedActionLinks.length > 0) {
-                    selectedActionLinks.forEach((link, index) => {
-                        const urlInput = $(`input[name="action_links[${index}][platform_url]"]`);
-                        const currentUrl = urlInput.length ? urlInput.val() : link.platform_url;
+            // Append action links to form data
+            if (selectedActionLinks && selectedActionLinks.length > 0) {
+                selectedActionLinks.forEach((link, index) => {
+                    const urlInput = $(`input[name="action_links[${index}][platform_url]"]`);
+                    const currentUrl = urlInput.length ? urlInput.val() : link.platform_url;
 
-                        formData.append(`action_links[${index}][id]`, link.id || '');
-                        formData.append(`action_links[${index}][platform_name]`, link
-                            .platform_name || '');
-                        formData.append(`action_links[${index}][platform_url]`, currentUrl || '');
-                    });
-                }
-
-                $.ajax({
-                    url: "{{ route('admin-sequences-list-update', $sequence->id) }}",
-                    method: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(resp) {
-                        toastr.success(resp.message || 'Updated successfully');
-                        setTimeout(() => location.reload(), 1500);
-                    },
-                    error: function(xhr) {
-                        if (xhr.status === 422 && xhr.responseJSON.errors) {
-                            Object.values(xhr.responseJSON.errors).forEach(err => toastr.error(
-                                err[0]));
-                        } else {
-                            toastr.error(xhr.responseJSON?.message || 'Update failed');
-                        }
-                    }
+                    formData.append(`action_links[${index}][id]`, link.id || '');
+                    formData.append(`action_links[${index}][platform_name]`, link.platform_name || '');
+                    formData.append(`action_links[${index}][platform_url]`, currentUrl || '');
                 });
+            }
+
+            $.ajax({
+                url: "{{ route('admin-sequences-list-update', $sequence->id) }}",
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(resp) {
+                    toastr.success(resp.message || 'Updated successfully');
+                    setTimeout(() => location.reload(), 1500);
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422 && xhr.responseJSON.errors) {
+                        Object.values(xhr.responseJSON.errors).forEach(err => toastr.error(
+                            err[0]));
+                    } else {
+                        toastr.error(xhr.responseJSON?.message || 'Update failed');
+                    }
+                }
             });
         });
     </script>

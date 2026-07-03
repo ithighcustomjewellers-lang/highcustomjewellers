@@ -39,7 +39,7 @@
             top: 0;
             left: 0;
             width: 260px;
-            height: 100vh;
+            height: 100%;
             background: #0f172a;
             color: #e2e8f0;
             z-index: 1050;

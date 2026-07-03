@@ -146,6 +146,7 @@ class MasterController extends Controller
     public function sequencesStore(Request $request)
     {
 
+
         Log::info('Store sequence request received', [
             'data' => $request->all()
         ]);
