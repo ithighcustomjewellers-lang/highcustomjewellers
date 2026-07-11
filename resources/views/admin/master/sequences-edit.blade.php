@@ -1,5 +1,157 @@
 @extends('admin.layouts.layout')
+    <style>
+        body {
+            background: #f3f6fc;
+        }
 
+        .text-gradient {
+            background: linear-gradient(135deg, #2b3b4e, #1a4d8c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .toolbar button,
+        .toolbar select {
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        .toolbar button:hover {
+            background-color: #e9ecef;
+            transform: scale(0.96);
+        }
+
+        .email-preview img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+        }
+
+        .email-preview .company-logo {
+            max-width: 140px;
+            max-height: 70px;
+            object-fit: contain;
+        }
+
+        .logo-left {
+            text-align: left;
+        }
+
+        .logo-center {
+            text-align: center;
+        }
+
+        .logo-right {
+            text-align: right;
+        }
+
+        .mobile-preview .btn,
+        .desktop-preview .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-width: 130px;
+            height: 42px;
+            padding: 0 18px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            transition: all .25s ease;
+        }
+
+        .active-preview {
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+
+        #emailEditor:focus {
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+            outline: none;
+        }
+
+        #emailEditor {
+            line-height: 1.4;
+        }
+
+        #emailEditor p,
+        #emailEditor div {
+            margin: 0;
+        }
+
+        #mobilePreviewContent {
+            line-height: 1.4;
+        }
+
+        #mobilePreviewContent p,
+        #mobilePreviewContent div {
+            margin: 0;
+        }
+
+        #desktopPreviewContent {
+            line-height: 1.4;
+        }
+
+        #desktopPreviewContent p,
+        #desktopPreviewContent div {
+            margin: 0;
+        }
+
+        #mobilePreviewContent,
+        #desktopPreviewContent {
+            height: 500px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        #mobilePreviewContent::-webkit-scrollbar,
+        #desktopPreviewContent::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #mobilePreviewContent::-webkit-scrollbar-thumb,
+        #desktopPreviewContent::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        /* Action Links Styles */
+        .action-link-item .input-group-text {
+            background-color: #f8f9fa;
+            font-size: 0.85rem;
+            min-width: 100px;
+            justify-content: center;
+        }
+
+        .action-link-item .btn-danger {
+            border-radius: 0 0.375rem 0.375rem 0;
+        }
+
+        .business-link-card {
+            transition: all 0.2s ease;
+            cursor: default;
+        }
+
+        .business-link-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .business-link-card .platform-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .business-link-card .platform-url {
+            font-size: 0.85rem;
+            color: #6c757d;
+            word-break: break-all;
+        }
+    </style>
 @section('content')
     <div class="container-fluid mt-4 px-4">
         <div class="row g-4">
@@ -151,11 +303,18 @@
                                     <option value="32px">32px</option>
                                 </select>
                                 <select onchange="formatText('foreColor', this.value)" class="form-control-sm">
-                                    <option value="#000000">Black</option>
-                                    <option value="#FF0000">Red</option>
-                                    <option value="#00FF00">Green</option>
-                                    <option value="#0000FF">Blue</option>
-                                    <option value="#FFA500">Orange</option>
+                                    <option value="#000000">⚫ Black</option>
+                                    <option value="#808080">⚪ Gray</option>
+                                    <option value="#FF0000">🔴 Red</option>
+                                    <option value="#FFA500">🟠 Orange</option>
+                                    <option value="#FFFF00">🟡 Yellow</option>
+                                    <option value="#00FF00">🟢 Green</option>
+                                    <option value="#008000">🟩 Dark Green</option>
+                                    <option value="#00FFFF">🔵 Cyan</option>
+                                    <option value="#0000FF">🔷 Blue</option>
+                                    <option value="#800080">🟣 Purple</option>
+                                    <option value="#FF00FF">🩷 Magenta</option>
+                                    <option value="#8B4513">🟤 Brown</option>
                                 </select>
                                 <button type="button" onclick="addHorizontalLine()"
                                     class="btn btn-outline-secondary">─</button>
@@ -317,159 +476,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <style>
-        body {
-            background: #f3f6fc;
-        }
 
-        .text-gradient {
-            background: linear-gradient(135deg, #2b3b4e, #1a4d8c);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .toolbar button,
-        .toolbar select {
-            cursor: pointer;
-            transition: all 0.1s ease;
-        }
-
-        .toolbar button:hover {
-            background-color: #e9ecef;
-            transform: scale(0.96);
-        }
-
-        .email-preview img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 12px;
-        }
-
-        .email-preview .company-logo {
-            max-width: 140px;
-            max-height: 70px;
-            object-fit: contain;
-        }
-
-        .logo-left {
-            text-align: left;
-        }
-
-        .logo-center {
-            text-align: center;
-        }
-
-        .logo-right {
-            text-align: right;
-        }
-
-        .mobile-preview .btn,
-        .desktop-preview .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            min-width: 130px;
-            height: 42px;
-            padding: 0 18px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            color: #fff;
-            transition: all .25s ease;
-        }
-
-        .active-preview {
-            background-color: #0d6efd !important;
-            color: white !important;
-        }
-
-        #emailEditor:focus {
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
-            outline: none;
-        }
-
-        #emailEditor {
-            line-height: 1.4;
-        }
-
-        #emailEditor p,
-        #emailEditor div {
-            margin: 0;
-        }
-
-        #mobilePreviewContent {
-            line-height: 1.4;
-        }
-
-        #mobilePreviewContent p,
-        #mobilePreviewContent div {
-            margin: 0;
-        }
-
-        #desktopPreviewContent {
-            line-height: 1.4;
-        }
-
-        #desktopPreviewContent p,
-        #desktopPreviewContent div {
-            margin: 0;
-        }
-
-        #mobilePreviewContent,
-        #desktopPreviewContent {
-            height: 500px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 20px;
-        }
-
-        #mobilePreviewContent::-webkit-scrollbar,
-        #desktopPreviewContent::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        #mobilePreviewContent::-webkit-scrollbar-thumb,
-        #desktopPreviewContent::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 10px;
-        }
-
-        /* Action Links Styles */
-        .action-link-item .input-group-text {
-            background-color: #f8f9fa;
-            font-size: 0.85rem;
-            min-width: 100px;
-            justify-content: center;
-        }
-
-        .action-link-item .btn-danger {
-            border-radius: 0 0.375rem 0.375rem 0;
-        }
-
-        .business-link-card {
-            transition: all 0.2s ease;
-            cursor: default;
-        }
-
-        .business-link-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-        }
-
-        .business-link-card .platform-name {
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .business-link-card .platform-url {
-            font-size: 0.85rem;
-            color: #6c757d;
-            word-break: break-all;
-        }
-    </style>
 
     <script>
         let currentEditor = document.getElementById('emailEditor');

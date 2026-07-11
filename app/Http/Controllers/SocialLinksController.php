@@ -208,49 +208,153 @@ class SocialLinksController extends Controller
     }
 
 
+    // public function updateQuickLink(Request $request)
+    // {
+
+    //     $request->validate([
+    //         'platform_key' => 'required|string',
+    //         'platform_url' => 'required|url|max:500',
+    //         'platform_name' => 'required|string'
+    //     ]);
+
+    //     $user = Auth::user();
+    //     $quickLinks = UserSetting::getValue($user->id, 'quick_links', []);
+    //     $quickLinks[$request->platform_key] = $request->platform_url;
+    //     UserSetting::setValue($user->id, 'quick_links', $quickLinks);
+
+    //     // Determine icon type for quick link
+    //     // $predefinedPlatforms = ['whatsapp', 'telegram', 'facebook', 'youtube', 'linkedin', 'instagram', 'x', 'threads', 'snapchat', 'reddit', 'discord', 'pinterest', 'twitch', 'quora', 'messenger', 'rumble', 'viber'];
+    //     $predefinedPlatforms = [
+    //         // ===== SOCIAL MEDIA =====
+    //         'whatsapp','telegram','facebook','youtube','linkedin','instagram','x','threads','snapchat','reddit','discord','pinterest',
+    //         'twitch','quora','messenger','rumble','viber','tiktok','twitter','skype','slack','medium','tumblr','flickr', 'soundcloud',
+    //         'vimeo', 'spotify','github', 'stackoverflow','behance','dribbble',
+
+    //         // ===== ECOMMERCE =====
+    //         'ebay','amazon','alibaba','indiamart','tradeindia','etsy','flipkart','shopify','walmart','aliexpress','meesho','nykaa','myntra','snapdeal','ajio',
+
+    //         // ===== PAYMENT GATEWAYS =====
+    //         'paypal', 'stripe', 'razorpay', 'payoneer','wise',
+    //         'airwallex', 'skydo', 'cashfree','instamojo',
+    //         'payu','westernunion', 'googlepay', 'applepay', 'samsungpay',
+    //         'phonepe','paytm','amazonpay','upi','zelle', 'venmo', 'crypto_btc', 'crypto_usdt',
+    //         'crypto_eth','bank',
+
+    //     ];
+    //     $isPredefined = in_array(strtolower($request->platform_name), $predefinedPlatforms);
+    //     $iconType = $isPredefined ? 'fa' : 'custom';
+
+    //     // Create or update in social_links table
+    //     $socialLink = SocialLink::updateOrCreate(
+    //         [
+    //             'user_id' => $user->id,
+    //             'platform_name' => $request->platform_name
+    //         ],
+    //         [
+    //             'platform_url' => $request->platform_url,
+    //             'icon_type' => $iconType,
+    //             'sort_order' => 0,
+    //             'is_active' => true
+    //         ]
+    //     );
+
+    //     $totalLinks = SocialLink::where('user_id', $user->id)->count();
+
+    //     $profileSlug = UserSetting::getValue($user->id, 'profile_slug');
+    //     if (!$profileSlug) {
+    //         $profileSlug = Str::slug($user->name) . '-' . $user->id;
+    //         UserSetting::setValue($user->id, 'profile_slug', $profileSlug);
+    //     }
+
+    //     $profileUrl = url('/profile/' . $profileSlug);
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => $request->platform_name . ' link updated successfully',
+    //         'totalLinks' => $totalLinks,
+    //         'profile_url' => $profileUrl,
+    //         'social_link' => $socialLink
+    //     ]);
+    // }
+
+
+    /**
+ * UPI ID को Deep Link में बदलें (सिर्फ UPI प्लेटफॉर्म के लिए)
+ */
+private function convertUpiToDeepLink($platformName, $platformUrl, $merchantName = 'Merchant')
+    {
+        $upiPlatforms = ['upi', 'googlepay', 'phonepe', 'paytm'];
+        if (in_array(strtolower($platformName), $upiPlatforms)) {
+            if (!preg_match('/^(http|https|upi|tez|phonepe|paytm):\/\//', $platformUrl)) {
+                $upiId = $platformUrl;
+                return 'upi://pay?pa=' . urlencode($upiId) .
+                       '&pn=' . urlencode($merchantName) .
+                       '&cu=INR';
+            }
+        }
+
+        return $platformUrl;
+    }
+
     public function updateQuickLink(Request $request)
     {
         $request->validate([
             'platform_key' => 'required|string',
-            'platform_url' => 'required|url|max:500',
             'platform_name' => 'required|string'
         ]);
 
         $user = Auth::user();
+        $platformName = $request->platform_name;
+        $platformUrl = $request->platform_url;
+
+        // ===== UPI / Google Pay Handling =====
+        $upiPlatforms = ['upi', 'googlepay', 'phonepe', 'paytm'];
+        if (in_array(strtolower($platformName), $upiPlatforms)) {
+            if (!preg_match('/^(http|https|upi|tez|phonepe|paytm):\/\//', $platformUrl)) {
+                $upiId = $platformUrl;
+                $merchantName = $user->name ?? 'Merchant';
+
+                // ✅ Google Pay के लिए सही डीप लिंक
+                $platformUrl = 'tez://upi/pay?pa=' . urlencode($upiId) .
+                            '&pn=' . urlencode($merchantName) .
+                            '&cu=INR';
+            }
+        } else {
+            // For non-UPI platforms, validate URL
+            $request->validate([
+                'platform_url' => 'required|url|max:500'
+            ]);
+        }
+
+        // ===== Save Quick Links =====
         $quickLinks = UserSetting::getValue($user->id, 'quick_links', []);
-        $quickLinks[$request->platform_key] = $request->platform_url;
+        $quickLinks[$request->platform_key] = $platformUrl;
         UserSetting::setValue($user->id, 'quick_links', $quickLinks);
 
-        // Determine icon type for quick link
-        // $predefinedPlatforms = ['whatsapp', 'telegram', 'facebook', 'youtube', 'linkedin', 'instagram', 'x', 'threads', 'snapchat', 'reddit', 'discord', 'pinterest', 'twitch', 'quora', 'messenger', 'rumble', 'viber'];
+        // ===== Determine Icon Type =====
         $predefinedPlatforms = [
-            // ===== SOCIAL MEDIA =====
             'whatsapp','telegram','facebook','youtube','linkedin','instagram','x','threads','snapchat','reddit','discord','pinterest',
             'twitch','quora','messenger','rumble','viber','tiktok','twitter','skype','slack','medium','tumblr','flickr', 'soundcloud',
             'vimeo', 'spotify','github', 'stackoverflow','behance','dribbble',
-
-            // ===== ECOMMERCE =====
             'ebay','amazon','alibaba','indiamart','tradeindia','etsy','flipkart','shopify','walmart','aliexpress','meesho','nykaa','myntra','snapdeal','ajio',
-
-            // ===== PAYMENT GATEWAYS =====
             'paypal', 'stripe', 'razorpay', 'payoneer','wise',
             'airwallex', 'skydo', 'cashfree','instamojo',
             'payu','westernunion', 'googlepay', 'applepay', 'samsungpay',
             'phonepe','paytm','amazonpay','upi','zelle', 'venmo', 'crypto_btc', 'crypto_usdt',
             'crypto_eth','bank',
-
         ];
-        $isPredefined = in_array(strtolower($request->platform_name), $predefinedPlatforms);
+
+        $isPredefined = in_array(strtolower($platformName), $predefinedPlatforms);
         $iconType = $isPredefined ? 'fa' : 'custom';
 
-        // Create or update in social_links table
+        // ===== Create or Update Social Link =====
         $socialLink = SocialLink::updateOrCreate(
             [
                 'user_id' => $user->id,
-                'platform_name' => $request->platform_name
+                'platform_name' => $platformName
             ],
             [
-                'platform_url' => $request->platform_url,
+                'platform_url' => $platformUrl, // Save converted URL
                 'icon_type' => $iconType,
                 'sort_order' => 0,
                 'is_active' => true
@@ -259,6 +363,7 @@ class SocialLinksController extends Controller
 
         $totalLinks = SocialLink::where('user_id', $user->id)->count();
 
+        // ===== Profile Slug =====
         $profileSlug = UserSetting::getValue($user->id, 'profile_slug');
         if (!$profileSlug) {
             $profileSlug = Str::slug($user->name) . '-' . $user->id;
@@ -269,7 +374,7 @@ class SocialLinksController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => $request->platform_name . ' link updated successfully',
+            'message' => $platformName . ' link updated successfully',
             'totalLinks' => $totalLinks,
             'profile_url' => $profileUrl,
             'social_link' => $socialLink
@@ -318,7 +423,6 @@ class SocialLinksController extends Controller
     public function saveMultipleQR(Request $request)
     {
         $user = Auth::user();
-
         $links = $request->links;
         if (!$links || count($links) == 0) {
             return response()->json([
@@ -333,16 +437,26 @@ class SocialLinksController extends Controller
             []
         );
 
-        $qrId = 'qr_' . time();
+         $convertedLinks = [];
+            foreach ($links as $link) {
+                $platform = $link['platform'];
+                $url = $link['url'];
+                $convertedUrl = $this->convertUpiToDeepLink($platform, $url, $user->name ?? 'Merchant');
+                $convertedLinks[] = [
+                    'platform' => $platform,
+                    'url' => $convertedUrl
+                ];
+            }
 
+        $qrId = 'qr_' . time();
         $savedQrs[] = [
             'id' => $qrId,
-            'title' => $request->title ?? '',
+            'title' => $request->title ?? 'Untitled QR',
             'tracking_slug' => $qrId,
-            'links' => $links,
+            // 'links' => $links,
+            'links' => $convertedLinks,
             'created_at' => now()->toDateTimeString()
         ];
-
         UserSetting::setValue(
             $user->id,
             'multi_qr_codes',
@@ -350,13 +464,10 @@ class SocialLinksController extends Controller
         );
 
         foreach ($savedQrs as &$qr) {
-
             $trackingSlug = $qr['tracking_slug'] ?? $qr['id'];
-
             $qr['qr_scans'] = AnalyticsTracking::getQRWiseScans(
                 $trackingSlug
             );
-
             $qr['button_clicks'] = AnalyticsTracking::getQRWiseClicks(
                 $trackingSlug
             );
@@ -410,6 +521,7 @@ class SocialLinksController extends Controller
 
     public function updateMultiQR(Request $request)
     {
+
         $request->validate([
             'qr_id' => 'required',
             'links' => 'required|array'
@@ -422,15 +534,37 @@ class SocialLinksController extends Controller
             []
         );
 
-        foreach ($qrs as &$qr) {
+        // foreach ($qrs as &$qr) {
+        //     if ($qr['id'] == $request->qr_id) {
+        //         $qr['title'] = $request->title ?? $qr['title'] ?? '';
+        //         $updatedLinks = [];
+        //         foreach ($request->links as $link) {
+        //             if (!empty($link['platform']) && !empty($link['url'])) {
+        //                 $updatedLinks[] = [
+        //                     'platform' => $link['platform'],
+        //                     'url' => $link['url']
+        //                 ];
+        //             }
+        //         }
+        //         $qr['links'] = $updatedLinks;
+        //         $qr['updated_at'] = now()->toDateTimeString();
+        //     }
+        // }
+
+         foreach ($qrs as &$qr) {
             if ($qr['id'] == $request->qr_id) {
                 $qr['title'] = $request->title ?? $qr['title'] ?? '';
                 $updatedLinks = [];
                 foreach ($request->links as $link) {
                     if (!empty($link['platform']) && !empty($link['url'])) {
+                        $convertedUrl = $this->convertUpiToDeepLink(
+                            $link['platform'],
+                            $link['url'],
+                            $user->name ?? 'Merchant'
+                        );
                         $updatedLinks[] = [
                             'platform' => $link['platform'],
-                            'url' => $link['url']
+                            'url' => $convertedUrl
                         ];
                     }
                 }

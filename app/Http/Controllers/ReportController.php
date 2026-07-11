@@ -6,10 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\CampaignLog;
 use App\Models\EmailLinkClick;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+
+
 
 class ReportController extends Controller
 {
@@ -22,6 +23,143 @@ class ReportController extends Controller
         }
         return view('reports.campaign', compact('status'));
     }
+
+
+    // live code
+    // public function getCampaignLogsData(Request $request)
+    // {
+    //     $columns = [
+    //         0 => 'campaign_logs.id',
+    //         1 => 'lead_name',
+    //         2 => 'lead_email',
+    //         3 => 'step',
+    //         4 => 'subject',
+    //         5 => 'campaign_logs.status',
+    //         6 => 'campaign_logs.scheduled_at',
+    //         7 => 'campaign_logs.sent_at',
+    //         8 => 'campaign_logs.seen_at',
+    //         9 => 'campaign_logs.total_clicks',
+    //     ];
+
+    //     $query = CampaignLog::with('linkClicks')
+    //         ->leftJoin('leads', 'campaign_logs.lead_id', '=', 'leads.id')
+    //         ->leftJoin('sequences', 'campaign_logs.sequence_id', '=', 'sequences.id')
+    //         ->where('campaign_logs.user_id', Auth::id())
+    //         ->select([
+    //             'campaign_logs.*',
+    //             'leads.name as lead_name',
+    //             'leads.email as lead_email',
+    //             'sequences.step as step',
+    //             'sequences.subject as subject',
+    //         ]);
+
+
+    //     if ($request->filled('status')) {
+    //         $status = $request->status;
+    //         $query->where('campaign_logs.status', $status);
+    //     }
+
+    //     // Total Records
+    //     $totalData = (clone $query)->count();
+
+    //     // Search
+    //     if (!empty($request->search['value'])) {
+    //         $search = $request->search['value'];
+    //         $query->where(function ($q) use ($search) {
+    //             $q->where('leads.name', 'LIKE', "%{$search}%")
+    //                 ->orWhere('leads.email', 'LIKE', "%{$search}%")
+    //                 ->orWhere('sequences.step', 'LIKE', "%{$search}%")
+    //                 ->orWhere('sequences.subject', 'LIKE', "%{$search}%")
+    //                 ->orWhere('campaign_logs.status', 'LIKE', "%{$search}%");
+    //         });
+    //     }
+    //     $totalFiltered = (clone $query)->count();
+    //     // Sorting
+    //     $orderColumn = $columns[$request->input('order.0.column', 0)]
+    //         ?? 'campaign_logs.id';
+    //     $orderDir = $request->input('order.0.dir', 'desc');
+    //     $query->orderBy($orderColumn, $orderDir);
+
+    //     // Pagination
+    //     $limit = $request->input('length', 25);
+    //     $start = $request->input('start', 0);
+    //     $campaignLogs = $query
+    //         ->offset($start)
+    //         ->limit($limit)
+    //         ->get();
+    //     $data = [];
+    //     foreach ($campaignLogs as $log) {
+    //         $whatsappClicks = $log->linkClicks->where('platform_name', 'whatsapp')->sum('click_count');
+    //         $telegramClicks = $log->linkClicks->where('platform_name', 'telegram')->sum('click_count');
+    //         $linkedinClicks = $log->linkClicks->where('platform_name', 'linkedin')->sum('click_count');
+    //         $instagramClicks = $log->linkClicks->where('platform_name', 'instagram')->sum('click_count');
+    //         $snapchatClicks = $log->linkClicks->where('platform_name', 'snapchat')->sum('click_count');
+    //         $xClicks = $log->linkClicks->where('platform_name', 'x')->sum('click_count');
+    //         $threadsClicks = $log->linkClicks->where('platform_name', 'threads')->sum('click_count');
+    //         $fbMessengerClicks = $log->linkClicks->where('platform_name', 'facebook_messenger')->sum('click_count');
+
+    //         $knownPlatforms = ['whatsapp', 'telegram', 'linkedin', 'instagram', 'snapchat', 'x', 'threads', 'facebook_messenger'];
+    //         $otherClicks = $log->linkClicks
+    //         ->whereNotIn('platform_name', $knownPlatforms)
+    //         ->sum('click_count');
+
+    //         // ✅ Total clicks - sum of all click_count
+    //         $totalClicks = $log->linkClicks->sum('click_count');
+
+    //         $statusBadge = $this->getStatusBadge($log->status);
+    //         $data[] = [
+    //             'id' => $log->id,
+    //             'lead_name' => $log->lead_name ?? 'N/A',
+    //             'lead_email' => $log->lead_email ?? 'N/A',
+    //             'step' => $log->step ?? '-',
+    //             'subject' => $log->subject
+    //                 ? Str::limit($log->subject, 40)
+    //                 : '-',
+    //             'status_badge' => $statusBadge,
+    //             'scheduled_at' => $this->convertToIST($log->scheduled_at),
+    //             'sent_at' => $this->convertToIST($log->sent_at),
+    //             'seen_at' => $this->convertToIST($log->seen_at),
+    //             'whatsapp_clicks' => $whatsappClicks > 0
+    //                 ? '<span class="badge bg-success">'.$whatsappClicks.'</span>'
+    //                 : '0',
+    //             'instagram_clicks' => $instagramClicks > 0
+    //                 ? '<span class="badge bg-danger">'.$instagramClicks.'</span>'
+    //                 : '0',
+    //             'facebook_messenger_clicks' => $fbMessengerClicks > 0
+    //                 ? '<span class="badge bg-primary">'.$fbMessengerClicks.'</span>'
+    //                 : '0',
+    //             'threads_clicks' => $threadsClicks > 0
+    //                 ? '<span class="badge bg-secondary">'.$threadsClicks.'</span>'
+    //                 : '0',
+    //             'telegram_clicks' => $telegramClicks > 0
+    //                 ? '<span class="badge bg-info">'.$telegramClicks.'</span>'
+    //                 : '0',
+    //             'snapchat_clicks' => $snapchatClicks > 0
+    //                 ? '<span class="badge bg-warning">'.$snapchatClicks.'</span>'
+    //                 : '0',
+    //             'x_clicks' => $xClicks > 0
+    //                 ? '<span class="badge bg-dark">'.$xClicks.'</span>'
+    //                 : '0',
+    //             'linkedin_clicks' => $linkedinClicks > 0
+    //                 ? '<span class="badge bg-primary">'.$linkedinClicks.'</span>'
+    //                 : '0',
+    //             'other_clicks' => $otherClicks > 0 ? '<span class="badge bg-secondary">' . $otherClicks . '</span>' : '0',
+    //             'total_clicks' => $totalClicks > 0
+    //                 ? '<span class="badge bg-dark fs-6">'.$totalClicks.'</span>'
+    //                 : '0',
+    //         ];
+    //     }
+
+    //     return response()->json([
+    //         'draw' => intval($request->draw),
+    //         'recordsTotal' => $totalData,
+    //         'recordsFiltered' => $totalFiltered,
+    //         'data' => $data,
+    //     ]);
+    // }
+
+    // end
+
 
     public function getCampaignLogsData(Request $request)
     {
@@ -50,19 +188,97 @@ class ReportController extends Controller
                 'sequences.subject as subject',
             ]);
 
+        /*
+|--------------------------------------------------------------------------
+| Apply Dashboard Filter Only
+|--------------------------------------------------------------------------
+*/
 
-            if ($request->filled('status')) {
-                $status = $request->status;
-                $query->where('campaign_logs.status', $status);
+   // Decide which date column to use based on status
+if ($request->from == 'dashboard') {
+
+        $filter = $request->filter ?? 'today';
+
+        // Change this column if you want to filter by sent_at or scheduled_at
+        $dateColumn = 'campaign_logs.created_at';
+
+
+
+        switch ($filter) {
+
+            case 'today':
+                $query->whereDate($dateColumn, Carbon::today());
+                break;
+
+            case 'weekly':
+                $query->whereBetween($dateColumn, [
+                    Carbon::now()->startOfWeek(),
+                    Carbon::now()->endOfWeek()
+                ]);
+                break;
+
+            case 'monthly':
+                $query->whereMonth($dateColumn, Carbon::now()->month)
+                      ->whereYear($dateColumn, Carbon::now()->year);
+                break;
+
+            case 'yearly':
+                $query->whereYear($dateColumn, Carbon::now()->year);
+                break;
+
+            case 'custom':
+
+                if ($request->filled('start_date') && $request->filled('end_date')) {
+
+                    $query->whereBetween($dateColumn, [
+                        Carbon::parse($request->start_date)->startOfDay(),
+                        Carbon::parse($request->end_date)->endOfDay(),
+                    ]);
+                }
+
+                break;
+        }
+    }
+        /*
+    |--------------------------------------------------------------------------
+    | Status Filter
+    |--------------------------------------------------------------------------
+    */
+
+        if ($request->filled('status')) {
+
+            if ($request->status == 'not_interested') {
+
+                $query->whereIn('campaign_logs.status', [
+                    'not_interested',
+                    'Not Interested'
+                ]);
+            } else {
+
+                $query->where('campaign_logs.status', $request->status);
             }
+        }
 
-        // Total Records
+        /*
+    |--------------------------------------------------------------------------
+    | Total Records
+    |--------------------------------------------------------------------------
+    */
+
         $totalData = (clone $query)->count();
 
-        // Search
+        /*
+    |--------------------------------------------------------------------------
+    | Search
+    |--------------------------------------------------------------------------
+    */
+
         if (!empty($request->search['value'])) {
+
             $search = $request->search['value'];
+
             $query->where(function ($q) use ($search) {
+
                 $q->where('leads.name', 'LIKE', "%{$search}%")
                     ->orWhere('leads.email', 'LIKE', "%{$search}%")
                     ->orWhere('sequences.step', 'LIKE', "%{$search}%")
@@ -70,22 +286,40 @@ class ReportController extends Controller
                     ->orWhere('campaign_logs.status', 'LIKE', "%{$search}%");
             });
         }
+
         $totalFiltered = (clone $query)->count();
-        // Sorting
+
+        /*
+    |--------------------------------------------------------------------------
+    | Sorting
+    |--------------------------------------------------------------------------
+    */
+
         $orderColumn = $columns[$request->input('order.0.column', 0)]
             ?? 'campaign_logs.id';
+
         $orderDir = $request->input('order.0.dir', 'desc');
+
         $query->orderBy($orderColumn, $orderDir);
 
-        // Pagination
+        /*
+    |--------------------------------------------------------------------------
+    | Pagination
+    |--------------------------------------------------------------------------
+    */
+
         $limit = $request->input('length', 25);
         $start = $request->input('start', 0);
+
         $campaignLogs = $query
             ->offset($start)
             ->limit($limit)
             ->get();
+
         $data = [];
+
         foreach ($campaignLogs as $log) {
+
             $whatsappClicks = $log->linkClicks->where('platform_name', 'whatsapp')->sum('click_count');
             $telegramClicks = $log->linkClicks->where('platform_name', 'telegram')->sum('click_count');
             $linkedinClicks = $log->linkClicks->where('platform_name', 'linkedin')->sum('click_count');
@@ -95,55 +329,85 @@ class ReportController extends Controller
             $threadsClicks = $log->linkClicks->where('platform_name', 'threads')->sum('click_count');
             $fbMessengerClicks = $log->linkClicks->where('platform_name', 'facebook_messenger')->sum('click_count');
 
-            $knownPlatforms = ['whatsapp', 'telegram', 'linkedin', 'instagram', 'snapchat', 'x', 'threads', 'facebook_messenger'];
-            $otherClicks = $log->linkClicks
-            ->whereNotIn('platform_name', $knownPlatforms)
-            ->sum('click_count');
+            $knownPlatforms = [
+                'whatsapp',
+                'telegram',
+                'linkedin',
+                'instagram',
+                'snapchat',
+                'x',
+                'threads',
+                'facebook_messenger'
+            ];
 
-            // ✅ Total clicks - sum of all click_count
+            $otherClicks = $log->linkClicks
+                ->whereNotIn('platform_name', $knownPlatforms)
+                ->sum('click_count');
+
             $totalClicks = $log->linkClicks->sum('click_count');
 
-            $statusBadge = $this->getStatusBadge($log->status);
             $data[] = [
+
                 'id' => $log->id,
+
                 'lead_name' => $log->lead_name ?? 'N/A',
+
                 'lead_email' => $log->lead_email ?? 'N/A',
+
                 'step' => $log->step ?? '-',
+
                 'subject' => $log->subject
                     ? Str::limit($log->subject, 40)
                     : '-',
-                'status_badge' => $statusBadge,
+
+                'status_badge' => $this->getStatusBadge($log->status),
+
                 'scheduled_at' => $this->convertToIST($log->scheduled_at),
+
                 'sent_at' => $this->convertToIST($log->sent_at),
+
                 'seen_at' => $this->convertToIST($log->seen_at),
-                'whatsapp_clicks' => $whatsappClicks > 0
-                    ? '<span class="badge bg-success">'.$whatsappClicks.'</span>'
+
+                'whatsapp_clicks' => $whatsappClicks
+                    ? '<span class="badge bg-success">' . $whatsappClicks . '</span>'
                     : '0',
-                'instagram_clicks' => $instagramClicks > 0
-                    ? '<span class="badge bg-danger">'.$instagramClicks.'</span>'
+
+                'instagram_clicks' => $instagramClicks
+                    ? '<span class="badge bg-danger">' . $instagramClicks . '</span>'
                     : '0',
-                'facebook_messenger_clicks' => $fbMessengerClicks > 0
-                    ? '<span class="badge bg-primary">'.$fbMessengerClicks.'</span>'
+
+                'facebook_messenger_clicks' => $fbMessengerClicks
+                    ? '<span class="badge bg-primary">' . $fbMessengerClicks . '</span>'
                     : '0',
-                'threads_clicks' => $threadsClicks > 0
-                    ? '<span class="badge bg-secondary">'.$threadsClicks.'</span>'
+
+                'threads_clicks' => $threadsClicks
+                    ? '<span class="badge bg-secondary">' . $threadsClicks . '</span>'
                     : '0',
-                'telegram_clicks' => $telegramClicks > 0
-                    ? '<span class="badge bg-info">'.$telegramClicks.'</span>'
+
+                'telegram_clicks' => $telegramClicks
+                    ? '<span class="badge bg-info">' . $telegramClicks . '</span>'
                     : '0',
-                'snapchat_clicks' => $snapchatClicks > 0
-                    ? '<span class="badge bg-warning">'.$snapchatClicks.'</span>'
+
+                'snapchat_clicks' => $snapchatClicks
+                    ? '<span class="badge bg-warning">' . $snapchatClicks . '</span>'
                     : '0',
-                'x_clicks' => $xClicks > 0
-                    ? '<span class="badge bg-dark">'.$xClicks.'</span>'
+
+                'x_clicks' => $xClicks
+                    ? '<span class="badge bg-dark">' . $xClicks . '</span>'
                     : '0',
-                'linkedin_clicks' => $linkedinClicks > 0
-                    ? '<span class="badge bg-primary">'.$linkedinClicks.'</span>'
+
+                'linkedin_clicks' => $linkedinClicks
+                    ? '<span class="badge bg-primary">' . $linkedinClicks . '</span>'
                     : '0',
-                'other_clicks' => $otherClicks > 0 ? '<span class="badge bg-secondary">' . $otherClicks . '</span>' : '0',
-                'total_clicks' => $totalClicks > 0
-                    ? '<span class="badge bg-dark fs-6">'.$totalClicks.'</span>'
+
+                'other_clicks' => $otherClicks
+                    ? '<span class="badge bg-secondary">' . $otherClicks . '</span>'
                     : '0',
+
+                'total_clicks' => $totalClicks
+                    ? '<span class="badge bg-dark fs-6">' . $totalClicks . '</span>'
+                    : '0',
+
             ];
         }
 
@@ -152,10 +416,11 @@ class ReportController extends Controller
             'recordsTotal' => $totalData,
             'recordsFiltered' => $totalFiltered,
             'data' => $data,
+
         ]);
     }
 
-      private function convertToIST($datetime)
+    private function convertToIST($datetime)
     {
         if (empty($datetime)) {
             return '-';
@@ -346,5 +611,136 @@ class ReportController extends Controller
 
         // Redirect to original destination URL
         return redirect($click->destination_url);
+    }
+
+    public function exportCsv(Request $request)
+    {
+        // ---------- Replicate the DataTable query (exactly as in getCampaignLogsData) ----------
+        $query = CampaignLog::with('linkClicks')
+            ->leftJoin('leads', 'campaign_logs.lead_id', '=', 'leads.id')
+            ->leftJoin('sequences', 'campaign_logs.sequence_id', '=', 'sequences.id')
+            ->where('campaign_logs.user_id', Auth::id())
+            ->select([
+                'campaign_logs.*',
+                'leads.name as lead_name',
+                'leads.email as lead_email',
+                'sequences.step as step',
+                'sequences.subject as subject',
+            ]);
+
+        // Apply status filter if provided
+        if ($request->filled('status')) {
+            $query->where('campaign_logs.status', $request->status);
+        }
+
+        // Apply search filter if provided
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('leads.name', 'LIKE', "%{$search}%")
+                    ->orWhere('leads.email', 'LIKE', "%{$search}%")
+                    ->orWhere('sequences.step', 'LIKE', "%{$search}%")
+                    ->orWhere('sequences.subject', 'LIKE', "%{$search}%")
+                    ->orWhere('campaign_logs.status', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Order by ID descending (same as DataTable default order)
+        $query->orderBy('campaign_logs.id', 'desc');
+
+        // ---------- Generate CSV ----------
+        $fileName = 'campaign_logs_' . date('Y-m-d') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$fileName\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($query) {
+            $handle = fopen('php://output', 'w');
+
+            // Write CSV header row
+            fputcsv($handle, [
+                'ID',
+                'Lead Name',
+                'Lead Email',
+                'Step',
+                'Subject',
+                'Status',
+                'Scheduled At',
+                'Sent At',
+                'Seen At',
+                'WhatsApp Clicks',
+                'Instagram Clicks',
+                'Facebook Messenger Clicks',
+                'Threads Clicks',
+                'Telegram Clicks',
+                'Snapchat Clicks',
+                'X Clicks',
+                'LinkedIn Clicks',
+                'Other Clicks',
+                'Total Clicks',
+            ]);
+
+            // Process in chunks to avoid memory issues
+            $query->chunk(200, function ($logs) use ($handle) {
+                foreach ($logs as $log) {
+                    // Aggregate clicks (same logic as in DataTable)
+                    $whatsappClicks   = $log->linkClicks->where('platform_name', 'whatsapp')->sum('click_count');
+                    $telegramClicks   = $log->linkClicks->where('platform_name', 'telegram')->sum('click_count');
+                    $linkedinClicks   = $log->linkClicks->where('platform_name', 'linkedin')->sum('click_count');
+                    $instagramClicks  = $log->linkClicks->where('platform_name', 'instagram')->sum('click_count');
+                    $snapchatClicks   = $log->linkClicks->where('platform_name', 'snapchat')->sum('click_count');
+                    $xClicks          = $log->linkClicks->where('platform_name', 'x')->sum('click_count');
+                    $threadsClicks    = $log->linkClicks->where('platform_name', 'threads')->sum('click_count');
+                    $fbMessengerClicks = $log->linkClicks->where('platform_name', 'facebook_messenger')->sum('click_count');
+
+                    $knownPlatforms = ['whatsapp', 'telegram', 'linkedin', 'instagram', 'snapchat', 'x', 'threads', 'facebook_messenger'];
+                    $otherClicks = $log->linkClicks->whereNotIn('platform_name', $knownPlatforms)->sum('click_count');
+
+                    $totalClicks = $log->linkClicks->sum('click_count');
+
+                    // Write one row
+                    fputcsv($handle, [
+                        $log->id,
+                        $log->lead_name ?? 'N/A',
+                        $log->lead_email ?? 'N/A',
+                        $log->step ?? '-',
+                        $log->subject ?? '-',
+                        ucfirst($log->status),
+                        $this->excelConvertToIST($log->scheduled_at),
+                        $this->excelConvertToIST($log->sent_at),
+                        $this->excelConvertToIST($log->seen_at),
+                        $whatsappClicks,
+                        $instagramClicks,
+                        $fbMessengerClicks,
+                        $threadsClicks,
+                        $telegramClicks,
+                        $snapchatClicks,
+                        $xClicks,
+                        $linkedinClicks,
+                        $otherClicks,
+                        $totalClicks,
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Helper to convert UTC to IST (copy from your existing method)
+     */
+    private function excelConvertToIST($date)
+    {
+        if (!$date) return null;
+        $datetime = new \DateTime($date, new \DateTimeZone('UTC'));
+        $datetime->setTimezone(new \DateTimeZone('Asia/Kolkata'));
+        return $datetime->format('Y-m-d H:i:s');
     }
 }

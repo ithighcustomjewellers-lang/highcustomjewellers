@@ -79,12 +79,16 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2>📊 Email Tracking Report</h2>
-                </div>
+                <h2>📊 Email Tracking Report</h2>
+                <a href="{{ route('report.campaign.export.csv', ['status' => request('status'), 'search' => request('search')]) }}"
+                class="btn btn-success" target="_blank">
+                    <i class="fas fa-file-csv"></i> Export CSV
+                </a>
             </div>
         </div>
     </div>
+
+
     <!-- DataTable -->
     <div class="card">
         <div class="card-body">
@@ -164,7 +168,11 @@ $(document).ready(function () {
 
             data: function(d){
                 d._token = "{{ csrf_token() }}";
+                d.from = "{{ request('from') }}";
                 d.status = "{{ request('status') }}";
+                d.filter = "{{ request('filter','today') }}";
+                d.start_date = "{{ request('start_date') }}";
+                d.end_date = "{{ request('end_date') }}";
             }
         },
 
@@ -208,7 +216,10 @@ $(document).ready(function () {
             $('[data-bs-toggle="tooltip"]').tooltip();
         }
     });
+
+
 });
+
 
 </script>
 @endsection

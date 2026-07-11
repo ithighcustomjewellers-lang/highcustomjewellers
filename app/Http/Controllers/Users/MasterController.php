@@ -40,17 +40,84 @@ class MasterController extends Controller
     }
 
 
+    // public function submitBusinessLinks(Request $request)
+    // {
+    //     // VALIDATION
+    //     $validator = Validator::make($request->all(), [
+    //         'whatsapp_link' => 'required|url|max:1000',
+    //         'company_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+    //         'social_link_ids' => 'nullable|array',
+    //         'social_link_ids.*' => 'exists:social_links,id'
+    //     ]);
+
+    //     // VALIDATION ERROR
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'errors' => $validator->errors()
+    //         ], 422);
+    //     }
+
+    //     // LOGIN USER ID
+    //     $userId = Auth::id();
+
+    //     // CHECK USER RECORD
+    //     $business = BusinessLink::where('user_id', $userId)->first();
+
+    //     // CREATE NEW RECORD IF NOT EXISTS
+    //     if (!$business) {
+    //         $business = new BusinessLink();
+    //         $business->user_id = $userId;
+    //     }
+
+    //     // UPDATE DATA
+    //     $business->whatsapp_link = $request->whatsapp_link;
+    //     $selectedLinks = [];
+
+    //     // Check if social_link_ids exists and is not null/empty
+    //     if ($request->has('social_link_ids') && is_array($request->social_link_ids) && !empty($request->social_link_ids)) {
+    //         $selectedLinks = SocialLink::where('user_id', $userId)
+    //             ->whereIn('id', $request->social_link_ids)
+    //             ->select('id', 'platform_name', 'platform_url')
+    //             ->get()
+    //             ->toArray();
+    //     }
+
+    //     // Convert array to JSON string for database storage
+    //     $business->action_links = json_encode($selectedLinks);
+
+    //     // IMAGE UPLOAD
+    //     if ($request->hasFile('company_logo')) {
+    //         $companyPath = public_path('uploads/company_logo');
+    //         if (!file_exists($companyPath)) {
+    //             mkdir($companyPath, 0777, true);
+    //         }
+    //         if ($business->company_logo && file_exists(public_path($business->company_logo))) {
+    //             unlink(public_path($business->company_logo));
+    //         }
+    //         $file = $request->file('company_logo');
+    //         $filename = time() . '_logo.' .  $file->getClientOriginalExtension();
+
+    //         $file->move($companyPath, $filename);
+    //         $business->company_logo = 'uploads/company_logo/' . $filename;
+    //     }
+    //     $business->save();
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Business information saved successfully!',
+    //         'data' => $business,
+    //     ], 200);
+    // }
+
     public function submitBusinessLinks(Request $request)
     {
-        // VALIDATION
         $validator = Validator::make($request->all(), [
-            'whatsapp_link' => 'required|url|max:1000',
-            'company_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'whatsapp_link'   => 'required|url|max:1000',
+            'company_logo'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'social_link_ids' => 'nullable|array',
             'social_link_ids.*' => 'exists:social_links,id'
         ]);
 
-        // VALIDATION ERROR
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -58,35 +125,29 @@ class MasterController extends Controller
             ], 422);
         }
 
-        // LOGIN USER ID
         $userId = Auth::id();
-
-        // CHECK USER RECORD
         $business = BusinessLink::where('user_id', $userId)->first();
 
-        // CREATE NEW RECORD IF NOT EXISTS
         if (!$business) {
             $business = new BusinessLink();
             $business->user_id = $userId;
         }
 
-        // UPDATE DATA
+        // ✅ हमेशा whatsapp_link अपडेट करें
         $business->whatsapp_link = $request->whatsapp_link;
-        $selectedLinks = [];
 
-        // Check if social_link_ids exists and is not null/empty
-        if ($request->has('social_link_ids') && is_array($request->social_link_ids) && !empty($request->social_link_ids)) {
+        // ✅ action_links को submitted IDs के अनुसार सेट करें
+        $selectedLinks = [];
+        if ($request->has('social_link_ids') && is_array($request->social_link_ids)) {
             $selectedLinks = SocialLink::where('user_id', $userId)
                 ->whereIn('id', $request->social_link_ids)
                 ->select('id', 'platform_name', 'platform_url')
                 ->get()
                 ->toArray();
         }
-
-        // Convert array to JSON string for database storage
         $business->action_links = json_encode($selectedLinks);
 
-        // IMAGE UPLOAD
+
         if ($request->hasFile('company_logo')) {
             $companyPath = public_path('uploads/company_logo');
             if (!file_exists($companyPath)) {
@@ -96,19 +157,19 @@ class MasterController extends Controller
                 unlink(public_path($business->company_logo));
             }
             $file = $request->file('company_logo');
-            $filename = time() . '_logo.' .  $file->getClientOriginalExtension();
-
+            $filename = time() . '_logo.' . $file->getClientOriginalExtension();
             $file->move($companyPath, $filename);
             $business->company_logo = 'uploads/company_logo/' . $filename;
         }
+
         $business->save();
+
         return response()->json([
             'success' => true,
             'message' => 'Business information saved successfully!',
             'data' => $business,
         ], 200);
     }
-
 
     public function getBusinessLinks()
     {
@@ -404,23 +465,27 @@ class MasterController extends Controller
      */
     public function getSequencesList(Request $request)
     {
+
         $columns = [
             0 => 'id',
             1 => 'step',
             2 => 'gap_days',
             3 => 'variant',
-            4 => 'message',
+            4 => 'type',
             5 => 'subject',
-            6 => 'type',
+            6 => 'message',
             7 => 'whatsapp_link',
             8 => 'created_at',
-            9 => 'updated_at',
+            9 => 'updated_at'
         ];
 
+        // ✅ Base query with user_id filter
         $query = Sequence::where('user_id', Auth::id());
+
+        // Total records (user wise)
         $totalData = $query->count();
 
-        // Search filter
+        // Search filter (same but on filtered query)
         if ($request->has('search') && $request->search['value'] != '') {
             $search = $request->search['value'];
             $query->where(function ($q) use ($search) {
@@ -432,33 +497,46 @@ class MasterController extends Controller
             });
         }
 
+        // Total after search
         $totalFiltered = $query->count();
+
 
         $orderColumn = $columns[$request->input('order.0.column', 0)];
         $orderDir = $request->input('order.0.dir', 'desc');
 
+
+
+        // $query->orderBy('step', 'asc');
+
         // Order by admin_updated_at first (show updated sequences at top)
-        if ($orderColumn == 'updated_at') {
+        // if ($orderColumn == 'updated_at') {
+        //     $query->orderByRaw('CASE WHEN admin_updated_at IS NOT NULL THEN 0 ELSE 1 END')
+        //           ->orderBy('admin_updated_at', 'desc')
+        //           ->orderBy('updated_at', $orderDir);
+        // } else {
+        //     $query->orderBy($orderColumn, $orderDir);
+        // }
+
+        if ($orderColumn == 'step') {
+            $query->orderByRaw("CAST(step AS UNSIGNED) {$orderDir}");
+        } elseif ($orderColumn == 'updated_at') {
             $query->orderByRaw('CASE WHEN admin_updated_at IS NOT NULL THEN 0 ELSE 1 END')
-                  ->orderBy('admin_updated_at', 'desc')
-                  ->orderBy('updated_at', $orderDir);
+                ->orderBy('admin_updated_at', 'desc')
+                ->orderBy('updated_at', $orderDir);
         } else {
             $query->orderBy($orderColumn, $orderDir);
         }
 
+        // Pagination
         $limit = $request->input('length', 10);
         $start = $request->input('start', 0);
         $sequences = $query->offset($start)->limit($limit)->get();
 
-        // ============ DO NOT RESET admin_updated_at HERE ============
-        // Highlight tab tak rahega jab tak user edit nahi karta
-
         $data = [];
         foreach ($sequences as $seq) {
             $isAdminUpdated = !is_null($seq->admin_updated_at);
-
             $data[] = [
-                'edit' => '<a href="' . route('sequences-list-edit', $seq->id) . '" class="edit-btn"><i class="fas fa-edit"></i> Edit</a>',
+                'edit' => '<a href="'.route('sequences-list-edit', $seq->id).'" class="btn btn-sm btn-primary">Edit</a>',
                 'id' => $seq->id,
                 'step' => $seq->step,
                 'gap_days' => $seq->gap_days ?? '-',
@@ -466,16 +544,13 @@ class MasterController extends Controller
                 'message' => Str::limit($seq->message, 50),
                 'subject' => $seq->subject,
                 'type' => $seq->type,
-                'whatsapp_link' => $seq->whatsapp_link ? '<a href="' . $seq->whatsapp_link . '" target="_blank" class="table-link"><i class="fas fa-external-link-alt"></i> Link</a>' : '-',
+                'whatsapp_link' => $seq->whatsapp_link ? '<a href="' . $seq->whatsapp_link . '" target="_blank">Link</a>' : '-',
+                'telegram_link' => $seq->telegram_link ? '<a href="' . $seq->telegram_link . '" target="_blank">Link</a>' : '-',
+                'business_link' => $seq->business_link ? '<a href="' . $seq->business_link . '" target="_blank">Link</a>' : '-',
                 'created_at' => date('Y-m-d', strtotime($seq->created_at)),
-                'updated_at' => date('Y-m-d H:i:s', strtotime($seq->updated_at)),
+                'updated_at' => date('Y-m-d', strtotime($seq->updated_at)),
                 'is_admin_updated' => $isAdminUpdated ? 1 : 0,
-                'delete' => '
-                <button type="button"
-                    onclick="deleteList('.$seq->id.')"
-                    class="btn btn-sm btn-danger">
-                    <i class="fas fa-trash"></i>
-                </button>',
+                'delete' => '<button type="button" onclick="deleteList('.$seq->id.')" class="btn btn-sm btn-danger"> <i class="fas fa-trash"></i> Delete </button>',
             ];
         }
 
@@ -488,7 +563,7 @@ class MasterController extends Controller
     }
 
 
-     /**
+    /**
      * Check if there are any admin updates (for polling)
      */
     public function checkAdminUpdates()
@@ -554,7 +629,7 @@ class MasterController extends Controller
         if (Auth::user()->is_admin) {
             return view('admin.master.sequences-edit', compact('sequence', 'allActionLinks'));
         }
-        return view('user.sequences-edit', compact('sequence','allActionLinks'));
+        return view('user.sequences-edit', compact('sequence', 'allActionLinks'));
     }
 
     /**
@@ -611,31 +686,31 @@ class MasterController extends Controller
                 ], 422);
             }
 
-                //  $actionLinks = [];
-                // $exists = [];
+            //  $actionLinks = [];
+            // $exists = [];
 
-                // foreach ($request->action_links as $link) {
+            // foreach ($request->action_links as $link) {
 
-                //     if (empty($link['platform_url'])) {
-                //         continue;
-                //     }
+            //     if (empty($link['platform_url'])) {
+            //         continue;
+            //     }
 
-                //     $id = $link['id'] ?? null;
+            //     $id = $link['id'] ?? null;
 
-                //     if ($id && isset($exists[$id])) {
-                //         continue;
-                //     }
+            //     if ($id && isset($exists[$id])) {
+            //         continue;
+            //     }
 
-                //     if ($id) {
-                //         $exists[$id] = true;
-                //     }
+            //     if ($id) {
+            //         $exists[$id] = true;
+            //     }
 
-                //     $actionLinks[] = [
-                //         'id' => $id,
-                //         'platform_name' => $link['platform_name'] ?? '',
-                //         'platform_url' => trim($link['platform_url']),
-                //     ];
-                // }
+            //     $actionLinks[] = [
+            //         'id' => $id,
+            //         'platform_name' => $link['platform_name'] ?? '',
+            //         'platform_url' => trim($link['platform_url']),
+            //     ];
+            // }
 
             $actionLinks = [];
             if ($request->filled('action_links')) {
@@ -670,7 +745,7 @@ class MasterController extends Controller
                 $originalName = $file->getClientOriginalName();
                 $fileSize = $file->getSize();
                 $extension = $file->getClientOriginalExtension();
-                $filename = date('Ymd_His') .'_attach_' . uniqid() .'.' . $extension;
+                $filename = date('Ymd_His') . '_attach_' . uniqid() . '.' . $extension;
                 $destination = public_path('attachments_image');
                 if (!file_exists($destination)) mkdir($destination, 0777, true);
                 $file->move($destination, $filename);
@@ -702,41 +777,96 @@ class MasterController extends Controller
             // ============ UPDATE SEQUENCE AND REMOVE HIGHLIGHT ============
             $sequence->update($validated);
 
-            // ============ REMOVE ADMIN UPDATE HIGHLIGHT ============
-            // Jab user edit karega tab highlight remove ho jayega
+            // Remove admin highlight
             $sequence->admin_updated_at = null;
             $sequence->save();
 
+            // Cancel all pending campaigns for this sequence
             CampaignLog::where('sequence_id', $sequence->id)
                 ->where('status', 'pending')
-                ->update(['status' => 'cancelled']);
+                ->update([
+                    'status' => 'cancelled',
+                ]);
 
-            $leads = Lead::where('user_id', Auth::id())
+            // Get all matching leads
+            $leads = Lead::where('user_id', $userId)
                 ->whereRaw('UPPER(type) = ?', [$sequence->type])
                 ->get();
 
+            $delaySeconds = 0;
+
             foreach ($leads as $lead) {
-                $alreadyQueued = CampaignLog::where('user_id', $userId)
-                    ->where('lead_id', $lead->id)
-                    ->where('sequence_id', $sequence->id)
-                    ->exists();
 
-                if ($alreadyQueued) continue;
-
-                $baseDelay = now()->addDays((int) $sequence->gap_days);
-                if (!isset($delaySeconds)) $delaySeconds = 0;
+                $baseDelay = now()->addDays((int)$sequence->gap_days);
                 $finalDelay = $baseDelay->copy()->addSeconds($delaySeconds);
                 $delaySeconds += rand(20, 40);
 
-                CampaignLog::create([
-                    'user_id' => $userId,
-                    'lead_id' => $lead->id,
-                    'sequence_id' => $sequence->id,
-                    'status' => 'pending',
-                    'scheduled_at' => $finalDelay,
-                ]);
+                /*
+    |--------------------------------------------------------------------------
+    | Skip if campaign already completed
+    |--------------------------------------------------------------------------
+    */
 
-                SendCampaignJob::dispatch($lead->id, $sequence->id, $userId)->delay($finalDelay);
+                $completedLog = CampaignLog::where('user_id', $userId)
+                    ->where('lead_id', $lead->id)
+                    ->where('sequence_id', $sequence->id)
+                    ->whereIn('status', [
+                        'send',
+                        'seen',
+                        'failed',
+                        'interested',
+                        'not_interested',
+                        'Not Interested'
+                    ])
+                    ->exists();
+
+                if ($completedLog) {
+                    continue;
+                }
+
+                /*
+    |--------------------------------------------------------------------------
+    | Reuse cancelled log if exists
+    |--------------------------------------------------------------------------
+    */
+
+                $cancelledLog = CampaignLog::where('user_id', $userId)
+                    ->where('lead_id', $lead->id)
+                    ->where('sequence_id', $sequence->id)
+                    ->where('status', 'cancelled')
+                    ->latest('id')
+                    ->first();
+
+                if ($cancelledLog) {
+
+                    $cancelledLog->update([
+                        'status'       => 'pending',
+                        'scheduled_at' => $finalDelay,
+                        'sent_at'      => null,
+                        'seen_at'      => null,
+                    ]);
+                } else {
+
+                    CampaignLog::create([
+                        'user_id'      => $userId,
+                        'lead_id'      => $lead->id,
+                        'sequence_id'  => $sequence->id,
+                        'status'       => 'pending',
+                        'scheduled_at' => $finalDelay,
+                    ]);
+                }
+
+                /*
+    |--------------------------------------------------------------------------
+    | Queue Mail
+    |--------------------------------------------------------------------------
+    */
+
+                SendCampaignJob::dispatch(
+                    $lead->id,
+                    $sequence->id,
+                    $userId
+                )->delay($finalDelay);
             }
 
             DB::commit();
@@ -745,7 +875,6 @@ class MasterController extends Controller
                 'status' => true,
                 'message' => 'Sequence updated & campaign restarted successfully 🚀'
             ]);
-
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Sequence Update Error', ['message' => $e->getMessage()]);
@@ -775,7 +904,4 @@ class MasterController extends Controller
             'admin_updated_sequence_id' => $sequences->where('admin_updated', true)->first()?->id
         ]);
     }
-
-
-
 }

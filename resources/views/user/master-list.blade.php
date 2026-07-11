@@ -535,7 +535,7 @@ $(document).ready(function() {
             }
         ],
         order: [
-            [9, 'desc']
+            [1, 'asc']  // Default order by Step descending
         ],
         pageLength: 10,
         language: {

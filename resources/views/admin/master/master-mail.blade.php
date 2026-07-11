@@ -1,271 +1,4 @@
 @extends('admin.layouts.layout')
-
-@section('content')
-<div class="container-fluid mt-4 px-4">
-    <div class="row g-4">
-        <!-- Email Designer Form -->
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-lg rounded-4">
-                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
-                    <h3 class="h4 mb-0 fw-bold text-gradient">✨ Create New Email Sequence</h3>
-                    <p class="text-muted small mt-1">Design engaging emails with our drag & drop editor</p>
-                </div>
-                <div class="card-body p-4">
-                    <form id="emailForm" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <!-- Basic Info Row -->
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold small text-uppercase text-muted">Step</label>
-                                <input type="number" name="step" id="step" class="form-control form-control-lg rounded-3" min="1" placeholder="e.g., 1">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold small text-uppercase text-muted">Gap Days</label>
-                                <input type="number" name="gap_days" id="gapDays" class="form-control form-control-lg rounded-3" placeholder="Day" min="0">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold small text-uppercase text-muted">Variant</label>
-                                <input type="text" name="variant" id="variant" class="form-control form-control-lg rounded-3 text-uppercase" placeholder="A/B/C" maxlength="1">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold small text-uppercase text-muted">Type</label>
-                                <select name="type" id="typeSelect" class="form-select form-control rounded-3 form-control-lg" >
-                                    <option value="B2B">B2B</option>
-                                    <option value="B2C">B2C</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold small text-uppercase text-muted">Email Subject</label>
-                            <input type="text" name="subject" id="subject" class="form-control form-control-lg rounded-3" placeholder="✉️ Write an engaging subject line...">
-                        </div>
-
-                        <!-- Branding Section (Logo/Banner) -->
-                        <!--<div class="card bg-light border-0 rounded-4 mb-4 overflow-hidden">-->
-                        <!--    <div class="card-body p-4">-->
-                        <!--        <div class="d-flex align-items-center gap-2 mb-3">-->
-                        <!--            <i class="bi bi-building fs-5"></i>-->
-                        <!--            <h5 class="mb-0 fw-bold">Brand Identity</h5>-->
-                        <!--        </div>-->
-                        <!--        <div class="row g-3 align-items-end">-->
-                        <!--            <div class="col-md-7">-->
-                        <!--                <label class="form-label fw-semibold">Company Logo / Banner</label>-->
-                        <!--                <input type="file" name="company_logo" id="companyLogoInput" class="form-control" accept="image/*">-->
-                        <!--                <input type="hidden" name="existing_company_logo" id="existingCompanyLogo">-->
-                        <!--                <input type="hidden" name="image_type" id="imageType" value="logo">-->
-                        <!--            </div>-->
-                        <!--            <div class="col-md-5">-->
-                        <!--                <div id="companyLogoPreview" class="mt-2" style="display:none;">-->
-                        <!--                    <img id="companyLogoPreviewImg" class="img-fluid rounded-3 border" style="max-height: 60px">-->
-                        <!--                </div>-->
-                        <!--                <label class="form-label fw-semibold">Logo Position</label>-->
-                        <!--                <select name="logo_position" id="logoPosition" class="form-select">-->
-                        <!--                    <option value="left">Left</option>-->
-                        <!--                    <option value="center" selected>Center</option>-->
-                        <!--                    <option value="right">Right</option>-->
-                        <!--                </select>-->
-                        <!--            </div>-->
-                        <!--        </div>-->
-                        <!--    </div>-->
-                        <!--</div>-->
-
-
-                        <!-- Branding Section (Logo/Banner) -->
-                        <div class="card bg-light border-0 rounded-4 mb-4 overflow-hidden">
-                            <div class="card-body p-4">
-                                <div class="d-flex align-items-center gap-2 mb-3">
-                                    <i class="bi bi-building fs-5"></i>
-                                    <h5 class="mb-0 fw-bold">Brand Identity</h5>
-                                </div>
-                                <div class="row g-3 align-items-end">
-                                    <div class="col-md-7">
-                                        <label class="form-label fw-semibold">Company Logo / Banner</label>
-                                        <input type="file" name="company_logo" id="companyLogoInput" class="form-control" accept="image/*">
-                                        <input type="hidden" name="existing_company_logo" id="existingCompanyLogo">
-                                        <input type="hidden" name="image_type" id="imageType" value="logo">
-                                    </div>
-                                    <div class="col-md-5">
-                                        <div id="companyLogoPreview" class="mt-2" style="display:none;">
-                                            <div class="d-flex align-items-center gap-3">
-                                                <img id="companyLogoPreviewImg" class="img-fluid rounded-3 border" style="max-height: 30px">
-                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="removeCompanyLogo()">
-                                                    <i class="bi bi-trash"></i> Remove
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <label class="form-label fw-semibold">Logo Position</label>
-                                        <select name="logo_position" id="logoPosition" class="form-select">
-                                            <option value="left">Left</option>
-                                            <option value="center" selected>Center</option>
-                                            <option value="right">Right</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Hero Image Upload -->
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold small text-uppercase text-muted">Hero Image (Top Banner)</label>
-                            <div class="border rounded-3 p-3 bg-light">
-                                <input type="file" name="hero_image" id="heroImage" class="form-control" accept="image/*" onchange="previewHeroImage(this)">
-                                <div id="heroImagePreview" class="mt-2" style="display:none;">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <img id="heroImagePreviewImg" class="rounded-3 border" style="max-width: 80px; max-height: 80px;">
-                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="removeHeroImage()">Remove</button>
-                                    </div>
-                                </div>
-                                <small class="text-muted">Recommended: 1200 x 400px. Max 2MB</small>
-                            </div>
-                        </div>
-
-                        <!-- WYSIWYG Toolbar -->
-                        <label class="form-label fw-semibold small text-uppercase text-muted">Email Content</label>
-                        <div class="toolbar mb-2 p-2 bg-white rounded-3 border d-flex flex-wrap gap-1 align-items-center">
-                            <div class="btn-group btn-group-sm me-1">
-                                <button type="button" onclick="formatText('bold')" class="btn btn-outline-secondary fw-bold">B</button>
-                                <button type="button" onclick="formatText('italic')" class="btn btn-outline-secondary fst-italic">I</button>
-                                <button type="button" onclick="formatText('underline')" class="btn btn-outline-secondary text-decoration-underline">U</button>
-                            </div>
-                            <select id="fontFamilySelect" onchange="formatText('fontName', this.value)" class="form-select form-select-sm w-auto">
-                                <option value="Arial">Arial</option>
-                                <option value="Verdana">Verdana</option>
-                                <option value="Georgia">Georgia</option>
-                                <option value="Times New Roman">Times New Roman</option>
-                            </select>
-                            <select id="fontSizeSelect" onchange="changeFontSize(this.value)" class="form-select form-select-sm w-auto">
-                                <option value="12px">12px</option>
-                                <option value="14px">14px</option>
-                                <option value="16px" selected>16px</option>
-                                <option value="18px">18px</option>
-                                <option value="24px">24px</option>
-                                <option value="32px">32px</option>
-                            </select>
-                            <select onchange="formatText('foreColor', this.value)" class="form-control-sm">
-                                <option value="#000000">Black</option>
-                                <option value="#FF0000">Red</option>
-                                <option value="#00FF00">Green</option>
-                                <option value="#0000FF">Blue</option>
-                                <option value="#FFA500">Orange</option>
-                            </select>
-                            <!--<div class="btn-group btn-group-sm">-->
-                            <!--    <button type="button" onclick="formatText('insertUnorderedList')" class="btn btn-outline-secondary">• List</button>-->
-                            <!--    <button type="button" onclick="formatText('insertOrderedList')" class="btn btn-outline-secondary">1. List</button>-->
-                            <!--</div>-->
-                            <!--<div class="btn-group btn-group-sm">-->
-                            <!--    <button type="button" onclick="formatText('justifyLeft')" class="btn btn-outline-secondary">⍇</button>-->
-                            <!--    <button type="button" onclick="formatText('justifyCenter')" class="btn btn-outline-secondary">⍌</button>-->
-                            <!--    <button type="button" onclick="formatText('justifyRight')" class="btn btn-outline-secondary">⍄</button>-->
-                            <!--</div>-->
-                            <button type="button" onclick="addHorizontalLine()" class="btn btn-outline-secondary">─</button>
-                        </div>
-
-                        <div id="emailEditor" class="form-control mb-3" contenteditable="true"
-                            style="min-height: 280px; border: 1px solid #dee2e6; border-radius: 12px; padding: 16px; overflow-y: auto; background: white; font-size: 16px;">
-                            <p>Start typing your email here...</p>
-                        </div>
-                        <textarea name="message" id="message" style="display:none;"></textarea>
-
-                        <!-- Attachment -->
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold small text-uppercase text-muted">Attachment (Download Link)</label>
-                            <div class="border rounded-3 p-3 bg-light">
-                                <input type="file" name="attachments_image" class="form-control" id="attachmentsImage"
-                                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip" onchange="previewAttachment(this)">
-                                <div id="attachmentPreview" class="mt-2" style="display:none;">
-                                    <div class="alert alert-info d-flex justify-content-between align-items-center py-2 px-3 mb-0">
-                                        <span><i class="bi bi-paperclip me-2"></i><span id="attachmentName"></span></span>
-                                        <button type="button" class="btn-close" onclick="removeAttachment()"></button>
-                                    </div>
-                                </div>
-                                <small class="text-muted">Max 5MB. PDF, DOC, XLS, ZIP, Images</small>
-                            </div>
-                        </div>
-
-                        <!-- Social & Business Links -->
-                        <div class="card bg-white border rounded-4 mb-4">
-                            <div class="card-body p-3">
-                                <label class="form-label fw-semibold small mb-2">🔗 Action Links (CTA Buttons)</label>
-                                <div class="row g-2">
-                                    <!--<div class="col-md-4">-->
-                                    <!--    <input type="text" name="whatsapp_link" class="form-control" id="whatsappLink" placeholder="WhatsApp URL">-->
-                                    <!--</div>-->
-
-                                     <!-- Social & Business Links -->
-                                    <div class="card bg-white border rounded-4 mb-4">
-                                        <div class="card-body p-3">
-                                            <label class="form-label fw-semibold small mb-2">whatsapp</label>
-                                            <div class="row g-2">
-                                                <div class="col-md-4">
-                                                    <input type="text" name="whatsapp_link" class="form-control" id="whatsappLink" placeholder="WhatsApp URL">
-                                                </div>
-                                                <div class="row g-2 mt-2" id="dynamicActionLinks"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex gap-3 mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">💾 Save Sequence</button>
-                            <a href="{{ route('admin-sequenceTable-index') }}" class="btn btn-outline-secondary btn-lg px-4 rounded-pill">← Back</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Live Email Preview -->
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-lg rounded-4" style="top: 20px;">
-                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-                    <h3 class="h4 fw-bold mb-0">📱 Live Preview</h3>
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-sm btn-outline-primary active-preview rounded-start-pill" data-preview="mobile">
-                            <i class="bi bi-phone"></i> Mobile
-                        </button>
-                        <button class="btn btn-sm btn-outline-primary rounded-end-pill" data-preview="desktop">
-                            <i class="bi bi-display"></i> Desktop
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body p-4 bg-light">
-                    <div class="preview-container d-flex justify-content-center">
-                        <!-- Mobile Frame -->
-                        <div id="mobilePreview" class="email-preview mobile-preview active" style="width: 100%; max-width: 360px; background: white; border-radius: 32px; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.3); overflow: hidden; transition: all 0.2s;">
-                            <div class="bg-dark text-white px-3 py-2 small d-flex justify-content-between">
-                                <span>12:00</span>
-                                <span>📶 🔋</span>
-                            </div>
-                            <div class="p-3" style="min-height: 520px;">
-                                <div class="email-preview-header bg-light p-2 rounded mb-2">
-                                    <strong>Subject:</strong> <span id="previewSubject">No subject</span>
-                                </div>
-                                <div id="mobilePreviewContent"></div>
-                            </div>
-
-                        </div>
-
-                        <!-- Desktop Frame -->
-                        <div id="desktopPreview" class="email-preview desktop-preview" style="display: none; width: 100%; max-width: 680px; background: white; border-radius: 24px; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2); overflow: hidden;">
-                            <div class="bg-light px-4 py-2 border-bottom d-flex gap-2 align-items-center">
-                                <i class="bi bi-envelope-fill text-primary"></i>
-                                <strong>Email Preview</strong>
-                                <span class="ms-auto"><span id="previewSubjectDesktop">No subject</span></span>
-                            </div>
-                            <div class="p-4" style="min-height: 500px;">
-                                <div id="desktopPreviewContent"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Additional Styles -->
 <style>
     @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');
@@ -313,8 +46,11 @@
         background-color: #0d6efd !important;
         color: white !important;
     }
+
+    /* ✅ FIX: added position:relative so placeholder pseudo-element positions inside editor */
     #emailEditor {
         transition: box-shadow 0.2s;
+        position: relative;
     }
     #emailEditor:focus {
         box-shadow: 0 0 0 3px rgba(13,110,253,0.25);
@@ -415,7 +151,250 @@
         /* background: #2563eb; */
         background: linear-gradient(135deg, #2563eb, #4f46e5);
     }
+
+    /* ─── PLACEHOLDER STYLES (ADDED) ─── */
+    #emailEditor.placeholder::before {
+        content: "Start typing your email here…";
+        color: #000000;
+        font-size: 16px;
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        pointer-events: none;
+        user-select: none;
+        line-height: 1.4;
+    }
 </style>
+@section('content')
+<div class="container-fluid mt-4 px-4">
+    <div class="row g-4">
+        <!-- Email Designer Form -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                    <h3 class="h4 mb-0 fw-bold text-gradient">✨ Create New Email Sequence</h3>
+                    <p class="text-muted small mt-1">Design engaging emails with our drag & drop editor</p>
+                </div>
+                <div class="card-body p-4">
+                    <form id="emailForm" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <!-- Basic Info Row -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Step</label>
+                                <input type="number" name="step" id="step" class="form-control form-control-lg rounded-3" min="1" placeholder="e.g., 1">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Gap Days</label>
+                                <input type="number" name="gap_days" id="gapDays" class="form-control form-control-lg rounded-3" placeholder="Day" min="0">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Variant</label>
+                                <input type="text" name="variant" id="variant" class="form-control form-control-lg rounded-3 text-uppercase" placeholder="A/B/C" maxlength="1">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Type</label>
+                                <select name="type" id="typeSelect" class="form-select form-control rounded-3 form-control-lg" >
+                                    <option value="B2B">B2B</option>
+                                    <option value="B2C">B2C</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small text-uppercase text-muted">Email Subject</label>
+                            <input type="text" name="subject" id="subject" class="form-control form-control-lg rounded-3" placeholder="✉️ Write an engaging subject line...">
+                        </div>
+
+                        <!-- Branding Section (Logo/Banner) -->
+                        <div class="card bg-light border-0 rounded-4 mb-4 overflow-hidden">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <i class="bi bi-building fs-5"></i>
+                                    <h5 class="mb-0 fw-bold">Brand Identity</h5>
+                                </div>
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-7">
+                                        <label class="form-label fw-semibold">Company Logo / Banner</label>
+                                        <input type="file" name="company_logo" id="companyLogoInput" class="form-control" accept="image/*">
+                                        <input type="hidden" name="existing_company_logo" id="existingCompanyLogo">
+                                        <input type="hidden" name="image_type" id="imageType" value="logo">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div id="companyLogoPreview" class="mt-2" style="display:none;">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img id="companyLogoPreviewImg" class="img-fluid rounded-3 border" style="max-height: 30px">
+                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="removeCompanyLogo()">
+                                                    <i class="bi bi-trash"></i> Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <label class="form-label fw-semibold">Logo Position</label>
+                                        <select name="logo_position" id="logoPosition" class="form-select">
+                                            <option value="left">Left</option>
+                                            <option value="center" selected>Center</option>
+                                            <option value="right">Right</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hero Image Upload -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small text-uppercase text-muted">Hero Image (Top Banner)</label>
+                            <div class="border rounded-3 p-3 bg-light">
+                                <input type="file" name="hero_image" id="heroImage" class="form-control" accept="image/*" onchange="previewHeroImage(this)">
+                                <div id="heroImagePreview" class="mt-2" style="display:none;">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img id="heroImagePreviewImg" class="rounded-3 border" style="max-width: 80px; max-height: 80px;">
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="removeHeroImage()">Remove</button>
+                                    </div>
+                                </div>
+                                <small class="text-muted">Recommended: 1200 x 400px. Max 2MB</small>
+                            </div>
+                        </div>
+
+                        <!-- WYSIWYG Toolbar -->
+                        <label class="form-label fw-semibold small text-uppercase text-muted">Email Content</label>
+                        <div class="toolbar mb-2 p-2 bg-white rounded-3 border d-flex flex-wrap gap-1 align-items-center">
+                            <div class="btn-group btn-group-sm me-1">
+                                <button type="button" onclick="formatText('bold')" class="btn btn-outline-secondary fw-bold">B</button>
+                                <button type="button" onclick="formatText('italic')" class="btn btn-outline-secondary fst-italic">I</button>
+                                <button type="button" onclick="formatText('underline')" class="btn btn-outline-secondary text-decoration-underline">U</button>
+                            </div>
+                            <select id="fontFamilySelect" onchange="formatText('fontName', this.value)" class="form-select form-select-sm w-auto">
+                                <option value="Arial">Arial</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                            </select>
+                            <select id="fontSizeSelect" onchange="changeFontSize(this.value)" class="form-select form-select-sm w-auto">
+                                <option value="12px">12px</option>
+                                <option value="14px">14px</option>
+                                <option value="16px" selected>16px</option>
+                                <option value="18px">18px</option>
+                                <option value="24px">24px</option>
+                                <option value="32px">32px</option>
+                            </select>
+                            <select onchange="formatText('foreColor', this.value)" class="form-control-sm">
+                                <option value="#000000">⚫ Black</option>
+                                <option value="#808080">⚪ Gray</option>
+                                <option value="#FF0000">🔴 Red</option>
+                                <option value="#FFA500">🟠 Orange</option>
+                                <option value="#FFFF00">🟡 Yellow</option>
+                                <option value="#00FF00">🟢 Green</option>
+                                <option value="#008000">🟩 Dark Green</option>
+                                <option value="#00FFFF">🔵 Cyan</option>
+                                <option value="#0000FF">🔷 Blue</option>
+                                <option value="#800080">🟣 Purple</option>
+                                <option value="#FF00FF">🩷 Magenta</option>
+                                <option value="#8B4513">🟤 Brown</option>
+                            </select>
+                            <button type="button" onclick="addHorizontalLine()" class="btn btn-outline-secondary">─</button>
+                        </div>
+
+                        <!-- ✅ FIX: removed hardcoded text, editor starts empty -->
+                        <div id="emailEditor" class="form-control mb-3" contenteditable="true"
+                            style="min-height: 280px; border: 1px solid #dee2e6; border-radius: 12px; padding: 16px; overflow-y: auto; background: white; font-size: 16px;">
+                        </div>
+                        <textarea name="message" id="message" style="display:none;"></textarea>
+
+                        <!-- Attachment -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small text-uppercase text-muted">Attachment (Download Link)</label>
+                            <div class="border rounded-3 p-3 bg-light">
+                                <input type="file" name="attachments_image" class="form-control" id="attachmentsImage"
+                                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip" onchange="previewAttachment(this)">
+                                <div id="attachmentPreview" class="mt-2" style="display:none;">
+                                    <div class="alert alert-info d-flex justify-content-between align-items-center py-2 px-3 mb-0">
+                                        <span><i class="bi bi-paperclip me-2"></i><span id="attachmentName"></span></span>
+                                        <button type="button" class="btn-close" onclick="removeAttachment()"></button>
+                                    </div>
+                                </div>
+                                <small class="text-muted">Max 5MB. PDF, DOC, XLS, ZIP, Images</small>
+                            </div>
+                        </div>
+
+                        <!-- Social & Business Links -->
+                        <div class="card bg-white border rounded-4 mb-4">
+                            <div class="card-body p-3">
+                                <label class="form-label fw-semibold small mb-2">🔗 Action Links (CTA Buttons)</label>
+                                <div class="row g-2">
+                                    <div class="card bg-white border rounded-4 mb-4">
+                                        <div class="card-body p-3">
+                                            <label class="form-label fw-semibold small mb-2">whatsapp</label>
+                                            <div class="row g-2">
+                                                <div class="col-md-4">
+                                                    <input type="text" name="whatsapp_link" class="form-control" id="whatsappLink" placeholder="WhatsApp URL">
+                                                </div>
+                                                <div class="row g-2 mt-2" id="dynamicActionLinks"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">💾 Save Sequence</button>
+                            <a href="{{ route('admin-sequenceTable-index') }}" class="btn btn-outline-secondary btn-lg px-4 rounded-pill">← Back</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Email Preview -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4" style="top: 20px;">
+                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <h3 class="h4 fw-bold mb-0">📱 Live Preview</h3>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-sm btn-outline-primary active-preview rounded-start-pill" data-preview="mobile">
+                            <i class="bi bi-phone"></i> Mobile
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary rounded-end-pill" data-preview="desktop">
+                            <i class="bi bi-display"></i> Desktop
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-4 bg-light">
+                    <div class="preview-container d-flex justify-content-center">
+                        <!-- Mobile Frame -->
+                        <div id="mobilePreview" class="email-preview mobile-preview active" style="width: 100%; max-width: 360px; background: white; border-radius: 32px; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.3); overflow: hidden; transition: all 0.2s;">
+                            <div class="bg-dark text-white px-3 py-2 small d-flex justify-content-between">
+                                <span>12:00</span>
+                                <span>📶 🔋</span>
+                            </div>
+                            <div class="p-3" style="min-height: 520px;">
+                                <div class="email-preview-header bg-light p-2 rounded mb-2">
+                                    <strong>Subject:</strong> <span id="previewSubject">No subject</span>
+                                </div>
+                                <div id="mobilePreviewContent"></div>
+                            </div>
+
+                        </div>
+
+                        <!-- Desktop Frame -->
+                        <div id="desktopPreview" class="email-preview desktop-preview" style="display: none; width: 100%; max-width: 680px; background: white; border-radius: 24px; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2); overflow: hidden;">
+                            <div class="bg-light px-4 py-2 border-bottom d-flex gap-2 align-items-center">
+                                <i class="bi bi-envelope-fill text-primary"></i>
+                                <strong>Email Preview</strong>
+                                <span class="ms-auto"><span id="previewSubjectDesktop">No subject</span></span>
+                            </div>
+                            <div class="p-4" style="min-height: 500px;">
+                                <div id="desktopPreviewContent"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <script src="{{ asset('js/jquery.min.js') }}"></script>
 <script>
@@ -427,54 +406,26 @@
     let currentCompanyLogoFile = null;
     let currentImageType = 'logo';
 
+    // ─── PLACEHOLDER HELPER (ADDED) ───
+    function updatePlaceholder() {
+        const el = currentEditor;
+        const text = el.textContent;
+        const html = el.innerHTML.trim();
+        const isEmpty = !text || text === '\u00A0' || text.trim() === '' ||
+                        html === '<br>' || html === '<p><br></p>' || html === '<p>&nbsp;</p>' ||
+                        html === '<div><br></div>' || html === '<div>&nbsp;</div>';
+        el.classList.toggle('placeholder', isEmpty);
+        if (isEmpty && (html === '' || html === '<br>' || html === '<div></div>' || html === '<p></p>')) {
+            el.innerHTML = '<p><br></p>';
+        }
+    }
+
     // Load initial data
     window.addEventListener('DOMContentLoaded', () => {
         loadBusinessLinks();
         updatePreview();
+        updatePlaceholder(); // ✅ show placeholder on first load
     });
-
-    // function loadBusinessLinks() {
-    //     fetch('{{ route('user-business-links') }}')
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             if (data.company_logo) {
-    //                 currentCompanyLogo = data.company_logo;
-    //                 currentImageType = data.image_type || 'logo';
-    //                 document.getElementById('companyLogoPreviewImg').src = data.company_logo;
-    //                 document.getElementById('companyLogoPreview').style.display = 'block';
-    //                 document.getElementById('existingCompanyLogo').value = data.company_logo;
-    //                 document.getElementById('imageType').value = currentImageType;
-    //             }
-    //             document.getElementById('whatsappLink').value = data.whatsapp_link || '';
-
-    //              window.selectedActionLinks = data.action_links || [];
-
-    //                 let html = '';
-    //                     window.selectedActionLinks.forEach(function(link, index) {
-    //                         html += `
-    //                             <div class="col-md-4 action-link-item mb-2">
-    //                                 <label class="small fw-semibold mb-1 d-block">
-    //                                     ${link.platform_name}
-    //                                 </label>
-    //                                 <div class="input-group">
-    //                                     <input type="text" class="form-control" name="action_links[${index}][platform_url]" value="${link.platform_url}">
-    //                                     <button type="button" class="btn btn-danger remove-action-link" data-id="${link.id}">
-    //                                         <i class="fas fa-times"></i>
-    //                                     </button>
-    //                                 </div>
-
-    //                                 <input type="hidden" name="action_links[${index}][platform_name]" value="${link.platform_name}">
-    //                                 <input type="hidden" name="action_links[${index}][id]" value="${link.id}">
-    //                             </div>
-    //                         `;
-    //                     });
-    //                 $('#dynamicActionLinks').html(html);
-    //             document.getElementById('logoPosition').value = data.logo_position || 'center';
-    //             updatePreview();
-    //         })
-    //         .catch(err => console.error(err));
-    // }
-
 
     function loadBusinessLinks() {
         fetch('{{ route('admin-user-business-links') }}')
@@ -524,22 +475,9 @@
             return link.id != linkId;
         });
         renderActionLinks(window.selectedActionLinks);
-        updatePreview();   // <-- Refresh the live preview
+        updatePreview();
         console.log(window.selectedActionLinks);
     });
-
-
-    // $(document).on('click', '.remove-action-link', function() {
-    //     const linkId = $(this).data('id');
-    //     // UI se remove
-    //     $(this).closest('.action-link-item').remove();
-    //     // Array se remove
-    //     window.selectedActionLinks =
-    //         window.selectedActionLinks.filter(function(link) {
-    //             return link.id != linkId;
-    //         });
-    //     console.log(window.selectedActionLinks);
-    // });
 
     // Logo upload with dimension detection
     document.getElementById('companyLogoInput').addEventListener('change', function(e) {
@@ -565,10 +503,11 @@
         }
     });
 
-    // Text formatting
+    // Text formatting (✅ added updatePlaceholder() calls)
     function formatText(command, value = null) {
         document.execCommand(command, false, value);
         updatePreview();
+        updatePlaceholder();
         currentEditor.focus();
     }
 
@@ -579,11 +518,13 @@
             el.style.fontSize = size;
         });
         updatePreview();
+        updatePlaceholder();
     }
 
     function addHorizontalLine() {
         document.execCommand('insertHorizontalRule', false, null);
         updatePreview();
+        updatePlaceholder();
     }
 
     // Hero image handlers
@@ -613,20 +554,13 @@
         currentCompanyLogoFile = null;
         currentImageType = 'logo';
 
-        // Clear file input
         document.getElementById('companyLogoInput').value = '';
-
-        // Clear hidden fields
         document.getElementById('existingCompanyLogo').value = '';
         document.getElementById('imageType').value = 'logo';
-
-        // Hide preview
         document.getElementById('companyLogoPreview').style.display = 'none';
         document.getElementById('companyLogoPreviewImg').src = '';
 
-        // Update preview
         updatePreview();
-
         toastr.info('Company logo/banner removed');
     }
 
@@ -670,7 +604,6 @@
             attachmentHtml = `<div class="alert alert-secondary mt-3 p-2 rounded-3"><i class="bi bi-paperclip"></i> <strong>Attachment:</strong> ${currentAttachment.name} (${currentAttachment.size})<br><a href="#" class="small">Download file →</a></div>`;
         }
 
-
         let linksHtml = `<div class="d-flex flex-wrap gap-3 justify-content-center mt-4">`;
         const whatsapp = document.getElementById('whatsappLink').value;
         if (whatsapp) {
@@ -692,19 +625,6 @@
         }
 
         linksHtml += `</div>`;
-
-        // let linksHtml = '';
-        // const whatsapp = document.getElementById('whatsappLink').value;
-
-            // const telegram = document.getElementById('telegramLink').value;
-            // const business = document.getElementById('businessLink').value;
-        // if (whatsapp || telegram || business) {
-        //     linksHtml = '<div class="d-flex flex-wrap gap-2 justify-content-center mt-4 pt-2">';
-        //     if (whatsapp) linksHtml += `<a href="${whatsapp}" class="btn btn-success rounded-pill" target="_blank" style="background:#25D366;">📱 WhatsApp</a>`;
-        //     if (telegram) linksHtml += `<a href="${telegram}" class="btn btn-info rounded-pill text-white" target="_blank" style="background:#0088cc;">📨 Telegram</a>`;
-        //     if (business) linksHtml += `<a href="${business}" class="btn btn-primary rounded-pill" target="_blank">💼 Website</a>`;
-        //     linksHtml += '</div>';
-        // }
         return logoHtml + heroHtml + content + attachmentHtml + linksHtml;
     }
 
@@ -718,35 +638,27 @@
 
         document.getElementById('mobilePreviewContent').innerHTML = fullHtml;
         document.getElementById('desktopPreviewContent').innerHTML = fullHtml;
-
-        // let html = currentEditor.innerHTML;
-
-        // // Empty paragraph = blank line
-        // html = html.replace(/<p><br><\/p>/gi, '<p>&nbsp;</p>');
-        // html = html.replace(/<p>\s*&nbsp;\s*<\/p>/gi, '<p>&nbsp;</p>');
-
-        // // Max 2 blank lines
-        // html = html.replace(
-        //     /(<p>&nbsp;<\/p>\s*){3,}/gi,
-        //     '<p>&nbsp;</p><p>&nbsp;</p>'
-        // );
-
-        // document.getElementById('message').value = html;
     }
 
-    // Event Listeners for live sync
+    // Event Listeners (✅ added updatePlaceholder() calls)
     document.getElementById('subject').addEventListener('input', updatePreview);
     document.getElementById('whatsappLink').addEventListener('input', updatePreview);
-    // document.getElementById('telegramLink').addEventListener('input', updatePreview);
-    // document.getElementById('businessLink').addEventListener('input', updatePreview);
     document.getElementById('logoPosition').addEventListener('change', updatePreview);
-    currentEditor.addEventListener('input', updatePreview);
-    currentEditor.addEventListener('keyup', updatePreview);
-    currentEditor.addEventListener('paste', (e) => {
+
+    currentEditor.addEventListener('input', function() {
+        updatePreview();
+        updatePlaceholder();
+    });
+    currentEditor.addEventListener('keyup', function() {
+        updatePreview();
+        updatePlaceholder();
+    });
+    currentEditor.addEventListener('paste', function(e) {
         e.preventDefault();
         const text = (e.clipboardData || window.clipboardData).getData('text/plain');
         document.execCommand('insertText', false, text);
         updatePreview();
+        updatePlaceholder();
     });
 
     // Preview toggle
@@ -776,47 +688,21 @@
         $('#emailForm').submit(function(e) {
             e.preventDefault();
 
-        // let html = currentEditor.innerHTML;
-
-        // // empty paragraph normalize
-        // html = html.replace(
-        //     /<p>(?:\s|&nbsp;|<br>)*<\/p>/gi,
-        //     '<p>&nbsp;</p>'
-        // );
-
-        // // max 2 blank lines
-        // html = html.replace(
-        //     /(<p>&nbsp;<\/p>\s*){3,}/gi,
-        //     '<p>&nbsp;</p><p>&nbsp;</p>'
-        // );
-
-        // document.getElementById('message').value = html;
-
-
-        let html = currentEditor.innerHTML;
-
-        // tags ke beech extra newlines remove
-        html = html.replace(/>\s+\</g, '><');
-
-        // empty paragraph normalize
-        html = html.replace(
-            /<p>(?:\s|&nbsp;|<br>)*<\/p>/gi,
-            '<p>&nbsp;</p>'
-        );
-
-        // last ke blank paragraphs remove
-        html = html.replace(
-            /(?:<p>&nbsp;<\/p>\s*)+$/i,
-            ''
-        );
-
-        // max 2 blank lines
-        html = html.replace(
-            /(<p>&nbsp;<\/p>\s*){3,}/gi,
-            '<p>&nbsp;</p><p>&nbsp;</p>'
-        );
-
-        document.getElementById('message').value = html;
+            let html = currentEditor.innerHTML;
+            html = html.replace(/>\s+\</g, '><');
+            html = html.replace(
+                /<p>(?:\s|&nbsp;|<br>)*<\/p>/gi,
+                '<p>&nbsp;</p>'
+            );
+            html = html.replace(
+                /(?:<p>&nbsp;<\/p>\s*)+$/i,
+                ''
+            );
+            html = html.replace(
+                /(<p>&nbsp;<\/p>\s*){3,}/gi,
+                '<p>&nbsp;</p><p>&nbsp;</p>'
+            );
+            document.getElementById('message').value = html;
 
             if (!$('#step').val()) { toastr.error('Step is required'); return; }
             if (!$('#subject').val()) { toastr.error('Subject is required'); return; }
@@ -835,7 +721,9 @@
                 success: function(resp) {
                     toastr.success(resp.message);
                     $('#emailForm')[0].reset();
-                    currentEditor.innerHTML = '<p>Start typing your email here...</p>';
+                    // ✅ FIX: set empty content and call updatePlaceholder()
+                    currentEditor.innerHTML = '<p><br></p>';
+                    updatePlaceholder();
                     currentHeroImage = null;
                     currentAttachment = null;
                     $('#heroImage').val('');

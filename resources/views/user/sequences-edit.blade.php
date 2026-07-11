@@ -118,11 +118,18 @@
                                 <option value="32px">32px</option>
                             </select>
                             <select onchange="formatText('foreColor', this.value)" class="form-control-sm">
-                                <option value="#000000">Black</option>
-                                <option value="#FF0000">Red</option>
-                                <option value="#00FF00">Green</option>
-                                <option value="#0000FF">Blue</option>
-                                <option value="#FFA500">Orange</option>
+                                <option value="#000000">⚫ Black</option>
+                                <option value="#808080">⚪ Gray</option>
+                                <option value="#FF0000">🔴 Red</option>
+                                <option value="#FFA500">🟠 Orange</option>
+                                <option value="#FFFF00">🟡 Yellow</option>
+                                <option value="#00FF00">🟢 Green</option>
+                                <option value="#008000">🟩 Dark Green</option>
+                                <option value="#00FFFF">🔵 Cyan</option>
+                                <option value="#0000FF">🔷 Blue</option>
+                                <option value="#800080">🟣 Purple</option>
+                                <option value="#FF00FF">🩷 Magenta</option>
+                                <option value="#8B4513">🟤 Brown</option>
                             </select>
                             <button type="button" onclick="addHorizontalLine()" class="btn btn-outline-secondary">─</button>
                         </div>
@@ -724,7 +731,7 @@
         const whatsapp = document.getElementById('whatsappLink').value;
         if (whatsapp) {
             linksHtml +=
-                `<a href="${whatsapp}" class="btn btn-success rounded-pill btn-sm" target="_blank" style="background:#007bff;">WhatsApp</a>`;
+                `<a href="${whatsapp}" class="btn btn-success rounded-pill btn-sm" target="_blank" style="background: linear-gradient(135deg, #2563eb, #4f46e5);">WhatsApp</a>`;
         }
 
         if (selectedActionLinks && selectedActionLinks.length > 0) {
@@ -732,7 +739,7 @@
                 let url = link.platform_url || '';
                 if (!url) return;
                 linksHtml += `
-                    <a href="${url}" class="btn btn-primary rounded-pill btn-sm" target="_blank" style="background: #007bff;">
+                    <a href="${url}" class="btn btn-primary rounded-pill btn-sm" target="_blank" style="background: linear-gradient(135deg, #2563eb, #4f46e5);">
                         ${link.platform_name}
                     </a>
                 `;

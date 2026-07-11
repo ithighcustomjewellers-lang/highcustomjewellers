@@ -199,7 +199,7 @@
             background: #fff;
             border-radius: 18px;
             border: 1px solid #dbe3ef;
-            box-shadow: 0 15px 35px rgba(0,0,0,.08);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, .08);
             z-index: 999;
             padding: 10px;
         }
@@ -279,13 +279,15 @@
                 @php
                     $user = Auth::user();
 
-                    $message = "Hi {$user->name},\n"
-                        . "I received your email and I'm interested in your jewelry collection. "
-                        . "I'm reaching out through WhatsApp to learn more about your products and pricing. "
-                        . "Could you please share more details?\n"
-                        . "Thank you.";
+                    $message =
+                        "Hi {$user->name},\n" .
+                        "I received your email and I'm interested in your jewelry collection. " .
+                        "I'm reaching out through WhatsApp to learn more about your products and pricing. " .
+                        "Could you please share more details?\n" .
+                        'Thank you.';
 
-                    $defaultWhatsappUrl = 'https://wa.me/' . preg_replace('/\D/', '', $user->mobile) . '?text=' . urlencode($message);
+                    $defaultWhatsappUrl =
+                        'https://wa.me/' . preg_replace('/\D/', '', $user->mobile) . '?text=' . urlencode($message);
                 @endphp
 
                 <!-- WHATSAPP -->
@@ -295,14 +297,77 @@
                     </label>
                     <div class="input-wrapper">
                         <i class="bi bi-whatsapp input-icon text-success"></i>
-                        <input type="text" name="whatsapp_link"  class="form-control custom-input" value="{{ $defaultWhatsappUrl }}" placeholder="https://wa.me/919999999999">
+                        <input type="text" name="whatsapp_link" class="form-control custom-input"
+                            value="{{ $defaultWhatsappUrl }}" placeholder="https://wa.me/919999999999">
                     </div>
                     <small class="text-danger whatsapp_link_error"></small>
                 </div>
 
+                  <!--<div class="mb-4">-->
+                <!--    <label class="upload-label">Select Action Links</label>-->
+
+                <!--    <div class="custom-dropdown">-->
+                <!--        <div class="dropdown-header" id="dropdownHeader">-->
+                <!--            <span id="selectedCount">Select Links</span>-->
+                <!--            <i class="fas fa-chevron-down"></i>-->
+                <!--        </div>-->
+
+                <!--        <div class="dropdown-content" id="dropdownContent">-->
+                <!--            @foreach($sociallinks as $link)-->
+                <!--                <label class="dropdown-item-custom">-->
+                <!--                    <input type="checkbox"-->
+                <!--                        name="social_link_ids[]"-->
+                <!--                        value="{{ $link->id }}"-->
+                <!--                        class="action-link-checkbox">-->
+
+                <!--                    <div class="link-info">-->
+                <!--                        <div class="platform-name">-->
+                <!--                            {{ $link->platform_name }}-->
+                <!--                        </div>-->
+
+                <!--                        <div class="platform-url">-->
+                <!--                            {{ Str::limit($link->platform_url, 50) }}-->
+                <!--                        </div>-->
+                <!--                    </div>-->
+                <!--                </label>-->
+                <!--            @endforeach-->
+                <!--        </div>-->
+                <!--    </div>-->
+                <!--</div>-->
+                <!-- BUTTON -->
+
+                @php
+                    $selectedIds = [];
+                    $selectedLinks = [];
+                    if (isset($business) && $business->action_links) {
+                        $actionLinks = json_decode($business->action_links, true);
+                        if (is_array($actionLinks)) {
+                            $selectedIds = array_column($actionLinks, 'id');
+                            $selectedLinks = $actionLinks;
+                        }
+                    }
+                @endphp
+
+                <!-- Selected Links (Tags) -->
+                <div class="mb-3" id="selectedLinksContainer">
+                    <label class="upload-label">Selected Action Links</label>
+                    <div id="selectedLinksList" class="d-flex flex-wrap gap-2 mt-2">
+                        @forelse($selectedLinks as $link)
+                            <span class="badge badge-light d-flex align-items-center p-2"
+                                style="background: #404e4ede; font-size: 0.9rem; border-radius: 20px;">
+                                <span>{{ $link['platform_name'] }}</span>
+                                <i class="fas fa-times ms-2 text-danger remove-link-tag"
+                                    style="cursor: pointer; font-size: 0.8rem;" data-link-id="{{ $link['id'] }}"></i>
+                            </span>
+                        @empty
+                            <span id="noSelectedMsg" class="text-muted">No links selected</span>
+                        @endforelse
+                    </div>
+                </div>
+
+                <!-- Dropdown with all available links -->
                 <div class="mb-4">
                     <label class="upload-label">Select Action Links</label>
-
                     <div class="custom-dropdown">
                         <div class="dropdown-header" id="dropdownHeader">
                             <span id="selectedCount">Select Links</span>
@@ -310,21 +375,14 @@
                         </div>
 
                         <div class="dropdown-content" id="dropdownContent">
-                            @foreach($sociallinks as $link)
+                            @foreach ($sociallinks as $link)
                                 <label class="dropdown-item-custom">
-                                    <input type="checkbox"
-                                        name="social_link_ids[]"
-                                        value="{{ $link->id }}"
-                                        class="action-link-checkbox">
-
+                                    <input type="checkbox" name="social_link_ids[]" value="{{ $link->id }}"
+                                        class="action-link-checkbox"
+                                        {{ in_array($link->id, $selectedIds) ? 'checked' : '' }}>
                                     <div class="link-info">
-                                        <div class="platform-name">
-                                            {{ $link->platform_name }}
-                                        </div>
-
-                                        <div class="platform-url">
-                                            {{ Str::limit($link->platform_url, 50) }}
-                                        </div>
+                                        <div class="platform-name">{{ $link->platform_name }}</div>
+                                        <div class="platform-url">{{ Str::limit($link->platform_url, 50) }}</div>
                                     </div>
                                 </label>
                             @endforeach
@@ -341,78 +399,195 @@
         </div>
     </div>
     <script>
-        // IMAGE PREVIEW
-        $('#companyLogo').change(function() {
-            let file = this.files[0];
-            if (file) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#imagePreview').attr('src', e.target.result);
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // FORM SUBMIT
-        $('#businessForm').submit(function(e) {
-            e.preventDefault();
-            $('.text-danger').text('');
-            let formData = new FormData(this);
-            $.ajax({
-                url: "{{ route('submit-business-links') }}",
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                beforeSend: function() {
-                    $('#saveBusinessBtn').html('<i class="fas fa-spinner fa-spin me-2"></i> Saving...').prop('disabled', true);
-                },
-                success: function(response) {
-                    $('#saveBusinessBtn').html('<i class="fas fa-check me-2"></i> Saved Successfully').prop('disabled', false);
-                    toastr.success(response.message);
-                    $('#businessForm')[0].reset();
-                    location.reload();
-                },
-                error: function(xhr) {
-                    $('#saveBusinessBtn')
-                        .html('<i class="fas fa-save me-2"></i> Save Business Details')
-                        .prop('disabled', false);
-                    if (xhr.status == 422) {
-                        let errors = xhr.responseJSON.errors;
-                        $.each(errors, function(key, value) {
-                            $('.' + key + '_error').text(value[0]);
-                        });
-                    } else {
-                        toastr.error('Something went wrong');
-                    }
-                }
-            });
-        });
-
-        $(document).ready(function () {
-            // Open / Close Dropdown
-            $('#dropdownHeader').on('click', function () {
+        $(document).ready(function() {
+            // Dropdown toggle
+            $('#dropdownHeader').on('click', function() {
                 $('#dropdownContent').toggleClass('active');
             });
-
-            // Close dropdown when click outside
-            $(document).on('click', function (e) {
+            $(document).on('click', function(e) {
                 if (!$(e.target).closest('.custom-dropdown').length) {
                     $('#dropdownContent').removeClass('active');
                 }
             });
 
-            // Update selected count
-            $(document).on('change', '.action-link-checkbox', function () {
-                let count = $('.action-link-checkbox:checked').length;
-                if (count > 0) {
-                    $('#selectedCount').text(count + ' Link(s) Selected');
+            // Function to update selected count and tags
+            function updateSelectedUI() {
+                let checkedBoxes = $('.action-link-checkbox:checked');
+                let count = checkedBoxes.length;
+                let container = $('#selectedLinksList');
+
+                // Update count text
+                $('#selectedCount').text(count > 0 ? count + ' Link(s) Selected' : 'Select Links');
+
+                // Rebuild tags
+                let html = '';
+                checkedBoxes.each(function() {
+                    let $cb = $(this);
+                    let id = $cb.val();
+                    let label = $cb.closest('.dropdown-item-custom').find('.platform-name').text().trim();
+                    html += `<span class="badge badge-light d-flex align-items-center p-2"
+                          style="background: #404e4ede; font-size: 0.9rem; border-radius: 20px;">
+                         <span>${label}</span>
+                         <i class="fas fa-times ms-2 text-danger remove-link-tag"
+                            style="cursor: pointer; font-size: 0.8rem;"
+                            data-link-id="${id}"></i>
+                     </span>`;
+                });
+
+                if (html) {
+                    container.html(html);
+                    $('#noSelectedMsg').remove();
                 } else {
-                    $('#selectedCount').text('Select Links');
+                    container.html('<span id="noSelectedMsg" class="text-muted">No links selected</span>');
+                }
+
+                // Bind remove event to new tags
+                $('.remove-link-tag').off('click').on('click', function() {
+                    let id = $(this).data('link-id');
+                    let checkbox = $(`.action-link-checkbox[value="${id}"]`);
+                    if (checkbox.length) {
+                        checkbox.prop('checked', false).trigger('change');
+                    }
+                });
+            }
+
+            // Listen to checkbox changes
+            $(document).on('change', '.action-link-checkbox', function() {
+                updateSelectedUI();
+            });
+
+            // Initial setup
+            updateSelectedUI();
+
+            // Image preview
+            $('#companyLogo').change(function() {
+                let file = this.files[0];
+                if (file) {
+                    let reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#imagePreview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
                 }
             });
+
+            // Form submit (पहले जैसा ही)
+            $('#businessForm').submit(function(e) {
+                e.preventDefault();
+                $('.text-danger').text('');
+                let formData = new FormData(this);
+                $.ajax({
+                    url: "{{ route('submit-business-links') }}",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        $('#saveBusinessBtn').html(
+                            '<i class="fas fa-spinner fa-spin me-2"></i> Saving...').prop(
+                            'disabled', true);
+                    },
+                    success: function(response) {
+                        $('#saveBusinessBtn').html(
+                            '<i class="fas fa-check me-2"></i> Saved Successfully').prop(
+                            'disabled', false);
+                        toastr.success(response.message);
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        $('#saveBusinessBtn')
+                            .html('<i class="fas fa-save me-2"></i> Save Business Details')
+                            .prop('disabled', false);
+                        if (xhr.status == 422) {
+                            let errors = xhr.responseJSON.errors;
+                            $.each(errors, function(key, value) {
+                                $('.' + key + '_error').text(value[0]);
+                            });
+                        } else {
+                            toastr.error('Something went wrong');
+                        }
+                    }
+                });
+            });
         });
+
+         // IMAGE PREVIEW
+        // $('#companyLogo').change(function() {
+        //     let file = this.files[0];
+        //     if (file) {
+        //         let reader = new FileReader();
+        //         reader.onload = function(e) {
+        //             $('#imagePreview').attr('src', e.target.result);
+        //         }
+        //         reader.readAsDataURL(file);
+        //     }
+        // });
+
+        // // FORM SUBMIT
+        // $('#businessForm').submit(function(e) {
+        //     e.preventDefault();
+        //     $('.text-danger').text('');
+        //     let formData = new FormData(this);
+        //     $.ajax({
+        //         url: "{{ route('submit-business-links') }}",
+        //         type: "POST",
+        //         data: formData,
+        //         processData: false,
+        //         contentType: false,
+        //         beforeSend: function() {
+        //             $('#saveBusinessBtn')
+        //                 .html('<i class="fas fa-spinner fa-spin me-2"></i> Saving...')
+        //                 .prop('disabled', true);
+        //         },
+        //          beforeSend: function() {
+        //             $('#saveBusinessBtn').html('<i class="fas fa-spinner fa-spin me-2"></i> Saving...').prop('disabled', true);
+        //         },
+        //         success: function(response) {
+        //             $('#saveBusinessBtn').html('<i class="fas fa-check me-2"></i> Saved Successfully').prop('disabled', false);
+        //             toastr.success(response.message);
+        //             $('#businessForm')[0].reset();
+        //             location.reload();
+        //         },
+
+        //         error: function(xhr) {
+        //             $('#saveBusinessBtn')
+        //                 .html('<i class="fas fa-save me-2"></i> Save Business Details')
+        //                 .prop('disabled', false);
+        //             if (xhr.status == 422) {
+        //                 let errors = xhr.responseJSON.errors;
+        //                 $.each(errors, function(key, value) {
+        //                     $('.' + key + '_error').text(value[0]);
+        //                 });
+        //             } else {
+        //                 toastr.error('Something went wrong');
+        //             }
+        //         }
+        //     });
+        // });
+
+
+        // $(document).ready(function () {
+        //     // Open / Close Dropdown
+        //     $('#dropdownHeader').on('click', function () {
+        //         $('#dropdownContent').toggleClass('active');
+        //     });
+
+        //     // Close dropdown when click outside
+        //     $(document).on('click', function (e) {
+        //         if (!$(e.target).closest('.custom-dropdown').length) {
+        //             $('#dropdownContent').removeClass('active');
+        //         }
+        //     });
+
+        //     // Update selected count
+        //     $(document).on('change', '.action-link-checkbox', function () {
+        //         let count = $('.action-link-checkbox:checked').length;
+        //         if (count > 0) {
+        //             $('#selectedCount').text(count + ' Link(s) Selected');
+        //         } else {
+        //             $('#selectedCount').text('Select Links');
+        //         }
+        //     });
+        // });
     </script>
-
-
 @endsection

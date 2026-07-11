@@ -118,73 +118,82 @@
     }
 </style>
 
+{{-- problem a hai ki dashboard me date ka filter add kiya hua hai
+for example mene sent mail 09/07/2026 kiya tha or mene filter kiya 10/07/2026 means today ok, so aaj se recode me 0 aayenga but
+fir mene sent pe click kiya so wo purana means 09/07/2026 ka mail show hua to a problem kaise solve kare  --}}
+
 @section('content')
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Dashboard</h2>
+            <p class="text-muted mb-0">Welcome back! Here's what's happening.</p>
+        </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="mb-1">Dashboard</h2>
-                <p class="text-muted mb-0">Welcome back! Here's what's happening.</p>
-            </div>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown"
+                data-bs-auto-close="outside">
 
-            <div class="dropdown">
-                <button class="btn btn-outline-secondary dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown"
-                    data-bs-auto-close="outside">
+                <i class="fas fa-calendar-alt me-2"></i>
+                {{ ucfirst(request('filter', 'Today')) }}
+            </button>
 
-                    <i class="fas fa-calendar-alt me-2"></i>
-                    {{ ucfirst(request('filter', 'Today')) }}
-                </button>
+            <div class="dropdown-menu dropdown-menu-end p-3 shadow" style="min-width:220px;">
 
-                <div class="dropdown-menu dropdown-menu-end p-3 shadow" style="min-width:220px;">
+                <a class="dropdown-item" href="?filter=today">
+                    <i class="fas fa-calendar-day me-2"></i> Today
+                </a>
 
-                    <a class="dropdown-item" href="?filter=today">
-                        <i class="fas fa-calendar-day me-2"></i> Today
-                    </a>
+                <a class="dropdown-item" href="?filter=weekly">
+                    <i class="fas fa-calendar-week me-2"></i> Weekly
+                </a>
 
-                    <a class="dropdown-item" href="?filter=weekly">
-                        <i class="fas fa-calendar-week me-2"></i> Weekly
-                    </a>
+                <a class="dropdown-item" href="?filter=monthly">
+                    <i class="fas fa-calendar-alt me-2"></i> Monthly
+                </a>
 
-                    <a class="dropdown-item" href="?filter=monthly">
-                        <i class="fas fa-calendar-alt me-2"></i> Monthly
-                    </a>
+                <a class="dropdown-item" href="?filter=yearly">
+                    <i class="fas fa-calendar me-2"></i> Yearly
+                </a>
 
-                    <a class="dropdown-item" href="?filter=yearly">
-                        <i class="fas fa-calendar me-2"></i> Yearly
-                    </a>
+                <hr>
 
-                    <hr>
+                <form method="GET" action="{{ route('dashboard') }}">
+                    <input type="hidden" name="filter" value="custom">
 
-                    <form method="GET" action="{{ route('dashboard') }}">
-                        <input type="hidden" name="filter" value="custom">
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold">Start Date</label>
+                        <input type="date" name="start_date" class="form-control form-control-sm"
+                            value="{{ request('start_date') }}">
+                    </div>
 
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold">Start Date</label>
-                            <input type="date" name="start_date" class="form-control form-control-sm"
-                                value="{{ request('start_date') }}">
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">End Date</label>
+                        <input type="date" name="end_date" class="form-control form-control-sm"
+                            value="{{ request('end_date') }}">
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">End Date</label>
-                            <input type="date" name="end_date" class="form-control form-control-sm"
-                                value="{{ request('end_date') }}">
-                        </div>
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="fas fa-search me-1"></i>
+                        Apply Filter
+                    </button>
+                </form>
 
-                        <button type="submit" class="btn btn-primary btn-sm w-100">
-                            <i class="fas fa-search me-1"></i>
-                            Apply Filter
-                        </button>
-                    </form>
-
-                </div>
             </div>
         </div>
+    </div>
     <div class="row g-4">
 
 
 
         <div class="dashboard-stats">
             {{-- Total Mail --}}
-            <a href="{{ route('report.campaign') }}" class="text-decoration-none text-dark">
+            <a href="{{ route('report.campaign', [
+                'filter' => request('filter', 'today'),
+                'from' => 'dashboard',
+                'start_date' => request('start_date'),
+                'end_date' => request('end_date'),
+            ]) }}"
+                class="text-decoration-none text-dark">
                 <div class="card dashboard-card border-0 shadow-sm">
                     <div class="card-body">
                         <div class="card-info">
@@ -203,7 +212,14 @@
             </a>
 
             {{-- Pending --}}
-            <a href="{{ route('report.campaign', ['status' => 'pending']) }}" class="text-decoration-none text-dark">
+            <a href="{{ route('report.campaign', [
+                'status' => 'pending',
+                'filter' => request('filter', 'today'),
+                'from' => 'dashboard',
+                'start_date' => request('start_date'),
+                'end_date' => request('end_date'),
+            ]) }}"
+                class="text-decoration-none text-dark">
                 <div class="card dashboard-card border-0 shadow-sm">
                     <div class="card-body">
                         <div class="card-info">
@@ -222,7 +238,14 @@
             </a>
 
             {{-- Sent --}}
-            <a href="{{ route('report.campaign', ['status' => 'send']) }}" class="text-decoration-none text-dark">
+            <a href="{{ route('report.campaign', [
+                'status' => 'send',
+                'filter' => request('filter', 'today'),
+                'from' => 'dashboard',
+                'start_date' => request('start_date'),
+                'end_date' => request('end_date'),
+            ]) }}"
+                class="text-decoration-none text-dark">
                 <div class="card dashboard-card border-0 shadow-sm">
                     <div class="card-body">
                         <div class="card-info">
@@ -241,7 +264,14 @@
             </a>
 
             {{-- Seen --}}
-            <a href="{{ route('report.campaign', ['status' => 'seen']) }}" class="text-decoration-none text-dark">
+            <a href="{{ route('report.campaign', [
+                'status' => 'seen',
+                'filter' => request('filter', 'today'),
+                'from' => 'dashboard',
+                'start_date' => request('start_date'),
+                'end_date' => request('end_date'),
+            ]) }}"
+                class="text-decoration-none text-dark">
                 <div class="card dashboard-card border-0 shadow-sm">
                     <div class="card-body">
                         <div class="card-info">
@@ -260,7 +290,14 @@
             </a>
 
             {{-- Failed --}}
-            <a href="{{ route('report.campaign', ['status' => 'failed']) }}" class="text-decoration-none text-dark">
+            <a href="{{ route('report.campaign', [
+                'status' => 'failed',
+                'filter' => request('filter', 'today'),
+                'from' => 'dashboard',
+                'start_date' => request('start_date'),
+                'end_date' => request('end_date'),
+            ]) }}"
+                class="text-decoration-none text-dark">
                 <div class="card dashboard-card border-0 shadow-sm">
                     <div class="card-body">
                         <div class="card-info">
@@ -279,7 +316,14 @@
             </a>
 
             {{-- Interested --}}
-            <a href="{{ route('report.campaign', ['status' => 'interested']) }}" class="text-decoration-none text-dark">
+            <a href="{{ route('report.campaign', [
+                'status' => 'interested',
+                'filter' => request('filter', 'today'),
+                'from' => 'dashboard',
+                'start_date' => request('start_date'),
+                'end_date' => request('end_date'),
+            ]) }}"
+                class="text-decoration-none text-dark">
                 <div class="card dashboard-card border-0 shadow-sm">
                     <div class="card-body">
                         <div class="card-info">
@@ -298,7 +342,13 @@
             </a>
 
             {{-- Not Interested --}}
-            <a href="{{ route('report.campaign', ['status' => 'not_interested']) }}"
+            <a href="{{ route('report.campaign', [
+                'status' => 'not_interested',
+                'filter' => request('filter', 'today'),
+                'from' => 'dashboard',
+                'start_date' => request('start_date'),
+                'end_date' => request('end_date'),
+            ]) }}"
                 class="text-decoration-none text-dark">
                 <div class="card dashboard-card border-0 shadow-sm">
                     <div class="card-body">
@@ -384,7 +434,7 @@
                     url: "{{ route('dashboard-chart-data') }}",
                     type: "GET",
                     data: {
-                         filter: "{{ request('filter', 'today') }}",
+                        filter: "{{ request('filter', 'today') }}",
                         start_date: "{{ request('start_date') }}",
                         end_date: "{{ request('end_date') }}"
                     },
@@ -468,7 +518,7 @@
                     url: "{{ route('dashboard-platform-click-chart') }}",
                     type: "GET",
                     data: {
-                         filter: "{{ request('filter', 'today') }}",
+                        filter: "{{ request('filter', 'today') }}",
                         start_date: "{{ request('start_date') }}",
                         end_date: "{{ request('end_date') }}"
                     },

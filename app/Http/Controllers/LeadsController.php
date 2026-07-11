@@ -185,9 +185,6 @@ class LeadsController extends Controller
 
     public function leadList(Request $request)
     {
-
-
-
         $userId = Auth::id();
 
         // Get filter parameters
@@ -217,7 +214,7 @@ class LeadsController extends Controller
                 break;
             case 'monthly':
                 $query->whereMonth('created_at', Carbon::now()->month)
-                      ->whereYear('created_at', Carbon::now()->year);
+                    ->whereYear('created_at', Carbon::now()->year);
                 break;
             case 'yearly':
                 $query->whereYear('created_at', Carbon::now()->year);
@@ -260,8 +257,10 @@ class LeadsController extends Controller
                 $firstLog = $campaignLogs[$lead->id]->first();
             }
 
+
             if ($lead->is_unsubscribed) {
-                $tracking = 'Not Interested';
+                // $tracking = 'Not Interested';
+                $tracking = ' <span class="badge bg-danger">Not Interested</span>';
             } elseif ($firstLog) {
                 switch ($firstLog->status) {
                     case 'pending':
@@ -280,7 +279,7 @@ class LeadsController extends Controller
                         $tracking = ' <span class="badge bg-primary">Interested</span>';
                         break;
                     case 'Not Interested':
-                        $tracking = ' <span class="badge bg-danger">Not Interested</span>';
+                        $tracking = ' <span class="badge bg-secondary">Not Interested</span>';
                         break;
                     default:
                         $tracking = ucfirst($firstLog->status);

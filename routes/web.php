@@ -86,6 +86,8 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/reports/campaign', [ReportController::class, 'index'])->name('report.campaign');
     Route::post('/reports/campaign-data', [ReportController::class, 'getCampaignLogsData'])->name('report.campaign.data');
 
+    Route::get('/report/campaign/export-csv', [ReportController::class, 'exportCsv'])->name('report.campaign.export.csv');
+
     // Check admin updates (polling)
     Route::get('check-admin-updates', [MasterController::class, 'checkAdminUpdates'])->name('check-admin-sequences-updates');
     Route::get('/user/sequences', [MasterController::class, 'getUserSequences']);
