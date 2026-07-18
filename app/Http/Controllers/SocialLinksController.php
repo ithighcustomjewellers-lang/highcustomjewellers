@@ -71,9 +71,6 @@ class SocialLinksController extends Controller
             // Merge: Admin quick links (except WhatsApp) + User quick links
             unset($adminQuickLinks['whatsapp_url']);
             $quickLinks = array_merge($adminQuickLinks, $userQuickLinks);
-
-            // IMPORTANT: Users should NOT see admin's custom links
-            // We only show predefined platforms + user's own custom links
         }
 
         // Get profile slug
@@ -278,9 +275,7 @@ class SocialLinksController extends Controller
     // }
 
 
-    /**
- * UPI ID को Deep Link में बदलें (सिर्फ UPI प्लेटफॉर्म के लिए)
- */
+
 private function convertUpiToDeepLink($platformName, $platformUrl, $merchantName = 'Merchant')
     {
         $upiPlatforms = ['upi', 'googlepay', 'phonepe', 'paytm'];

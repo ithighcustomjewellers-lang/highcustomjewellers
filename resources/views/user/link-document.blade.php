@@ -471,7 +471,6 @@
                 }
             });
 
-            // Form submit (पहले जैसा ही)
             $('#businessForm').submit(function(e) {
                 e.preventDefault();
                 $('.text-danger').text('');

@@ -118,9 +118,7 @@
     }
 </style>
 
-{{-- problem a hai ki dashboard me date ka filter add kiya hua hai
-for example mene sent mail 09/07/2026 kiya tha or mene filter kiya 10/07/2026 means today ok, so aaj se recode me 0 aayenga but
-fir mene sent pe click kiya so wo purana means 09/07/2026 ka mail show hua to a problem kaise solve kare  --}}
+
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -182,9 +180,6 @@ fir mene sent pe click kiya so wo purana means 09/07/2026 ka mail show hua to a 
         </div>
     </div>
     <div class="row g-4">
-
-
-
         <div class="dashboard-stats">
             {{-- Total Mail --}}
             <a href="{{ route('report.campaign', [
@@ -367,6 +362,23 @@ fir mene sent pe click kiya so wo purana means 09/07/2026 ka mail show hua to a 
                 </div>
             </a>
 
+
+            <a href="{{ route('dashboard.total.leads.list') }}" class="text-decoration-none text-dark">
+                <div class="card dashboard-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="card-info">
+                            <div>
+                                <h6 class="text-danger">Total Leads</h6>
+                                <h2>{{ number_format($stats['total_leads']) }}</h2>
+                                <small>Total leads</small>
+                            </div>
+                            <div class="dashboard-icon bg-not-interest">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
         </div>
 
         <div class="row mt-4">

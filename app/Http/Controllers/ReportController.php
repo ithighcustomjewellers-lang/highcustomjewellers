@@ -16,12 +16,17 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
+
         $status = $request->status;
+        $filter = $request->filter;
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+        $from = $request->from;
 
         if (Auth::user()->is_admin == 1) {
             return view('admin.reports.campaign');
         }
-        return view('reports.campaign', compact('status'));
+        return view('reports.campaign', compact('status','filter', 'start_date', 'end_date', 'from'));
     }
 
 
@@ -163,6 +168,8 @@ class ReportController extends Controller
 
     public function getCampaignLogsData(Request $request)
     {
+
+
         $columns = [
             0 => 'campaign_logs.id',
             1 => 'lead_name',
@@ -197,48 +204,102 @@ class ReportController extends Controller
    // Decide which date column to use based on status
 if ($request->from == 'dashboard') {
 
-        $filter = $request->filter ?? 'today';
+    $filter = $request->filter ?? 'today';
 
-        // Change this column if you want to filter by sent_at or scheduled_at
-        $dateColumn = 'campaign_logs.created_at';
+    /*
+    |--------------------------------------------------------------------------
+    | Select Date Column According To Dashboard Card
+    |--------------------------------------------------------------------------
+    */
 
+    switch ($request->status) {
 
+        case 'pending':
+            $dateColumn = 'campaign_logs.scheduled_at';
+            break;
 
-        switch ($filter) {
+        case 'send':
+            $dateColumn = 'campaign_logs.sent_at';
+            break;
 
-            case 'today':
-                $query->whereDate($dateColumn, Carbon::today());
-                break;
+        case 'seen':
+            $dateColumn = 'campaign_logs.seen_at';
+            break;
 
-            case 'weekly':
-                $query->whereBetween($dateColumn, [
-                    Carbon::now()->startOfWeek(),
-                    Carbon::now()->endOfWeek()
-                ]);
-                break;
+        case 'failed':
+            $dateColumn = 'campaign_logs.updated_at';
+            break;
 
-            case 'monthly':
-                $query->whereMonth($dateColumn, Carbon::now()->month)
-                      ->whereYear($dateColumn, Carbon::now()->year);
-                break;
+        case 'interested':
+            $dateColumn = 'campaign_logs.updated_at';
+            break;
 
-            case 'yearly':
-                $query->whereYear($dateColumn, Carbon::now()->year);
-                break;
+        case 'not_interested':
+            $dateColumn = 'campaign_logs.updated_at';
+            break;
 
-            case 'custom':
-
-                if ($request->filled('start_date') && $request->filled('end_date')) {
-
-                    $query->whereBetween($dateColumn, [
-                        Carbon::parse($request->start_date)->startOfDay(),
-                        Carbon::parse($request->end_date)->endOfDay(),
-                    ]);
-                }
-
-                break;
-        }
+        default:
+            $dateColumn = 'campaign_logs.created_at';
+            break;
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Apply Date Filter
+    |--------------------------------------------------------------------------
+    */
+
+    switch ($filter) {
+
+        case 'today':
+
+            $query->whereBetween($dateColumn, [
+                Carbon::today()->startOfDay(),
+                Carbon::today()->endOfDay()
+            ]);
+
+            break;
+
+        case 'weekly':
+
+            $query->whereBetween($dateColumn, [
+                Carbon::now()->startOfWeek(),
+                Carbon::now()->endOfWeek()
+            ]);
+
+            break;
+
+        case 'monthly':
+
+            $query->whereBetween($dateColumn, [
+                Carbon::now()->startOfMonth(),
+                Carbon::now()->endOfMonth()
+            ]);
+
+            break;
+
+        case 'yearly':
+
+            $query->whereBetween($dateColumn, [
+                Carbon::now()->startOfYear(),
+                Carbon::now()->endOfYear()
+            ]);
+
+            break;
+
+        case 'custom':
+
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+
+                $query->whereBetween($dateColumn, [
+                    Carbon::parse($request->start_date)->startOfDay(),
+                    Carbon::parse($request->end_date)->endOfDay(),
+                ]);
+            }
+
+            break;
+    }
+}
         /*
     |--------------------------------------------------------------------------
     | Status Filter

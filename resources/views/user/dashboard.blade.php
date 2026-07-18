@@ -429,6 +429,32 @@
                     <span class="menu-text">Leads</span>
                 </a>
             </li>
+
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('privacyPolicy') ? 'active' : '' }}"
+                    href="{{ route('privacyPolicy') }}">
+                    <i class="fas fa-shield-alt"></i>
+                    <span class="menu-text">Privacy Policy</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('terms') ? 'active' : '' }}"
+                    href="{{ route('terms') }}">
+                    <i class="fas fa-file-contract"></i>
+                    <span class="menu-text">Terms & Conditions</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('landingPage') ? 'active' : '' }}"
+                    href="{{ route('landingPage') }}">
+                    <i class="fas fa-home"></i>
+                    <span class="menu-text">Landing Page</span>
+                </a>
+            </li>
+
         </ul>
     </aside>
 
@@ -460,15 +486,19 @@
                         </a>
                     </li>
                      <li>
-                        @if(!auth()->user()->gmail_token)
-                            <a href="{{ url('connect-gmail') }}" class="gmail-connect-btn">
-                                <i class="fas fa-envelope me-2"></i>Connect Gmail
-                            </a>
-                        @else
-                            <span class="gmail-connected">
-                                <i class="fas fa-envelope me-2"></i>Gmail Connected
-                            </span>
-                        @endif
+                        <a href="{{ url('connect-gmail') }}" class="gmail-connect-btn">
+                            <i class="fas fa-envelope me-2"></i>Connect Gmail
+                        </a>
+
+                         <!--@if(!auth()->user()->gmail_token)-->
+                        <!--    <a href="{{ url('connect-gmail') }}" class="gmail-connect-btn">-->
+                        <!--        <i class="fas fa-envelope me-2"></i>Connect Gmail-->
+                        <!--    </a>-->
+                        <!--@else-->
+                        <!--    <span class="gmail-connected">-->
+                        <!--        <i class="fas fa-envelope me-2"></i>Gmail Connected-->
+                        <!--    </span>-->
+                        <!--@endif-->
                     </li>
                     <li>
                         <hr class="dropdown-divider">

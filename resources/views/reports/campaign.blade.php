@@ -173,6 +173,7 @@ $(document).ready(function () {
                 d.filter = "{{ request('filter','today') }}";
                 d.start_date = "{{ request('start_date') }}";
                 d.end_date = "{{ request('end_date') }}";
+                d._ = Date.now();
             }
         },
 

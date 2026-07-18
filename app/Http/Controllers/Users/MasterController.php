@@ -206,8 +206,6 @@ class MasterController extends Controller
 
     public function sequencesStore(Request $request)
     {
-
-
         Log::info('Store sequence request received', [
             'data' => $request->all()
         ]);
@@ -638,6 +636,8 @@ class MasterController extends Controller
     public function sequencesListUpdate(Request $request, $id)
     {
         $userId = Auth::id();
+        $senderIp = $request->ip();
+
         DB::beginTransaction();
         try {
             $sequence = Sequence::where('id', $id)
@@ -686,32 +686,6 @@ class MasterController extends Controller
                 ], 422);
             }
 
-            //  $actionLinks = [];
-            // $exists = [];
-
-            // foreach ($request->action_links as $link) {
-
-            //     if (empty($link['platform_url'])) {
-            //         continue;
-            //     }
-
-            //     $id = $link['id'] ?? null;
-
-            //     if ($id && isset($exists[$id])) {
-            //         continue;
-            //     }
-
-            //     if ($id) {
-            //         $exists[$id] = true;
-            //     }
-
-            //     $actionLinks[] = [
-            //         'id' => $id,
-            //         'platform_name' => $link['platform_name'] ?? '',
-            //         'platform_url' => trim($link['platform_url']),
-            //     ];
-            // }
-
             $actionLinks = [];
             if ($request->filled('action_links')) {
                 foreach ($request->action_links as $link) {
@@ -726,17 +700,34 @@ class MasterController extends Controller
             }
             $validated['action_links'] = $actionLinks;
 
-            // Handle files...
+
+            // ========== HERO IMAGE ==========
             if ($request->hasFile('hero_image')) {
+                // Validate and upload new hero image
                 $request->validate(['hero_image' => 'image|mimes:jpeg,png,jpg,gif|max:2048']);
                 $file = $request->file('hero_image');
                 $filename = time() . '_hero_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $destination = public_path('hero_image');
                 if (!file_exists($destination)) mkdir($destination, 0777, true);
                 $file->move($destination, $filename);
+
+                // Delete old hero image if exists
+                if ($sequence->hero_image && file_exists(public_path($sequence->hero_image))) {
+                    unlink(public_path($sequence->hero_image));
+                }
+
                 $validated['hero_image'] = 'hero_image/' . $filename;
             } else {
-                $validated['hero_image'] = $sequence->hero_image;
+                // Check if removal flag is set
+                if ($request->input('remove_hero_image') == 1) {
+                    // Delete old file if exists
+                    if ($sequence->hero_image && file_exists(public_path($sequence->hero_image))) {
+                        unlink(public_path($sequence->hero_image));
+                    }
+                    $validated['hero_image'] = null;
+                } else {
+                    $validated['hero_image'] = $sequence->hero_image;
+                }
             }
 
             if ($request->hasFile('attachments_image')) {
@@ -758,6 +749,9 @@ class MasterController extends Controller
                 $validated['attachment_size'] = $sequence->attachment_size;
             }
 
+
+
+            // ========== COMPANY LOGO ==========
             if ($request->hasFile('company_logo')) {
                 $request->validate(['company_logo' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048']);
                 $file = $request->file('company_logo');
@@ -765,9 +759,19 @@ class MasterController extends Controller
                 $destination = public_path('uploads/company_logo');
                 if (!file_exists($destination)) mkdir($destination, 0777, true);
                 $file->move($destination, $filename);
+
+                // Delete old logo if exists
+                if ($sequence->existing_company_logo && file_exists(public_path($sequence->existing_company_logo))) {
+                    unlink(public_path($sequence->existing_company_logo));
+                }
+
                 $validated['existing_company_logo'] = 'uploads/company_logo/' . $filename;
             } else {
                 if ($request->input('remove_logo') == 1) {
+                    // Delete old file if exists
+                    if ($sequence->existing_company_logo && file_exists(public_path($sequence->existing_company_logo))) {
+                        unlink(public_path($sequence->existing_company_logo));
+                    }
                     $validated['existing_company_logo'] = null;
                 } else {
                     $validated['existing_company_logo'] = $sequence->existing_company_logo;
@@ -853,6 +857,7 @@ class MasterController extends Controller
                         'sequence_id'  => $sequence->id,
                         'status'       => 'pending',
                         'scheduled_at' => $finalDelay,
+                        'sender_ip'      => $senderIp,
                     ]);
                 }
 
@@ -865,7 +870,8 @@ class MasterController extends Controller
                 SendCampaignJob::dispatch(
                     $lead->id,
                     $sequence->id,
-                    $userId
+                    $userId,
+                    $senderIp
                 )->delay($finalDelay);
             }
 

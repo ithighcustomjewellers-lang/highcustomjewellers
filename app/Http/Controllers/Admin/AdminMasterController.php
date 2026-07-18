@@ -365,6 +365,8 @@ class AdminMasterController extends Controller
     public function userMasterSequencesListUpdate(Request $request, $id)
     {
         DB::beginTransaction();
+
+        $senderIp = $request->ip();
         try {
             $sequence = Sequence::where('id', $id)->firstOrFail();
             $userId = $sequence->user_id;
@@ -506,9 +508,10 @@ class AdminMasterController extends Controller
                     'sequence_id' => $sequence->id,
                     'status' => 'pending',
                     'scheduled_at' => $finalDelay,
+                    'sender_ip'    => $senderIp,
                 ]);
 
-                SendCampaignJob::dispatch($lead->id, $sequence->id, $userId)->delay($finalDelay);
+                SendCampaignJob::dispatch($lead->id, $sequence->id, $userId, $senderIp)->delay($finalDelay);
             }
 
             DB::commit();
@@ -603,6 +606,7 @@ class AdminMasterController extends Controller
        Log::info('Store sequence request received', [
             'data' => $request->all()
         ]);
+        $senderIp = $request->ip();
         $userId = Auth::id();
         // =========================
         // ✅ VALIDATION
@@ -778,6 +782,7 @@ class AdminMasterController extends Controller
                     'sequence_id' => $sequence->id,
                     'status' => 'pending',
                     'scheduled_at' => $finalDelay,
+                    'sender_ip'    => $senderIp,
                 ]);
 
                 // =========================
@@ -786,7 +791,8 @@ class AdminMasterController extends Controller
                 SendCampaignJob::dispatch(
                     $lead->id,
                     $sequence->id,
-                    $userId
+                    $userId,
+                    $senderIp
                 )->delay($finalDelay);
             }
 

@@ -61,10 +61,15 @@
                                         <input type="file" name="company_logo" id="companyLogoInput" class="form-control" accept="image/*">
                                         <input type="hidden" name="existing_company_logo" id="existingCompanyLogo" value="{{ $sequence->existing_company_logo }}">
                                         <input type="hidden" name="image_type" id="imageType" value="{{ $sequence->image_type ?? 'logo' }}">
+                                        <!-- NEW: hidden flag for removal -->
+                                        <input type="hidden" name="remove_logo" id="removeLogo" value="0">
                                     </div>
                                     <div class="col-md-5">
                                         <div id="companyLogoPreview" class="mt-2" style="{{ $sequence->existing_company_logo ? 'display:block' : 'display:none' }}">
                                             <img id="companyLogoPreviewImg" class="img-fluid rounded-3 border" style="max-height: 60px" src="{{ $sequence->existing_company_logo ? asset($sequence->existing_company_logo) : '' }}">
+                                            <!-- NEW: Remove button -->
+                                            {{-- <button type="button" class="btn btn-sm btn-danger ms-2" onclick="removeLogo()">Remove</button> --}}
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" id="removeLogoBtn">Remove</button>
                                         </div>
                                         <label class="form-label fw-semibold">Logo Position</label>
                                         <select name="logo_position" id="logoPosition" class="form-select">
@@ -82,19 +87,20 @@
                             <label class="form-label fw-semibold small text-uppercase text-muted">Hero Image (Top Banner)</label>
                             <div class="border rounded-3 p-3 bg-light">
                                 <input type="file" name="hero_image" id="heroImage" class="form-control" accept="image/*" onchange="previewHeroImage(this)">
-                                @if($sequence->hero_image)
-                                    <div id="heroImagePreview" class="mt-2" style="display:block;">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <img id="heroImagePreviewImg" class="rounded-3 border" style="max-width: 80px; max-height: 80px;" src="{{ asset($sequence->hero_image) }}">
-                                        </div>
+                                <input type="hidden" name="remove_hero_image" id="removeHeroImage" value="0">
+
+                                <!-- Preview container – always present -->
+                                <div id="heroImagePreview" class="mt-2" style="{{ $sequence->hero_image ? 'display:block' : 'display:none' }}">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img id="heroImagePreviewImg" class="rounded-3 border" style="max-width: 80px; max-height: 80px;"
+                                            src="{{ $sequence->hero_image ? asset($sequence->hero_image) : '' }}">
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" id="removeHeroImageBtn">Remove</button>
                                     </div>
-                                @else
-                                    <div id="heroImagePreview" class="mt-2" style="display:none;"></div>
-                                @endif
+                                </div>
+
                                 <small class="text-muted">Recommended: 1200 x 400px. Max 2MB</small>
                             </div>
                         </div>
-
                         <!-- WYSIWYG Toolbar -->
                         <label class="form-label fw-semibold small text-uppercase text-muted">Email Content</label>
                         <div class="toolbar mb-2 p-2 bg-white rounded-3 border d-flex flex-wrap gap-1 align-items-center">
@@ -339,6 +345,23 @@
     let selectedActionLinks = [];
     // Bootstrap modal instance
     let businessLinkModal = null;
+
+
+    $('#removeLogoBtn').on('click', function() {
+        document.getElementById('removeLogo').value = '1';
+        document.getElementById('companyLogoInput').value = '';
+        $('#companyLogoPreview').hide();
+        currentCompanyLogo = null;
+        updatePreview();
+    });
+
+    $('#removeHeroImageBtn').on('click', function() {
+        document.getElementById('removeHeroImage').value = '1';
+        document.getElementById('heroImage').value = '';
+        $('#heroImagePreview').hide();
+        currentHeroImage = null;
+        updatePreview();
+    });
 
     // ============================================================
     // INITIALIZATION - LOAD EXISTING SEQUENCE LINKS

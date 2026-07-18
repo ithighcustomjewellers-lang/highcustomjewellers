@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AnalyticsTracking;
 use App\Models\CampaignLog;
 use App\Models\EmailLinkClick;
+use App\Models\Lead;
 use App\Models\MultiQrLink;
 use App\Models\UserSetting;
 use Carbon\Carbon;
@@ -32,7 +33,6 @@ class DashboardController extends Controller
         $to = null;
 
         switch ($filter) {
-
             case 'today':
                 $from = Carbon::today()->startOfDay();
                 $to   = Carbon::today()->endOfDay();
@@ -54,9 +54,7 @@ class DashboardController extends Controller
                 break;
 
             case 'custom':
-
                 if ($request->filled('start_date') && $request->filled('end_date')) {
-
                     $from = Carbon::parse($request->start_date)->startOfDay();
                     $to   = Carbon::parse($request->end_date)->endOfDay();
                 }
@@ -111,37 +109,110 @@ class DashboardController extends Controller
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | Dashboard Stats
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Dashboard Stats
+        |--------------------------------------------------------------------------
+        */
 
         $stats = [
-            'total_mail' => (clone $campaignQuery)->count(),
 
-            'pending' => (clone $campaignQuery)
+            'total_leads' => Lead::where('user_id', $user->id)->count(),
+
+            /*
+        |--------------------------------------------------------------------------
+        | Total Created
+        |--------------------------------------------------------------------------
+        */
+
+            'total_mail' => CampaignLog::where('user_id', $user->id)
+                ->when($from && $to, function ($q) use ($from, $to) {
+                    $q->whereBetween('created_at', [$from, $to]);
+                })
+                ->count(),
+
+            /*
+        |--------------------------------------------------------------------------
+        | Pending
+        |--------------------------------------------------------------------------
+        */
+
+            'pending' => CampaignLog::where('user_id', $user->id)
                 ->where('status', 'pending')
+                ->when($from && $to, function ($q) use ($from, $to) {
+                    $q->whereBetween('scheduled_at', [$from, $to]);
+                })
                 ->count(),
 
-            'sent' => (clone $campaignQuery)
+            /*
+        |--------------------------------------------------------------------------
+        | Sent
+        |--------------------------------------------------------------------------
+        */
+
+            'sent' => CampaignLog::where('user_id', $user->id)
                 ->where('status', 'send')
+                ->when($from && $to, function ($q) use ($from, $to) {
+                    $q->whereBetween('sent_at', [$from, $to]);
+                })
                 ->count(),
 
-            'seen' => (clone $campaignQuery)
+            /*
+        |--------------------------------------------------------------------------
+        | Seen
+        |--------------------------------------------------------------------------
+        */
+
+            'seen' => CampaignLog::where('user_id', $user->id)
                 ->where('status', 'seen')
+                ->when($from && $to, function ($q) use ($from, $to) {
+                    $q->whereBetween('seen_at', [$from, $to]);
+                })
                 ->count(),
 
-            'fail' => (clone $campaignQuery)
+            /*
+        |--------------------------------------------------------------------------
+        | Failed
+        |--------------------------------------------------------------------------
+        */
+
+            'fail' => CampaignLog::where('user_id', $user->id)
                 ->where('status', 'failed')
+                ->when($from && $to, function ($q) use ($from, $to) {
+                    $q->whereBetween('updated_at', [$from, $to]);
+                })
                 ->count(),
 
-            'interested' => (clone $campaignQuery)
+            /*
+        |--------------------------------------------------------------------------
+        | Interested
+        |--------------------------------------------------------------------------
+        */
+
+            'interested' => CampaignLog::where('user_id', $user->id)
                 ->where('status', 'interested')
+                ->when($from && $to, function ($q) use ($from, $to) {
+                    $q->whereBetween('updated_at', [$from, $to]);
+                })
                 ->count(),
 
-            'not_interested' => (clone $campaignQuery)
-                ->where('status', 'not_interested')
+            /*
+        |--------------------------------------------------------------------------
+        | Not Interested
+        |--------------------------------------------------------------------------
+        */
+
+            'not_interested' => CampaignLog::where('user_id', $user->id)
+                ->whereIn('status', ['not_interested', 'Not Interested'])
+                ->when($from && $to, function ($q) use ($from, $to) {
+                    $q->whereBetween('updated_at', [$from, $to]);
+                })
                 ->count(),
+
+            /*
+        |--------------------------------------------------------------------------
+        | QR Stats
+        |--------------------------------------------------------------------------
+        */
 
             'qr_scans' => (clone $analyticsQuery)
                 ->where('event_type', 'qr_scan')
@@ -151,6 +222,7 @@ class DashboardController extends Controller
                 ->where('event_type', 'button_click')
                 ->count(),
         ];
+
         return view('user.main-dashboard', compact('stats', 'filter', 'from', 'to'));
     }
 
@@ -214,53 +286,120 @@ class DashboardController extends Controller
 
             case 'today':
                 $from = Carbon::today()->startOfDay();
-                $to = Carbon::today()->endOfDay();
+                $to   = Carbon::today()->endOfDay();
                 break;
 
             case 'weekly':
                 $from = Carbon::now()->startOfWeek();
-                $to = Carbon::now()->endOfWeek();
+                $to   = Carbon::now()->endOfWeek();
                 break;
 
             case 'monthly':
                 $from = Carbon::now()->startOfMonth();
-                $to = Carbon::now()->endOfMonth();
+                $to   = Carbon::now()->endOfMonth();
                 break;
 
             case 'yearly':
                 $from = Carbon::now()->startOfYear();
-                $to = Carbon::now()->endOfYear();
+                $to   = Carbon::now()->endOfYear();
                 break;
 
             case 'custom':
                 if ($request->filled('start_date') && $request->filled('end_date')) {
                     $from = Carbon::parse($request->start_date)->startOfDay();
-                    $to = Carbon::parse($request->end_date)->endOfDay();
+                    $to   = Carbon::parse($request->end_date)->endOfDay();
                 }
                 break;
         }
 
-        $query = CampaignLog::where('user_id', $userId);
+        /*
+    |--------------------------------------------------------------------------
+    | Pending (scheduled_at)
+    |--------------------------------------------------------------------------
+    */
 
-        if ($from && $to) {
-            $query->whereBetween('created_at', [$from, $to]);
-        }
+        $pending = CampaignLog::where('user_id', $userId)
+            ->where('status', 'pending')
+            ->when($from && $to, function ($q) use ($from, $to) {
+                $q->whereBetween('scheduled_at', [$from, $to]);
+            })
+            ->count();
 
-        $pending = (clone $query)->where('status', 'pending')->count();
-        $sent = (clone $query)->where('status', 'send')->count();
-        $seen = (clone $query)->where('status', 'seen')->count();
-        $fail = (clone $query)->where('status', 'failed')->count();
-        $interested = (clone $query)->where('status', 'interested')->count();
-        $notInterested = (clone $query)->where('status', 'not_interested')->count();
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Sent (sent_at)
+    |--------------------------------------------------------------------------
+    */
+
+        $sent = CampaignLog::where('user_id', $userId)
+            ->where('status', 'send')
+            ->when($from && $to, function ($q) use ($from, $to) {
+                $q->whereBetween('sent_at', [$from, $to]);
+            })
+            ->count();
+
+        /*
+    |--------------------------------------------------------------------------
+    | Seen (seen_at)
+    |--------------------------------------------------------------------------
+    */
+
+        $seen = CampaignLog::where('user_id', $userId)
+            ->where('status', 'seen')
+            ->when($from && $to, function ($q) use ($from, $to) {
+                $q->whereBetween('seen_at', [$from, $to]);
+            })
+            ->count();
+
+        /*
+    |--------------------------------------------------------------------------
+    | Failed (sent_at)
+    |--------------------------------------------------------------------------
+    */
+
+        $fail = CampaignLog::where('user_id', $userId)
+            ->where('status', 'failed')
+            ->when($from && $to, function ($q) use ($from, $to) {
+                $q->whereBetween('sent_at', [$from, $to]);
+            })
+            ->count();
+        /*
+
+    |--------------------------------------------------------------------------
+    | Interested (updated_at)
+    |--------------------------------------------------------------------------
+    */
+
+        $interested = CampaignLog::where('user_id', $userId)
+            ->where('status', 'interested')
+            ->when($from && $to, function ($q) use ($from, $to) {
+                $q->whereBetween('updated_at', [$from, $to]);
+            })
+            ->count();
+
+        /*
+    |--------------------------------------------------------------------------
+    | Not Interested (updated_at)
+    |--------------------------------------------------------------------------
+    */
+
+        $notInterested = CampaignLog::where('user_id', $userId)
+            ->whereIn('status', ['not_interested', 'Not Interested'])
+            ->when($from && $to, function ($q) use ($from, $to) {
+                $q->whereBetween('updated_at', [$from, $to]);
+            })
+            ->count();
 
         return response()->json([
-            'pending' => $pending,
-            'sent' => $sent,
-            'seen' => $seen,
-            'fail' => $fail,
-            'interested' => $interested,
-            'not_interested' => $notInterested,
-            'total_mail' => $pending + $sent + $seen + $fail + $interested + $notInterested
+            'pending'         => $pending,
+            'sent'            => $sent,
+            'seen'            => $seen,
+            'fail'            => $fail,
+            'interested'      => $interested,
+            'not_interested'  => $notInterested,
+            'total_mail'      => $pending + $sent + $seen + $fail + $interested + $notInterested,
         ]);
     }
 
@@ -455,4 +594,75 @@ class DashboardController extends Controller
     //         'total' => (int)array_sum($data)
     //     ]);
     // }
+
+
+    public function dashboardTotalLeadsList()
+    {
+        return view('user.Leads.total-leads');
+    }
+
+    public function totalLeadsDataList(Request $request)
+    {
+        $columns = [
+            0 => 'email',
+            1 => 'name',
+            2 => 'lastname',
+            3 => 'company_name',
+            4 => 'type',
+            5 => 'created_at',
+            6 => 'updated_at',
+        ];
+
+        $query = Lead::where('user_id', Auth::id());
+
+        $totalData = $query->count();
+
+        if ($request->filled('search.value')) {
+
+            $search = $request->search['value'];
+
+            $query->where(function ($q) use ($search) {
+
+                $q->where('email', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%")
+                    ->orWhere('lastname', 'like', "%{$search}%")
+                    ->orWhere('company_name', 'like', "%{$search}%")
+                    ->orWhere('type', 'like', "%{$search}%");
+            });
+        }
+
+        $totalFiltered = $query->count();
+
+        $orderColumn = $columns[$request->input('order.0.column', 0)];
+        $orderDir = $request->input('order.0.dir', 'desc');
+
+        $query->orderBy($orderColumn, $orderDir);
+
+        $leads = $query
+            ->skip($request->start)
+            ->take($request->length)
+            ->get();
+
+        $data = [];
+
+        foreach ($leads as $lead) {
+
+            $data[] = [
+                'email'        => $lead->email,
+                'name'         => $lead->name,
+                'lastname'     => $lead->lastname,
+                'company_name' => $lead->company_name,
+                'type'         => $lead->type,
+                'created_at'   => $lead->created_at->format('d-m-Y H:i'),
+                'updated_at'   => $lead->updated_at->format('d-m-Y H:i'),
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $totalData,
+            'recordsFiltered' => $totalFiltered,
+            'data' => $data
+        ]);
+    }
 }

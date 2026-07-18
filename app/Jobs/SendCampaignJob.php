@@ -30,15 +30,17 @@ class SendCampaignJob implements ShouldQueue
     protected $leadId;
     protected $sequenceId;
     protected $userId;
+    protected $senderIp;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(int $leadId, int $sequenceId, int $userId)
+    public function __construct(int $leadId, int $sequenceId, int $userId, string $senderIp)
     {
         $this->leadId = $leadId;
         $this->sequenceId = $sequenceId;
         $this->userId = $userId;
+        $this->senderIp = $senderIp;
     }
 
     /**
@@ -66,6 +68,10 @@ class SendCampaignJob implements ShouldQueue
 
         if (!$campaignLog) {
             return;
+        }
+
+        if (is_null($campaignLog->sender_ip)) {
+            $campaignLog->update(['sender_ip' => $this->senderIp]);
         }
 
         // Replace variables
@@ -125,7 +131,6 @@ class SendCampaignJob implements ShouldQueue
                 'status'  => 'send',
                 'sent_at' => now()
             ]);
-
         } catch (\Exception $e) {
             $campaignLog->update([
                 'status' => 'failed'
@@ -185,37 +190,36 @@ class SendCampaignJob implements ShouldQueue
         }
 
         // Create tracking records and replace URLs
-         foreach ($urlsToTrack as $item) {
-        try {
-            // ✅ Jab email send hota hai tab sirf record create hota hai
-            // click_count = 0, clicked_at = NULL (kyuki click abhi hua nahi)
-            $click = EmailLinkClick::create([
-                'campaign_log_id' => $campaignLog->id,
-                'lead_id' => $lead->id,
-                'user_id' => $this->userId,
-                'sequence_id' => $sequence->id,
-                'platform_name' => $item['platform'],
-                'destination_url' => $item['url'],
-                'click_token' => Str::random(64),
-                'click_count' => 0,        // ✅ Initially 0
-                'clicked_at' => null       // ✅ Initially null (click nahi hua)
-            ]);
+        foreach ($urlsToTrack as $item) {
+            try {
+                // ✅ Jab email send hota hai tab sirf record create hota hai
+                // click_count = 0, clicked_at = NULL (kyuki click abhi hua nahi)
+                $click = EmailLinkClick::create([
+                    'campaign_log_id' => $campaignLog->id,
+                    'lead_id' => $lead->id,
+                    'user_id' => $this->userId,
+                    'sequence_id' => $sequence->id,
+                    'platform_name' => $item['platform'],
+                    'destination_url' => $item['url'],
+                    'click_token' => Str::random(64),
+                    'click_count' => 0,        // ✅ Initially 0
+                    'clicked_at' => null       // ✅ Initially null (click nahi hua)
+                ]);
 
-            // Generate tracking URL
-            $trackingUrl = route('track.click', $click->click_token);
+                // Generate tracking URL
+                $trackingUrl = route('track.click', $click->click_token);
 
-            // Replace original URL with tracking URL
-            $html = str_replace($item['url'], $trackingUrl, $html);
-
-        } catch (\Exception $e) {
-            Log::error('❌ Failed to create tracking link', [
-                'error' => $e->getMessage(),
-                'url' => $item['url']
-            ]);
+                // Replace original URL with tracking URL
+                $html = str_replace($item['url'], $trackingUrl, $html);
+            } catch (\Exception $e) {
+                Log::error('❌ Failed to create tracking link', [
+                    'error' => $e->getMessage(),
+                    'url' => $item['url']
+                ]);
+            }
         }
-    }
 
-    return $html;
+        return $html;
     }
 
     /**
@@ -269,31 +273,78 @@ class SendCampaignJob implements ShouldQueue
     private function sendViaGmailAPI($user, string $to, string $subject, string $html, $sequence): void
     {
         $client = new Google_Client();
+
         $client->setClientId(config('services.google.client_id'));
         $client->setClientSecret(config('services.google.client_secret'));
 
+        // Load current token
         $client->setAccessToken([
             'access_token'  => $user->gmail_token,
             'refresh_token' => $user->gmail_refresh_token,
         ]);
 
+        /*
+    |--------------------------------------------------------------------------
+    | Refresh Token Automatically
+    |--------------------------------------------------------------------------
+    */
+
         if ($client->isAccessTokenExpired()) {
-            if (!$user->gmail_refresh_token) {
-                throw new \Exception("No refresh token available.");
-            }
 
-            $newToken = $client->fetchAccessTokenWithRefreshToken($user->gmail_refresh_token);
+            if (!$user->gmail_token_expires_at || now()->greaterThanOrEqualTo($user->gmail_token_expires_at)) {
 
-            if (isset($newToken['access_token'])) {
+                if (empty($user->gmail_refresh_token)) {
+                    throw new \Exception('No Gmail refresh token found. Please reconnect Gmail.');
+                }
+
+                $newToken = $client->fetchAccessTokenWithRefreshToken(
+                    $user->gmail_refresh_token
+                );
+
+                if (isset($newToken['error'])) {
+                    throw new \Exception(
+                        $newToken['error_description']
+                            ?? 'Unable to refresh Gmail token.'
+                    );
+                }
+
+                if (!isset($newToken['access_token'])) {
+                    throw new \Exception('Failed to refresh Gmail access token.');
+                }
+
+                // Save new Access Token
                 $user->gmail_token = $newToken['access_token'];
+
+                // Google normally doesn't send refresh token again
+                if (!empty($newToken['refresh_token'])) {
+                    $user->gmail_refresh_token = $newToken['refresh_token'];
+                }
+
+                // Save expiry time
+                if (!empty($newToken['expires_in'])) {
+                    $user->gmail_token_expires_at = now()->addSeconds(
+                        $newToken['expires_in']
+                    );
+                }
+
                 $user->save();
-                $client->setAccessToken($newToken);
-            } else {
-                throw new \Exception("Failed to refresh Gmail token.");
+
+                // Reload new token into Google Client
+                $client->setAccessToken([
+                    'access_token'  => $user->gmail_token,
+                    'refresh_token' => $user->gmail_refresh_token,
+                ]);
             }
         }
 
+        /*
+    |--------------------------------------------------------------------------
+    | Gmail Service
+    |--------------------------------------------------------------------------
+    */
+
         $service = new Google_Service_Gmail($client);
+
         $boundary = uniqid(rand(), true);
 
         $rawMessage = "MIME-Version: 1.0\r\n";
@@ -301,50 +352,79 @@ class SendCampaignJob implements ShouldQueue
         $rawMessage .= "Subject: {$subject}\r\n";
         $rawMessage .= "Content-Type: multipart/mixed; boundary=\"{$boundary}\"\r\n\r\n";
 
-        // HTML BODY
+        /*
+    |--------------------------------------------------------------------------
+    | HTML BODY
+    |--------------------------------------------------------------------------
+    */
+
         $rawMessage .= "--{$boundary}\r\n";
         $rawMessage .= "Content-Type: text/html; charset=UTF-8\r\n";
         $rawMessage .= "Content-Transfer-Encoding: base64\r\n\r\n";
         $rawMessage .= chunk_split(base64_encode($html)) . "\r\n";
 
-        $filePath = public_path($sequence->attachments_image);
+        /*
+    |--------------------------------------------------------------------------
+    | Attachment
+    |--------------------------------------------------------------------------
+    */
 
-        Log::info('Attachment Check', [
-            'attachment' => $sequence->attachments_image,
-            'file_path'  => $filePath,
-            'exists'     => file_exists($filePath),
-            'is_file'    => is_file($filePath),
-        ]);
+        if (!empty($sequence->attachments_image)) {
 
-        if (!empty($sequence->attachments_image) && file_exists($filePath) && is_file($filePath)) {
-            Log::info('Attachment Found', ['path' => $filePath]);
+            $filePath = public_path($sequence->attachments_image);
 
-            $fileData = chunk_split(base64_encode(file_get_contents($filePath)));
-            $fileName = $sequence->attachment_name ?: basename($filePath);
-            $mime = mime_content_type($filePath) ?: 'application/octet-stream';
-
-            $rawMessage .= "--{$boundary}\r\n";
-            $rawMessage .= "Content-Type: {$mime}; name=\"{$fileName}\"\r\n";
-            $rawMessage .= "Content-Disposition: attachment; filename=\"{$fileName}\"\r\n";
-            $rawMessage .= "Content-Transfer-Encoding: base64\r\n\r\n";
-            $rawMessage .= $fileData . "\r\n";
-        } else {
-            Log::warning('Attachment file missing', [
+            Log::info('Attachment Check', [
                 'attachment' => $sequence->attachments_image,
-                'file_path'  => $filePath,
+                'path'       => $filePath,
+                'exists'     => file_exists($filePath),
             ]);
+
+            if (file_exists($filePath) && is_file($filePath)) {
+
+                $fileData = chunk_split(base64_encode(file_get_contents($filePath)));
+
+                $fileName = $sequence->attachment_name ?: basename($filePath);
+
+                $mime = mime_content_type($filePath) ?: 'application/octet-stream';
+
+                $rawMessage .= "--{$boundary}\r\n";
+                $rawMessage .= "Content-Type: {$mime}; name=\"{$fileName}\"\r\n";
+                $rawMessage .= "Content-Disposition: attachment; filename=\"{$fileName}\"\r\n";
+                $rawMessage .= "Content-Transfer-Encoding: base64\r\n\r\n";
+                $rawMessage .= $fileData . "\r\n";
+            } else {
+
+                Log::warning('Attachment missing', [
+                    'path' => $filePath
+                ]);
+            }
         }
 
         $rawMessage .= "--{$boundary}--";
 
-        $encodedMessage = rtrim(strtr(base64_encode($rawMessage), '+/', '-_'), '=');
-        $msg = new Google_Service_Gmail_Message();
-        $msg->setRaw($encodedMessage);
+        /*
+    |--------------------------------------------------------------------------
+    | Send Mail
+    |--------------------------------------------------------------------------
+    */
+
+        $encodedMessage = rtrim(
+            strtr(base64_encode($rawMessage), '+/', '-_'),
+            '='
+        );
+
+        $message = new Google_Service_Gmail_Message();
+        $message->setRaw($encodedMessage);
 
         try {
-            $service->users_messages->send('me', $msg);
+
+            $service->users_messages->send('me', $message);
         } catch (\Exception $e) {
-            Log::error("Gmail API send error", ['error' => $e->getMessage()]);
+
+            Log::error('Gmail API Send Error', [
+                'message' => $e->getMessage()
+            ]);
+
             throw $e;
         }
     }

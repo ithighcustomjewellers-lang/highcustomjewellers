@@ -59,6 +59,9 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::post('sequences/store', [MasterController::class, 'sequencesStore'])->name('user-sequences-store');
     Route::post('/sequence/delete', [SocialLinksController::class, 'deleteSequence'])->name('sequence-delete');
 
+    // leads
+    Route::get('dashboard/total-leads', [DashboardController::class, 'dashboardTotalLeadsList'])->name('dashboard.total.leads.list');
+    Route::post('dashboard/total-leads-data-list', [DashboardController::class, 'totalLeadsDataList'])->name('total.leads.data.list');
 
     Route::get('Leads', [LeadsController::class, 'index'])->name('leads-index');
     Route::post('leads/store', [LeadsController::class, 'leadStore'])->name('lead-store');
@@ -171,10 +174,13 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 });
 
 Route::get('lead-response/{log}/{status}',[CampaignController::class, 'leadResponse'])->name('lead-response');
-Route::get('track-open/{logId}', [CampaignController::class, 'trackOpen'])->name('track-open');
-
 Route::get('/profile/{slug}', [ProfileController::class, 'show'])->name('profile.show');
-Route::post('/profile/{slug}/track-click', [ProfileController::class, 'trackClick'])->name('profile.track.click');
+
+// Open tracking – uses tracking_token
+Route::get('track-open/{token}', [CampaignController::class, 'trackOpen'])->name('track-open');
+
+// Click tracking
+Route::get('track-click/{token}', [CampaignController::class, 'trackClick'])->name('track-click');
 
 Route::post('logout', [AuthLoginController::class, 'logout'])
     ->middleware('auth')

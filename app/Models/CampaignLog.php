@@ -12,6 +12,7 @@ class CampaignLog extends Model
             'scheduled_at',
             'sent_at',
             'tracking_token',
+            'open_token',
             'seen_at',
             'ip_address',
             'user_agent'
