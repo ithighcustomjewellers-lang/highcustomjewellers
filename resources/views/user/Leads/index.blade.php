@@ -971,11 +971,9 @@
             formData.append('type', type);
 
             let email = $('#email').val().trim();
-            let name = $('#name').val().trim();
-            let lastname = $('#lastname').val().trim();
 
-            if (!email || !name || !lastname) {
-                toastr.error('All fields are required (Email, First Name, Last Name)');
+            if (!email) {
+                toastr.error('Please Enter Email');
                 return;
             }
 

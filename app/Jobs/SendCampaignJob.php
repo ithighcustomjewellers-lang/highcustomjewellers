@@ -60,23 +60,43 @@ class SendCampaignJob implements ShouldQueue
             return;
         }
 
+        // Find pending CampaignLog for this sequence
         $campaignLog = CampaignLog::where('lead_id', $lead->id)
-            ->where('sequence_id', $sequence->id)
-            ->where('status', 'pending')
-            ->latest()
-            ->first();
+        ->where('sequence_id', $sequence->id)
+        ->where('status', 'pending')
+        ->latest()
+        ->first();
 
         if (!$campaignLog) {
             return;
         }
 
-        if (is_null($campaignLog->sender_ip)) {
-            $campaignLog->update(['sender_ip' => $this->senderIp]);
+        $alreadySent = CampaignLog::where('lead_id', $lead->id)
+            ->where('id', '!=', $campaignLog->id)
+            ->whereIn('status', ['send', 'seen'])
+            ->whereHas('sequence', function ($q) use ($sequence) {
+                $q->where('step', $sequence->step);
+            })
+            ->exists();
+
+        if ($alreadySent) {
+
+            $campaignLog->update([
+                'status' => 'cancelled',
+            ]);
+
+            Log::info('Campaign skipped because another variant was already sent.', [
+                'lead_id' => $lead->id,
+                'step' => $sequence->step,
+                'sequence_id' => $sequence->id,
+            ]);
+
+            return;
         }
 
         // Replace variables
         $variables = [
-            '[Name]' => $lead->name ?? $lead->fullname ?? '',
+            '[Name]' => $lead->name ?? $lead->fullname ?? 'Sir/Madam',
             '[Company Name]' => $lead->company_name ?? '',
         ];
 

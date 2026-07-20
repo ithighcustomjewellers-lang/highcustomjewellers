@@ -25,6 +25,7 @@ class Sequence extends Model
         'attachment_size',
         'whatsapp_link',
         'action_links',
+        'hero_image_link'
     ];
 
     protected $casts = [

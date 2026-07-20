@@ -278,12 +278,7 @@ body{
                 User Master
             </h2>
         </div>
-        {{-- <a href="{{ route('master-view-page') }}" class="btn add-sequence-btn">
-            <i class="fa fa-plus-circle me-2"></i>
-            Add New Sequence
-        </a> --}}
     </div>
-
         <div class="filter-bar">
             <!-- User Name Filter -->
             <div class="filter-group">
@@ -323,292 +318,290 @@ body{
             </div>
         </div>
 
-    <div class="sequence-card">
-        <div class="table-responsive">
-            <table id="userMasterList" class="table align-middle sequence-table">
-                <thead>
-                    <tr>
-                        <th>Edit</th>
-                        <th>Step</th>
-                        <th>Gap Days</th>
-                        <th>Variant</th>
-                        <th>Message</th>
-                        <th>Subject</th>
-                        <th>Type</th>
-                        <th>Whatsapp</th>
-                        <th>User Name</th>
-                        <th>User Email</th>
-                        <th>Created</th>
-                        <th>Updated</th>
-                        <th>Delete</th>
-                    </tr>
-                </thead>
-            </table>
+        <div class="sequence-card">
+            <div class="table-responsive">
+                <table id="userMasterList" class="table align-middle sequence-table">
+                    <thead>
+                        <tr>
+                            <th>Edit</th>
+                            <th>Step</th>
+                            <th>Gap Days</th>
+                            <th>Variant</th>
+                            <th>Message</th>
+                            <th>Subject</th>
+                            <th>Type</th>
+                            <th>Whatsapp</th>
+                            <th>User Name</th>
+                            <th>User Email</th>
+                            <th>Created</th>
+                            <th>Updated</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 @endsection
-
-
 
 <script src="{{ asset('js/jquery.min.js') }}"></script>
 <script>
-$(document).ready(function() {
-    var table = $('#userMasterList').DataTable({
-        processing:true,
-        serverSide:true,
-        responsive:true,
-        ajax:{
-            url:"{{ route('admin-master-data-list') }}",
-            type:'POST',
-            headers:{
-                'X-CSRF-TOKEN':'{{ csrf_token() }}'
-            },
-            data: function(d) {
-                // Add user name and email filters
-                d['user_name'] = $('#user_name_filter').val();
-                d['user_email'] = $('#user_email_filter').val();
-            }
-        },
-        columns:[
-            {
-                data:'edit',
-                name:'edit',
-                orderable:false,
-                searchable:false
-            },
-            {
-                data:'step',
-                name:'step'
-            },
-            {
-                data:'gap_days',
-                name:'gap_days'
-            },
-            {
-                data:'variant',
-                name:'variant'
-            },
-            {
-                data:'message',
-                name:'message'
-            },
-            {
-                data:'subject',
-                name:'subject'
-            },
-            {
-                data:'type',
-                name:'type'
-            },
-            {
-                data:'whatsapp_link',
-                name:'whatsapp_link'
-            },
-            {
-                data:'user_name',
-                name:'user_name'
-            },
-            {
-                data:'user_email',
-                name:'user_email'
-            },
-            {
-                data:'created_at',
-                name:'created_at'
-            },
-            {
-                data:'updated_at',
-                name:'updated_at'
-            },
-            {
-                data:'delete',
-                orderable:false,
-                searchable:false
-            }
-
-        ],
-        order:[[1,'asc']],
-        pageLength:10,
-        language:{
-            paginate:{
-                previous:'← Previous',
-                next:'Next →'
-            },
-            searchPlaceholder:"Search sequence..."
-        }
-    });
-
-    // Clear filters button
-    $('#clear_filters').on('click', function() {
-        $('#user_name_filter').val('');
-        $('#user_email_filter').val('');
-        // Also clear column searches
-        $('.column-search-input').each(function() {
-            if ($(this).prop('disabled') !== true) {
-                $(this).val('');
-            }
-        });
-        table.search('').columns().search('').draw();
-    });
-
-    // Auto-apply filters on change (optional)
-    $('#user_name_filter, #user_email_filter').on('change', function() {
-        table.draw();
-    });
-
-    // Auto-apply filters on change
-    $('#user_name_filter, #user_email_filter').on('change', function() {
-        table.draw();
-    });
-
-    $('#userMasterList tbody').on('click', 'td.editable-cell', function() {
-        if ($(this).find('input').length) return;
-
-        let td = $(this);
-        let currentValue = td.text().trim();
-        let field = td.data('field');
-        let id = td.data('id');
-
-        let input = $('<input>', {
-            type: 'text',
-            value: currentValue,
-            class: 'editable-input'
-        });
-
-        td.html(input);
-        input.focus();
-
-        // Optional: force uppercase while typing
-        input.on('input', function() {
-            if (field === 'variant') {
-                let start = this.selectionStart;
-                let end = this.selectionEnd;
-                let oldValue = $(this).val();
-                let newValue = oldValue.toUpperCase();
-                if (oldValue !== newValue) {
-                    $(this).val(newValue);
-                    this.setSelectionRange(start, end);
+    $(document).ready(function() {
+        var table = $('#userMasterList').DataTable({
+            processing:true,
+            serverSide:true,
+            responsive:true,
+            ajax:{
+                url:"{{ route('admin-master-data-list') }}",
+                type:'POST',
+                headers:{
+                    'X-CSRF-TOKEN':'{{ csrf_token() }}'
+                },
+                data: function(d) {
+                    // Add user name and email filters
+                    d['user_name'] = $('#user_name_filter').val();
+                    d['user_email'] = $('#user_email_filter').val();
                 }
-            }
-        });
-
-        input.on('blur', function() {
-            let newValue = input.val().trim();
-            if (field === 'variant') {
-                newValue = newValue.toUpperCase();
-            }
-            saveInlineEdit(td, id, field, newValue);
-        }).on('keypress', function(e) {
-            if (e.which === 13) {
-                input.blur();
-            }
-        });
-    });
-
-
-    function saveInlineEdit(td,id,field,newValue){
-        $.ajax({
-            url:"{{ route('user-master-list-sequences-inlineUpdate') }}",
-            type:"POST",
-            data:{
-                _token:'{{ csrf_token() }}',
-                id:id,
-                field:field,
-                value:newValue
             },
-            success:function(response){
-                td.text(newValue);
-            },
-            error:function(xhr){
-                alert(xhr.responseJSON?.message || 'Validation error');
-                table.ajax.reload(null,false);
+            columns:[
+                {
+                    data:'edit',
+                    name:'edit',
+                    orderable:false,
+                    searchable:false
+                },
+                {
+                    data:'step',
+                    name:'step'
+                },
+                {
+                    data:'gap_days',
+                    name:'gap_days'
+                },
+                {
+                    data:'variant',
+                    name:'variant'
+                },
+                {
+                    data:'message',
+                    name:'message'
+                },
+                {
+                    data:'subject',
+                    name:'subject'
+                },
+                {
+                    data:'type',
+                    name:'type'
+                },
+                {
+                    data:'whatsapp_link',
+                    name:'whatsapp_link'
+                },
+                {
+                    data:'user_name',
+                    name:'user_name'
+                },
+                {
+                    data:'user_email',
+                    name:'user_email'
+                },
+                {
+                    data:'created_at',
+                    name:'created_at'
+                },
+                {
+                    data:'updated_at',
+                    name:'updated_at'
+                },
+                {
+                    data:'delete',
+                    orderable:false,
+                    searchable:false
+                }
+
+            ],
+            order:[[1,'asc']],
+            pageLength:10,
+            language:{
+                paginate:{
+                    previous:'← Previous',
+                    next:'Next →'
+                },
+                searchPlaceholder:"Search sequence..."
             }
         });
-    }
 
-
-    // =======================
-    // EDITABLE CELLS
-    // =======================
-
-    table.on('draw',function(){
-        $('#userMasterList tbody tr').each(function(){
-            let rowData = table.row(this).data();
-            if(rowData && rowData.id){
-                $(this).find('td:eq(1)')
-                    .addClass('editable-cell')
-                    .attr('data-field','step')
-                    .attr('data-id',rowData.id);
-                $(this).find('td:eq(2)')
-                    .addClass('editable-cell')
-                    .attr('data-field','gap_days')
-                    .attr('data-id',rowData.id);
-                $(this).find('td:eq(3)')
-                    .addClass('editable-cell')
-                    .attr('data-field','variant')
-                    .attr('data-id',rowData.id);
-            }
+        // Clear filters button
+        $('#clear_filters').on('click', function() {
+            $('#user_name_filter').val('');
+            $('#user_email_filter').val('');
+            // Also clear column searches
+            $('.column-search-input').each(function() {
+                if ($(this).prop('disabled') !== true) {
+                    $(this).val('');
+                }
+            });
+            table.search('').columns().search('').draw();
         });
-    });
 
-});
+        // Auto-apply filters on change (optional)
+        $('#user_name_filter, #user_email_filter').on('change', function() {
+            table.draw();
+        });
 
-function userMasterDeleteList(id)
-{
-    Swal.fire({
-        title: 'Delete Sequence?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Yes Delete'
-    }).then((result) => {
+        // Auto-apply filters on change
+        $('#user_name_filter, #user_email_filter').on('change', function() {
+            table.draw();
+        });
 
-        if(result.isConfirmed)
-        {
+        $('#userMasterList tbody').on('click', 'td.editable-cell', function() {
+            if ($(this).find('input').length) return;
+
+            let td = $(this);
+            let currentValue = td.text().trim();
+            let field = td.data('field');
+            let id = td.data('id');
+
+            let input = $('<input>', {
+                type: 'text',
+                value: currentValue,
+                class: 'editable-input'
+            });
+
+            td.html(input);
+            input.focus();
+
+            // Optional: force uppercase while typing
+            input.on('input', function() {
+                if (field === 'variant') {
+                    let start = this.selectionStart;
+                    let end = this.selectionEnd;
+                    let oldValue = $(this).val();
+                    let newValue = oldValue.toUpperCase();
+                    if (oldValue !== newValue) {
+                        $(this).val(newValue);
+                        this.setSelectionRange(start, end);
+                    }
+                }
+            });
+
+            input.on('blur', function() {
+                let newValue = input.val().trim();
+                if (field === 'variant') {
+                    newValue = newValue.toUpperCase();
+                }
+                saveInlineEdit(td, id, field, newValue);
+            }).on('keypress', function(e) {
+                if (e.which === 13) {
+                    input.blur();
+                }
+            });
+        });
+
+
+        function saveInlineEdit(td,id,field,newValue){
             $.ajax({
-                url: "{{ route('user-master-sequence-delete') }}",
-                type: "POST",
-                data: {
-                    id: id,
-                    _token: "{{ csrf_token() }}"
+                url:"{{ route('user-master-list-sequences-inlineUpdate') }}",
+                type:"POST",
+                data:{
+                    _token:'{{ csrf_token() }}',
+                    id:id,
+                    field:field,
+                    value:newValue
                 },
-                success: function(response)
-                {
-                    if(response.success)
-                    {
-                        Swal.fire(
-                            'Deleted!',
-                            response.message,
-                            'success'
-                        );
-
-                        $('#userMasterList')
-                            .DataTable()
-                            .ajax
-                            .reload(null,false);
-                    }
-                    else {
-                        Swal.fire(
-                            'Error',
-                            response.message,
-                            'error'
-                        );
-                    }
+                success:function(response){
+                    td.text(newValue);
                 },
-                error: function()
-                {
-                    Swal.fire(
-                        'Error',
-                        'Something went wrong',
-                        'error'
-                    );
+                error:function(xhr){
+                    alert(xhr.responseJSON?.message || 'Validation error');
+                    table.ajax.reload(null,false);
                 }
             });
         }
 
+
+        // =======================
+        // EDITABLE CELLS
+        // =======================
+
+        table.on('draw',function(){
+            $('#userMasterList tbody tr').each(function(){
+                let rowData = table.row(this).data();
+                if(rowData && rowData.id){
+                    $(this).find('td:eq(1)')
+                        .addClass('editable-cell')
+                        .attr('data-field','step')
+                        .attr('data-id',rowData.id);
+                    $(this).find('td:eq(2)')
+                        .addClass('editable-cell')
+                        .attr('data-field','gap_days')
+                        .attr('data-id',rowData.id);
+                    $(this).find('td:eq(3)')
+                        .addClass('editable-cell')
+                        .attr('data-field','variant')
+                        .attr('data-id',rowData.id);
+                }
+            });
+        });
+
     });
-}
+
+    function userMasterDeleteList(id)
+    {
+        Swal.fire({
+            title: 'Delete Sequence?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes Delete'
+        }).then((result) => {
+
+            if(result.isConfirmed)
+            {
+                $.ajax({
+                    url: "{{ route('user-master-sequence-delete') }}",
+                    type: "POST",
+                    data: {
+                        id: id,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response)
+                    {
+                        if(response.success)
+                        {
+                            Swal.fire(
+                                'Deleted!',
+                                response.message,
+                                'success'
+                            );
+
+                            $('#userMasterList')
+                                .DataTable()
+                                .ajax
+                                .reload(null,false);
+                        }
+                        else {
+                            Swal.fire(
+                                'Error',
+                                response.message,
+                                'error'
+                            );
+                        }
+                    },
+                    error: function()
+                    {
+                        Swal.fire(
+                            'Error',
+                            'Something went wrong',
+                            'error'
+                        );
+                    }
+                });
+            }
+
+        });
+    }
 </script>

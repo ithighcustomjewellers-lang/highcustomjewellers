@@ -148,17 +148,34 @@ class MasterController extends Controller
         $business->action_links = json_encode($selectedLinks);
 
 
-        if ($request->hasFile('company_logo')) {
-            $companyPath = public_path('uploads/company_logo');
-            if (!file_exists($companyPath)) {
-                mkdir($companyPath, 0777, true);
-            }
-            if ($business->company_logo && file_exists(public_path($business->company_logo))) {
+        $companyPath = public_path('uploads/company_logo');
+
+        if (!file_exists($companyPath)) {
+            mkdir($companyPath, 0777, true);
+        }
+
+        // Remove existing logo
+        if ($request->removeLogo == "1") {
+
+            if (!empty($business->company_logo) && file_exists(public_path($business->company_logo))) {
                 unlink(public_path($business->company_logo));
             }
+
+            $business->company_logo = null;
+        }
+
+        // Upload new logo
+        if ($request->hasFile('company_logo')) {
+
+            // Delete old logo if exists
+            if (!empty($business->company_logo) && file_exists(public_path($business->company_logo))) {
+                unlink(public_path($business->company_logo));
+            }
+
             $file = $request->file('company_logo');
             $filename = time() . '_logo.' . $file->getClientOriginalExtension();
             $file->move($companyPath, $filename);
+
             $business->company_logo = 'uploads/company_logo/' . $filename;
         }
 
@@ -231,6 +248,7 @@ class MasterController extends Controller
             'action_links.*.platform_url' => 'required|string',
             'action_links.*.id' => 'nullable',
             'company_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'hero_image_link' => 'nullable|url|max:1000',
         ]);
 
         try {
@@ -299,6 +317,7 @@ class MasterController extends Controller
             $data['type'] = $type;
             $data['variant'] = $variant;
             $data['existing_company_logo'] = $existingCompanyLogo;
+            $data['hero_image_link'] = $request->hero_image_link;
 
             // =========================
             // ✅ HERO IMAGE
@@ -344,16 +363,17 @@ class MasterController extends Controller
                 ->whereRaw('UPPER(type) = ?', [$type])
                 ->get();
 
+                $delaySeconds = 0;
+
             foreach ($leads as $lead) {
-                // =========================
-                // ❌ PREVENT DUPLICATE
-                // =========================
-                $alreadyQueued = CampaignLog::where('user_id', $userId)
+                $alreadyHasStep = CampaignLog::where('user_id', $userId)
                     ->where('lead_id', $lead->id)
-                    ->where('sequence_id', $sequence->id)
+                    ->whereHas('sequence', function ($q) use ($sequence) {
+                        $q->where('step', $sequence->step);
+                    })
                     ->exists();
 
-                if ($alreadyQueued) {
+                if ($alreadyHasStep) {
                     continue;
                 }
 
@@ -379,7 +399,6 @@ class MasterController extends Controller
                 // ✅ CREATE LOG
                 // =========================
                 CampaignLog::create([
-                    'user_id' => $userId,
                     'lead_id' => $lead->id,
                     'sequence_id' => $sequence->id,
                     'status' => 'pending',
@@ -534,7 +553,7 @@ class MasterController extends Controller
         foreach ($sequences as $seq) {
             $isAdminUpdated = !is_null($seq->admin_updated_at);
             $data[] = [
-                'edit' => '<a href="'.route('sequences-list-edit', $seq->id).'" class="btn btn-sm btn-primary">Edit</a>',
+                'edit' => '<a href="' . route('sequences-list-edit', $seq->id) . '" class="btn btn-sm btn-primary">Edit</a>',
                 'id' => $seq->id,
                 'step' => $seq->step,
                 'gap_days' => $seq->gap_days ?? '-',
@@ -548,7 +567,7 @@ class MasterController extends Controller
                 'created_at' => date('Y-m-d', strtotime($seq->created_at)),
                 'updated_at' => date('Y-m-d', strtotime($seq->updated_at)),
                 'is_admin_updated' => $isAdminUpdated ? 1 : 0,
-                'delete' => '<button type="button" onclick="deleteList('.$seq->id.')" class="btn btn-sm btn-danger"> <i class="fas fa-trash"></i> Delete </button>',
+                'delete' => '<button type="button" onclick="deleteList(' . $seq->id . ')" class="btn btn-sm btn-danger"> <i class="fas fa-trash"></i> Delete </button>',
             ];
         }
 
@@ -660,6 +679,7 @@ class MasterController extends Controller
                 'hero_image'     => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'attachments_image' => 'nullable|file|max:5120',
                 'company_logo'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                 'hero_image_link' => 'nullable|url|max:1000',
             ]);
 
             $validated['type'] = strtoupper($validated['type']);
@@ -783,6 +803,7 @@ class MasterController extends Controller
 
             // Remove admin highlight
             $sequence->admin_updated_at = null;
+            $sequence->hero_image_link = $request->hero_image_link;
             $sequence->save();
 
             // Cancel all pending campaigns for this sequence
@@ -794,86 +815,101 @@ class MasterController extends Controller
 
             // Get all matching leads
             $leads = Lead::where('user_id', $userId)
-                ->whereRaw('UPPER(type) = ?', [$sequence->type])
-                ->get();
+            ->whereRaw('UPPER(type) = ?', [$sequence->type])
+            ->get();
 
-            $delaySeconds = 0;
+                $delaySeconds = 0;
 
-            foreach ($leads as $lead) {
+                foreach ($leads as $lead) {
+                    // 🔍 SKIP if lead already has a different variant for this step
+                    // $hasOtherStepVariant = CampaignLog::where('user_id', $userId)
+                    //     ->where('lead_id', $lead->id)
+                    //     ->whereHas('sequence', function ($q) use ($sequence) {
+                    //         $q->where('step', $sequence->step);
+                    //     })
+                    //     ->where('sequence_id', '!=', $sequence->id)
+                    //     ->whereNotIn('status', ['cancelled'])
+                    //     ->exists();
 
-                $baseDelay = now()->addDays((int)$sequence->gap_days);
-                $finalDelay = $baseDelay->copy()->addSeconds($delaySeconds);
-                $delaySeconds += rand(20, 40);
+                    // if ($hasOtherStepVariant) {
+                    //     continue;
 
-                /*
-    |--------------------------------------------------------------------------
-    | Skip if campaign already completed
-    |--------------------------------------------------------------------------
-    */
+                    // }
 
-                $completedLog = CampaignLog::where('user_id', $userId)
-                    ->where('lead_id', $lead->id)
-                    ->where('sequence_id', $sequence->id)
-                    ->whereIn('status', [
-                        'send',
-                        'seen',
-                        'failed',
-                        'interested',
-                        'not_interested',
-                        'Not Interested'
-                    ])
-                    ->exists();
 
-                if ($completedLog) {
-                    continue;
+
+                    // for the same Step
+                    $alreadyHasStep = CampaignLog::where('user_id', $userId)
+                        ->where('lead_id', $lead->id)
+                        ->whereHas('sequence', function ($q) use ($sequence) {
+                            $q->where('step', $sequence->step);
+                        })
+                        ->whereIn('status', [
+                            'pending',
+                            'send',
+                            'seen',
+                            'failed',
+                            'interested',
+                            'not_interested',
+                            'Not Interested',
+                        ])
+                        ->exists();
+
+                    if ($alreadyHasStep) {
+                        continue;
+                    }
+
+                    $baseDelay = now()->addDays((int)$sequence->gap_days);
+                    $finalDelay = $baseDelay->copy()->addSeconds($delaySeconds);
+                    $delaySeconds += rand(20, 40);
+
+                    // Skip if campaign already completed for this sequence
+                    $completedLog = CampaignLog::where('user_id', $userId)
+                        ->where('lead_id', $lead->id)
+                        ->where('sequence_id', $sequence->id)
+                        ->whereIn('status', [
+                            'send', 'seen', 'failed',
+                            'interested', 'not_interested', 'Not Interested'
+                        ])
+                        ->exists();
+
+                    if ($completedLog) {
+                        continue;
+                    }
+
+                    // Reuse cancelled log or create new
+                    $cancelledLog = CampaignLog::where('user_id', $userId)
+                        ->where('lead_id', $lead->id)
+                        ->where('sequence_id', $sequence->id)
+                        ->where('status', 'cancelled')
+                        ->latest('id')
+                        ->first();
+
+                    if ($cancelledLog) {
+                        $cancelledLog->update([
+                            'status'       => 'pending',
+                            'scheduled_at' => $finalDelay,
+                            'sent_at'      => null,
+                            'seen_at'      => null,
+                        ]);
+                    } else {
+                        CampaignLog::create([
+                            'user_id'      => $userId,
+                            'lead_id'      => $lead->id,
+                            'sequence_id'  => $sequence->id,
+                            'status'       => 'pending',
+                            'scheduled_at' => $finalDelay,
+                            'sender_ip'    => $senderIp,
+                        ]);
+                    }
+
+                    SendCampaignJob::dispatch(
+                        $lead->id,
+                        $sequence->id,
+                        $userId,
+                        $senderIp
+                    )->delay($finalDelay);
                 }
-
-                /*
-    |--------------------------------------------------------------------------
-    | Reuse cancelled log if exists
-    |--------------------------------------------------------------------------
-    */
-
-                $cancelledLog = CampaignLog::where('user_id', $userId)
-                    ->where('lead_id', $lead->id)
-                    ->where('sequence_id', $sequence->id)
-                    ->where('status', 'cancelled')
-                    ->latest('id')
-                    ->first();
-
-                if ($cancelledLog) {
-
-                    $cancelledLog->update([
-                        'status'       => 'pending',
-                        'scheduled_at' => $finalDelay,
-                        'sent_at'      => null,
-                        'seen_at'      => null,
-                    ]);
-                } else {
-
-                    CampaignLog::create([
-                        'user_id'      => $userId,
-                        'lead_id'      => $lead->id,
-                        'sequence_id'  => $sequence->id,
-                        'status'       => 'pending',
-                        'scheduled_at' => $finalDelay,
-                        'sender_ip'      => $senderIp,
-                    ]);
-                }
-
-                /*
-    |--------------------------------------------------------------------------
-    | Queue Mail
-    |--------------------------------------------------------------------------
-    */
-
-                SendCampaignJob::dispatch(
-                    $lead->id,
-                    $sequence->id,
-                    $userId,
-                    $senderIp
-                )->delay($finalDelay);
-            }
 
             DB::commit();
 

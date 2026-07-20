@@ -31,8 +31,6 @@ class LeadsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
-            'name' => 'required|string',
-            'lastname' => 'required|string',
             'type' => 'required|in:B2B,B2C',
         ]);
         if ($validator->fails()) {
@@ -191,8 +189,6 @@ class LeadsController extends Controller
         $filter = $request->input('filter', 'today');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-
-        // dd($filter);
 
         // Base query
         $query = Lead::query()
@@ -362,9 +358,6 @@ class LeadsController extends Controller
                     ->update([
                         'status' => 'pending'
                     ]);
-                // ->where('status', 'Pending')
-                // ->delete();
-                // Restart campaign
                 app(CampaignController::class)->start($lead->id);
             }
             DB::commit();

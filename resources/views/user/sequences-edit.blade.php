@@ -63,7 +63,13 @@
                                         <input type="hidden" name="image_type" id="imageType" value="{{ $sequence->image_type ?? 'logo' }}">
                                         <!-- NEW: hidden flag for removal -->
                                         <input type="hidden" name="remove_logo" id="removeLogo" value="0">
+                                        <small class="text-muted d-block mt-2">
+                                            <strong>Recommended Company Logo / Banner</strong><br>
+                                            📌 <strong>Banner:</strong> 500 × 200 px or 800 × 300 px<br>
+                                            📌 <strong>Logo:</strong> 300 × 300 px or 450 × 120 px
+                                        </small>
                                     </div>
+
                                     <div class="col-md-5">
                                         <div id="companyLogoPreview" class="mt-2" style="{{ $sequence->existing_company_logo ? 'display:block' : 'display:none' }}">
                                             <img id="companyLogoPreviewImg" class="img-fluid rounded-3 border" style="max-height: 60px" src="{{ $sequence->existing_company_logo ? asset($sequence->existing_company_logo) : '' }}">
@@ -97,8 +103,17 @@
                                         <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" id="removeHeroImageBtn">Remove</button>
                                     </div>
                                 </div>
-
                                 <small class="text-muted">Recommended: 1200 x 400px. Max 2MB</small>
+                                <div class="mt-2">
+                                    <label class="form-label fw-semibold small text-muted">Hero Image Link
+                                        (Optional)</label>
+                                    <input type="url" name="hero_image_link" id="heroImageLink"
+                                        class="form-control"
+                                        placeholder="https://example.com/landing-page"
+                                        value="{{ old('hero_image_link', $sequence->hero_image_link ?? '') }}">
+                                    <small class="text-muted">If provided, the hero image will become
+                                        clickable.</small>
+                                </div>
                             </div>
                         </div>
                         <!-- WYSIWYG Toolbar -->

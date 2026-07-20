@@ -13,59 +13,109 @@ use Illuminate\Http\Request;
 
 class CampaignController extends Controller
 {
+    // public function start($id)
+    // {
+    //     $lead = Lead::findOrFail($id);
+    //      $senderIp = request()->ip();
+
+    //     // =========================
+    //     // ✅ USER WISE SEQUENCE
+    //     // =========================
+    //     $sequences = Sequence::where('user_id', $lead->user_id)
+    //         ->whereRaw('UPPER(type) = ?', [strtoupper($lead->type)])
+    //         ->orderBy('step')
+    //         ->get();
+
+    //     foreach ($sequences as $sequence) {
+
+    //         // =========================
+    //         // ❌ DUPLICATE CHECK
+    //         // =========================
+    //         $alreadyQueued = CampaignLog::where('user_id', $lead->user_id)
+    //             ->where('lead_id', $lead->id)
+    //             ->where('sequence_id', $sequence->id)
+    //             ->exists();
+
+    //         if ($alreadyQueued) {
+    //             continue;
+    //         }
+
+    //         // =========================
+    //         // ✅ SEND DATE
+    //         // =========================
+    //         $delay = now()->addDays((int) $sequence->gap_days);
+
+    //         // =========================
+    //         // ✅ CREATE LOG
+    //         // =========================
+    //         start($id)::create([
+    //             'user_id' => $lead->user_id,
+    //             'lead_id' => $lead->id,
+    //             'sequence_id' => $sequence->id,
+    //             'tracking_token' => Str::uuid(),
+    //             // 'scheduled_at' => $delay,
+    //             'open_token' => Str::random(80),
+    //             'status' => 'pending',
+    //             'sender_ip' => $senderIp,
+    //         ]);
+
+
+    //         // =========================
+    //         // ✅ DISPATCH JOB
+    //         // =========================
+    //         SendCampaignJob::dispatch(
+    //             $lead->id,
+    //             $sequence->id,
+    //             $lead->user_id,
+    //             $senderIp
+    //         )->delay($delay);
+    //     }
+
+    //     return true;
+    // }
+
     public function start($id)
     {
         $lead = Lead::findOrFail($id);
-         $senderIp = request()->ip();
+        $senderIp = request()->ip();
 
-        // =========================
-        // ✅ USER WISE SEQUENCE
-        // =========================
         $sequences = Sequence::where('user_id', $lead->user_id)
             ->whereRaw('UPPER(type) = ?', [strtoupper($lead->type)])
             ->orderBy('step')
             ->get();
 
-        foreach ($sequences as $sequence) {
+        $grouped = $sequences->groupBy('step');
 
-            // =========================
-            // ❌ DUPLICATE CHECK
-            // =========================
-            $alreadyQueued = CampaignLog::where('user_id', $lead->user_id)
+        foreach ($grouped as $step => $stepSequences) {
+            // Check if lead already got ANY sequence for this step
+            $alreadySentForStep = CampaignLog::where('user_id', $lead->user_id)
                 ->where('lead_id', $lead->id)
-                ->where('sequence_id', $sequence->id)
+                ->whereHas('sequence', function ($query) use ($step) {
+                    $query->where('step', $step);
+                })
                 ->exists();
 
-            if ($alreadyQueued) {
+            if ($alreadySentForStep) {
                 continue;
             }
 
-            // =========================
-            // ✅ SEND DATE
-            // =========================
-            $delay = now()->addDays((int) $sequence->gap_days);
+            $selectedSequence = $stepSequences->random();
+            $delay = now()->addDays((int) $selectedSequence->gap_days);
 
-            // =========================
-            // ✅ CREATE LOG
-            // =========================
             CampaignLog::create([
-                'user_id' => $lead->user_id,
-                'lead_id' => $lead->id,
-                'sequence_id' => $sequence->id,
-                'tracking_token' => Str::uuid(),
-                // 'scheduled_at' => $delay,
-                'open_token' => Str::random(80),
-                'status' => 'pending',
-                'sender_ip' => $senderIp,
+                'user_id'       => $lead->user_id,
+                'lead_id'       => $lead->id,
+                'sequence_id'   => $selectedSequence->id,
+                'tracking_token'=> Str::uuid(),
+                'open_token'    => Str::random(80),
+                'status'        => 'pending',
+                'sender_ip'     => $senderIp,
+                'scheduled_at'  => $delay,
             ]);
 
-
-            // =========================
-            // ✅ DISPATCH JOB
-            // =========================
             SendCampaignJob::dispatch(
                 $lead->id,
-                $sequence->id,
+                $selectedSequence->id,
                 $lead->user_id,
                 $senderIp
             )->delay($delay);
@@ -103,7 +153,6 @@ class CampaignController extends Controller
 
                         'status' => 'not_interested'
                     ]);
-
             } elseif ($status == 'interested') {
 
                 // Subscribe again
@@ -209,9 +258,19 @@ class CampaignController extends Controller
         }
 
         // Bots (but NOT Google proxy)
-        $botKeywords = ['bot', 'crawler', 'spider', 'preview', 'scanner',
-                        'facebookexternalhit', 'slackbot', 'linkedinbot',
-                        'discordbot', 'whatsapp', 'telegrambot'];
+        $botKeywords = [
+            'bot',
+            'crawler',
+            'spider',
+            'preview',
+            'scanner',
+            'facebookexternalhit',
+            'slackbot',
+            'linkedinbot',
+            'discordbot',
+            'whatsapp',
+            'telegrambot'
+        ];
         foreach ($botKeywords as $bot) {
             if (str_contains($userAgent, $bot)) {
                 Log::info('✅ TrackOpen: Ignored bot', ['log_id' => $log->id, 'bot' => $bot]);
@@ -312,5 +371,4 @@ class CampaignController extends Controller
             ->header('Pragma', 'no-cache')
             ->header('Expires', '0');
     }
-
 }

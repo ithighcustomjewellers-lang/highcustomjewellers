@@ -585,12 +585,10 @@
             formData.append('type', type);
 
             let email = $('#email').val().trim();
-            let name = $('#name').val().trim();
-            let lastname = $('#lastname').val().trim();
-            // let company = $('#company_name').val().trim();
+
 
             if (!email || !name || !lastname) {
-                toastr.error('All fields are required (Email, First Name, Last Name)');
+                toastr.error('Please Enter Email');
                 return;
             }
 

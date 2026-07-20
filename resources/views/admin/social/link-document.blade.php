@@ -262,12 +262,11 @@
             <form id="adminBusinessForm" enctype="multipart/form-data">
                 @csrf
                 <!-- IMAGE -->
-                <div class="upload-box mb-4">
+                {{-- <div class="upload-box mb-4">
                     <label class="upload-label">
                         Company Logo
                     </label>
                     <div class="text-center">
-                        {{-- <img src="{{ asset('images/company-logo.jpg') }}" class="preview-image" id="imagePreview"> --}}
                         <img src="{{ isset($business->company_logo) ? asset($business->company_logo) : asset('images/company-logo.jpg') }}"
                             class="preview-image" id="imagePreview">
                     </div>
@@ -275,7 +274,36 @@
                         <input type="file" name="company_logo" id="companyLogo" class="form-control custom-input">
                         <small class="text-danger company_logo_error"></small>
                     </div>
+                </div> --}}
+
+                <!-- IMAGE -->
+                <div class="upload-box mb-4">
+                    <input type="hidden" name="removeLogo" id="removeLogo" value="0">
+
+                    <label class="upload-label d-flex justify-content-between align-items-center">
+                        Company Logo
+
+                        <button type="button" id="removeLogoBtn"
+                            class="btn btn-sm btn-outline-danger rounded-pill"
+                            {{ empty($business->company_logo) ? 'style=display:none;' : '' }}>
+                            Remove Logo
+                        </button>
+                    </label>
+
+                    <div class="text-center">
+                        <img src="{{ !empty($business->company_logo) ? asset($business->company_logo) : '' }}"
+                            id="imagePreview"
+                            class="preview-image"
+                            style="{{ empty($business->company_logo) ? 'display:none;' : '' }}">
+                    </div>
+
+                    <div class="mt-4">
+                        <input type="file" name="company_logo" id="companyLogo" class="form-control custom-input">
+                        <small class="text-danger company_logo_error"></small>
+                    </div>
                 </div>
+
+
                 @php
                     $user = Auth::user();
 
@@ -342,16 +370,32 @@
     </div>
     <script>
         // IMAGE PREVIEW
-        $('#companyLogo').change(function() {
-            let file = this.files[0];
-            if (file) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#imagePreview').attr('src', e.target.result);
+        // Preview selected logo
+            $('#companyLogo').on('change', function () {
+                let file = this.files[0];
+
+                if (file) {
+                    let reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        $('#imagePreview')
+                            .attr('src', e.target.result)
+                            .show();
+
+                        $('#removeLogoBtn').show();
+                        $('#removeLogo').val('0');
+                    };
+                    reader.readAsDataURL(file);
                 }
-                reader.readAsDataURL(file);
-            }
-        });
+            });
+
+            // Remove logo
+            $('#removeLogoBtn').on('click', function () {
+                $('#removeLogo').val('1');
+                $('#companyLogo').val('');
+                $('#imagePreview').attr('src', '').hide();
+                $(this).hide();
+            });
 
         // FORM SUBMIT
         $('#adminBusinessForm').submit(function(e) {

@@ -243,6 +243,7 @@
     </style>
 
 
+
     <div class="business-wrapper">
         <div class="business-card">
             <div class="text-center">
@@ -261,21 +262,41 @@
 
             <form id="businessForm" enctype="multipart/form-data">
                 @csrf
+
                 <!-- IMAGE -->
                 <div class="upload-box mb-4">
-                    <label class="upload-label">
+                    <input type="hidden" name="removeLogo" id="removeLogo" value="0">
+
+                    <label class="upload-label d-flex justify-content-between align-items-center">
                         Company Logo
+
+                        <button type="button" id="removeLogoBtn"
+                            class="btn btn-sm btn-outline-danger rounded-pill"
+                            {{ empty($business->company_logo) ? 'style=display:none;' : '' }}>
+                            Remove Logo
+                        </button>
                     </label>
+
                     <div class="text-center">
-                        {{-- <img src="{{ asset('images/company-logo.jpg') }}" class="preview-image" id="imagePreview"> --}}
-                        <img src="{{ isset($business->company_logo) ? asset($business->company_logo) : asset('images/company-logo.jpg') }}"
-                            class="preview-image" id="imagePreview">
+                        <img src="{{ !empty($business->company_logo) ? asset($business->company_logo) : '' }}"
+                            id="imagePreview"
+                            class="preview-image"
+                            style="{{ empty($business->company_logo) ? 'display:none;' : '' }}">
                     </div>
+
+                    <small class="text-muted d-block mt-2">
+                        <strong>Recommended Company Logo / Banner</strong><br>
+                        📌 <strong>Banner:</strong> 500 × 200 px or 800 × 300 px<br>
+                        📌 <strong>Logo:</strong> 300 × 300 px or 450 × 120 px
+                    </small>
+
                     <div class="mt-4">
                         <input type="file" name="company_logo" id="companyLogo" class="form-control custom-input">
                         <small class="text-danger company_logo_error"></small>
                     </div>
                 </div>
+
+
                 @php
                     $user = Auth::user();
 
@@ -302,39 +323,6 @@
                     </div>
                     <small class="text-danger whatsapp_link_error"></small>
                 </div>
-
-                  <!--<div class="mb-4">-->
-                <!--    <label class="upload-label">Select Action Links</label>-->
-
-                <!--    <div class="custom-dropdown">-->
-                <!--        <div class="dropdown-header" id="dropdownHeader">-->
-                <!--            <span id="selectedCount">Select Links</span>-->
-                <!--            <i class="fas fa-chevron-down"></i>-->
-                <!--        </div>-->
-
-                <!--        <div class="dropdown-content" id="dropdownContent">-->
-                <!--            @foreach($sociallinks as $link)-->
-                <!--                <label class="dropdown-item-custom">-->
-                <!--                    <input type="checkbox"-->
-                <!--                        name="social_link_ids[]"-->
-                <!--                        value="{{ $link->id }}"-->
-                <!--                        class="action-link-checkbox">-->
-
-                <!--                    <div class="link-info">-->
-                <!--                        <div class="platform-name">-->
-                <!--                            {{ $link->platform_name }}-->
-                <!--                        </div>-->
-
-                <!--                        <div class="platform-url">-->
-                <!--                            {{ Str::limit($link->platform_url, 50) }}-->
-                <!--                        </div>-->
-                <!--                    </div>-->
-                <!--                </label>-->
-                <!--            @endforeach-->
-                <!--        </div>-->
-                <!--    </div>-->
-                <!--</div>-->
-                <!-- BUTTON -->
 
                 @php
                     $selectedIds = [];
@@ -410,6 +398,33 @@
                 }
             });
 
+            // Preview selected logo
+            $('#companyLogo').on('change', function () {
+                let file = this.files[0];
+
+                if (file) {
+                    let reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        $('#imagePreview')
+                            .attr('src', e.target.result)
+                            .show();
+
+                        $('#removeLogoBtn').show();
+                        $('#removeLogo').val('0');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Remove logo
+            $('#removeLogoBtn').on('click', function () {
+                $('#removeLogo').val('1');
+                $('#companyLogo').val('');
+                $('#imagePreview').attr('src', '').hide();
+                $(this).hide();
+            });
+
             // Function to update selected count and tags
             function updateSelectedUI() {
                 let checkedBoxes = $('.action-link-checkbox:checked');
@@ -460,13 +475,16 @@
             updateSelectedUI();
 
             // Image preview
-            $('#companyLogo').change(function() {
+            $('#companyLogo').on('change', function() {
                 let file = this.files[0];
+
                 if (file) {
                     let reader = new FileReader();
                     reader.onload = function(e) {
-                        $('#imagePreview').attr('src', e.target.result);
-                    }
+                        $('#imagePreview')
+                            .attr('src', e.target.result)
+                            .show(); // show preview
+                    };
                     reader.readAsDataURL(file);
                 }
             });
@@ -510,83 +528,6 @@
             });
         });
 
-         // IMAGE PREVIEW
-        // $('#companyLogo').change(function() {
-        //     let file = this.files[0];
-        //     if (file) {
-        //         let reader = new FileReader();
-        //         reader.onload = function(e) {
-        //             $('#imagePreview').attr('src', e.target.result);
-        //         }
-        //         reader.readAsDataURL(file);
-        //     }
-        // });
 
-        // // FORM SUBMIT
-        // $('#businessForm').submit(function(e) {
-        //     e.preventDefault();
-        //     $('.text-danger').text('');
-        //     let formData = new FormData(this);
-        //     $.ajax({
-        //         url: "{{ route('submit-business-links') }}",
-        //         type: "POST",
-        //         data: formData,
-        //         processData: false,
-        //         contentType: false,
-        //         beforeSend: function() {
-        //             $('#saveBusinessBtn')
-        //                 .html('<i class="fas fa-spinner fa-spin me-2"></i> Saving...')
-        //                 .prop('disabled', true);
-        //         },
-        //          beforeSend: function() {
-        //             $('#saveBusinessBtn').html('<i class="fas fa-spinner fa-spin me-2"></i> Saving...').prop('disabled', true);
-        //         },
-        //         success: function(response) {
-        //             $('#saveBusinessBtn').html('<i class="fas fa-check me-2"></i> Saved Successfully').prop('disabled', false);
-        //             toastr.success(response.message);
-        //             $('#businessForm')[0].reset();
-        //             location.reload();
-        //         },
-
-        //         error: function(xhr) {
-        //             $('#saveBusinessBtn')
-        //                 .html('<i class="fas fa-save me-2"></i> Save Business Details')
-        //                 .prop('disabled', false);
-        //             if (xhr.status == 422) {
-        //                 let errors = xhr.responseJSON.errors;
-        //                 $.each(errors, function(key, value) {
-        //                     $('.' + key + '_error').text(value[0]);
-        //                 });
-        //             } else {
-        //                 toastr.error('Something went wrong');
-        //             }
-        //         }
-        //     });
-        // });
-
-
-        // $(document).ready(function () {
-        //     // Open / Close Dropdown
-        //     $('#dropdownHeader').on('click', function () {
-        //         $('#dropdownContent').toggleClass('active');
-        //     });
-
-        //     // Close dropdown when click outside
-        //     $(document).on('click', function (e) {
-        //         if (!$(e.target).closest('.custom-dropdown').length) {
-        //             $('#dropdownContent').removeClass('active');
-        //         }
-        //     });
-
-        //     // Update selected count
-        //     $(document).on('change', '.action-link-checkbox', function () {
-        //         let count = $('.action-link-checkbox:checked').length;
-        //         if (count > 0) {
-        //             $('#selectedCount').text(count + ' Link(s) Selected');
-        //         } else {
-        //             $('#selectedCount').text('Select Links');
-        //         }
-        //     });
-        // });
     </script>
 @endsection

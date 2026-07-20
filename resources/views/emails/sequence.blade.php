@@ -64,7 +64,7 @@
                     {{-- ========================================= --}}
                     {{-- ✅ HERO IMAGE --}}
                     {{-- ========================================= --}}
-                    @if(!empty($sequence->hero_image))
+                    {{-- @if(!empty($sequence->hero_image))
                         <tr>
                             <td>
                                 <img src="{{ url($sequence->hero_image) }}"
@@ -73,7 +73,30 @@
                                      style="width:100%;max-width:100%;display:block;">
                             </td>
                         </tr>
+                    @endif --}}
+
+                    @if(!empty($sequence->hero_image))
+                        <tr>
+                            <td>
+                                @if(!empty($sequence->hero_image_link))
+                                    <a href="{{ $sequence->hero_image_link }}"
+                                    target="_blank"
+                                    style="display:block;text-decoration:none;">
+                                        <img src="{{ url($sequence->hero_image) }}"
+                                            alt="Hero Image"
+                                            width="100%"
+                                            style="width:100%;max-width:100%;display:block;border:0;outline:none;text-decoration:none;">
+                                    </a>
+                                @else
+                                    <img src="{{ url($sequence->hero_image) }}"
+                                        alt="Hero Image"
+                                        width="100%"
+                                        style="width:100%;max-width:100%;display:block;border:0;outline:none;">
+                                @endif
+                            </td>
+                        </tr>
                     @endif
+
 
                     {{-- ========================================= --}}
                     {{-- ✅ CONTENT --}}
