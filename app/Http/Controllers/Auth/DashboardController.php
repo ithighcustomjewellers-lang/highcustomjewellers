@@ -404,6 +404,8 @@ class DashboardController extends Controller
     }
 
 
+
+
     // live
     // public function chartData()
     // {
@@ -663,6 +665,224 @@ class DashboardController extends Controller
             'recordsTotal' => $totalData,
             'recordsFiltered' => $totalFiltered,
             'data' => $data
+        ]);
+    }
+
+    // public function dashboardButtonClickChart(Request $request)
+    // {
+    //     $query = AnalyticsTracking::where('event_type', 'button_click');
+    //     $filter = $request->get('filter', 'today');
+    //     $from = null;
+    //     $to = null;
+
+    //     switch ($filter) {
+    //         case 'today':
+    //             $from = Carbon::today()->startOfDay();
+    //             $to = Carbon::today()->endOfDay();
+    //             break;
+
+    //         case 'weekly':
+    //             $from = Carbon::now()->startOfWeek();
+    //             $to = Carbon::now()->endOfWeek();
+    //             break;
+
+    //         case 'monthly':
+    //             $from = Carbon::now()->startOfMonth();
+    //             $to = Carbon::now()->endOfMonth();
+    //             break;
+
+    //         case 'yearly':
+    //             $from = Carbon::now()->startOfYear();
+    //             $to = Carbon::now()->endOfYear();
+    //             break;
+
+    //         case 'custom':
+    //             if ($request->filled('start_date') && $request->filled('end_date')) {
+    //                 $from = Carbon::parse($request->start_date)->startOfDay();
+    //                 $to   = Carbon::parse($request->end_date)->endOfDay();
+    //             }
+    //             break;
+    //     }
+
+    //     if ($from && $to) {
+    //         $query->whereBetween('created_at', [$from, $to]);
+    //     }
+
+    //     $buttons = $query
+    //         ->whereNotNull('platform')
+    //         ->where('platform', '!=', '')
+    //         ->selectRaw('platform, COUNT(*) as total')
+    //         ->groupBy('platform')
+    //         ->orderByDesc('total')
+    //         ->get();
+
+    //     return response()->json([
+    //         'labels' => $buttons->pluck('platform')->values(),
+    //         'series' => $buttons->pluck('total')->values(),
+    //         'total'  => $buttons->sum('total'),
+    //     ]);
+    // }
+
+    // public function dashboardButtonClickChart(Request $request)
+    // {
+    //     $user = Auth::user();
+
+    //     // Logged-in user ke QR codes
+    //     $userSetting = UserSetting::where('user_id', $user->id)->first();
+    //     $multiQrCodes = json_decode($userSetting->value ?? '[]', true);
+
+    //     dd($multiQrCodes);
+
+    //     $trackingSlugs = collect($multiQrCodes)
+    //         ->pluck('tracking_slug')
+    //         ->filter()
+    //         ->values()
+    //         ->toArray();
+
+    //     $query = AnalyticsTracking::whereIn('profile_slug', $trackingSlugs)
+    //         ->where('event_type', 'button_click');
+
+    //     $filter = $request->get('filter', 'today');
+
+    //     $from = null;
+    //     $to = null;
+
+    //     switch ($filter) {
+
+    //         case 'today':
+    //             $from = Carbon::today()->startOfDay();
+    //             $to = Carbon::today()->endOfDay();
+    //             break;
+
+    //         case 'weekly':
+    //             $from = Carbon::now()->startOfWeek();
+    //             $to = Carbon::now()->endOfWeek();
+    //             break;
+
+    //         case 'monthly':
+    //             $from = Carbon::now()->startOfMonth();
+    //             $to = Carbon::now()->endOfMonth();
+    //             break;
+
+    //         case 'yearly':
+    //             $from = Carbon::now()->startOfYear();
+    //             $to = Carbon::now()->endOfYear();
+    //             break;
+
+    //         case 'custom':
+
+    //             if ($request->filled('start_date') && $request->filled('end_date')) {
+
+    //                 $from = Carbon::parse($request->start_date)->startOfDay();
+    //                 $to   = Carbon::parse($request->end_date)->endOfDay();
+    //             }
+
+    //             break;
+    //     }
+
+    //     if ($from && $to) {
+    //         $query->whereBetween('created_at', [$from, $to]);
+    //     }
+
+    //     $buttons = $query
+    //         ->whereNotNull('platform')
+    //         ->where('platform', '!=', '')
+    //         ->selectRaw('platform, COUNT(*) as total')
+    //         ->groupBy('platform')
+    //         ->orderByDesc('total')
+    //         ->get();
+
+    //     return response()->json([
+    //         'labels' => $buttons->pluck('platform')->values(),
+    //         'series' => $buttons->pluck('total')->values(),
+    //         'total'  => $buttons->sum('total'),
+    //     ]);
+    // }
+
+    public function dashboardButtonClickChart(Request $request)
+    {
+        // Logged-in User
+        $user = Auth::user();
+
+        // User ke Multi QR Codes
+        $userSetting = UserSetting::where('user_id', $user->id)
+            ->where('key', 'multi_qr_codes')
+            ->first();
+
+       $multiQrCodes = $userSetting->value ?? [];
+
+        // Sirf current QR tracking slugs
+        $trackingSlugs = collect($multiQrCodes)
+            ->pluck('tracking_slug')
+            ->filter()
+            ->values()
+            ->toArray();
+
+        // Agar user ke paas koi QR nahi hai
+        if (empty($trackingSlugs)) {
+            return response()->json([
+                'labels' => [],
+                'series' => [],
+                'total'  => 0,
+            ]);
+        }
+
+        $query = AnalyticsTracking::where('event_type', 'button_click')
+            ->whereIn('profile_slug', $trackingSlugs);
+
+        // Date Filter
+        $filter = $request->get('filter', 'today');
+
+        $from = null;
+        $to   = null;
+
+        switch ($filter) {
+
+            case 'today':
+                $from = Carbon::today()->startOfDay();
+                $to   = Carbon::today()->endOfDay();
+                break;
+
+            case 'weekly':
+                $from = Carbon::now()->startOfWeek();
+                $to   = Carbon::now()->endOfWeek();
+                break;
+
+            case 'monthly':
+                $from = Carbon::now()->startOfMonth();
+                $to   = Carbon::now()->endOfMonth();
+                break;
+
+            case 'yearly':
+                $from = Carbon::now()->startOfYear();
+                $to   = Carbon::now()->endOfYear();
+                break;
+
+            case 'custom':
+                if ($request->filled('start_date') && $request->filled('end_date')) {
+                    $from = Carbon::parse($request->start_date)->startOfDay();
+                    $to   = Carbon::parse($request->end_date)->endOfDay();
+                }
+                break;
+        }
+
+        if ($from && $to) {
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+        // Platform-wise Button Clicks
+        $buttons = $query
+            ->whereNotNull('platform')
+            ->where('platform', '!=', '')
+            ->selectRaw('platform, COUNT(*) as total')
+            ->groupBy('platform')
+            ->orderByDesc('total')
+            ->get();
+
+        return response()->json([
+            'labels' => $buttons->pluck('platform')->toArray(),
+            'series' => $buttons->pluck('total')->toArray(),
+            'total'  => $buttons->sum('total'),
         ]);
     }
 }

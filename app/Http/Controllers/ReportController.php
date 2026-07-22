@@ -168,9 +168,7 @@ class ReportController extends Controller
 
     public function getCampaignLogsData(Request $request)
     {
-
-
-        $columns = [
+    $columns = [
             0 => 'campaign_logs.id',
             1 => 'lead_name',
             2 => 'lead_email',
@@ -213,7 +211,6 @@ if ($request->from == 'dashboard') {
     */
 
     switch ($request->status) {
-
         case 'pending':
             $dateColumn = 'campaign_logs.scheduled_at';
             break;
@@ -250,53 +247,37 @@ if ($request->from == 'dashboard') {
     */
 
     switch ($filter) {
-
         case 'today':
-
             $query->whereBetween($dateColumn, [
                 Carbon::today()->startOfDay(),
                 Carbon::today()->endOfDay()
             ]);
-
             break;
-
         case 'weekly':
-
             $query->whereBetween($dateColumn, [
                 Carbon::now()->startOfWeek(),
                 Carbon::now()->endOfWeek()
             ]);
-
             break;
-
         case 'monthly':
-
             $query->whereBetween($dateColumn, [
                 Carbon::now()->startOfMonth(),
                 Carbon::now()->endOfMonth()
             ]);
-
             break;
-
         case 'yearly':
-
             $query->whereBetween($dateColumn, [
                 Carbon::now()->startOfYear(),
                 Carbon::now()->endOfYear()
             ]);
-
             break;
-
         case 'custom':
-
             if ($request->filled('start_date') && $request->filled('end_date')) {
-
                 $query->whereBetween($dateColumn, [
                     Carbon::parse($request->start_date)->startOfDay(),
                     Carbon::parse($request->end_date)->endOfDay(),
                 ]);
             }
-
             break;
     }
 }
@@ -335,11 +316,8 @@ if ($request->from == 'dashboard') {
     */
 
         if (!empty($request->search['value'])) {
-
             $search = $request->search['value'];
-
             $query->where(function ($q) use ($search) {
-
                 $q->where('leads.name', 'LIKE', "%{$search}%")
                     ->orWhere('leads.email', 'LIKE', "%{$search}%")
                     ->orWhere('sequences.step', 'LIKE', "%{$search}%")
@@ -356,11 +334,8 @@ if ($request->from == 'dashboard') {
     |--------------------------------------------------------------------------
     */
 
-        $orderColumn = $columns[$request->input('order.0.column', 0)]
-            ?? 'campaign_logs.id';
-
+        $orderColumn = $columns[$request->input('order.0.column', 0)];
         $orderDir = $request->input('order.0.dir', 'desc');
-
         $query->orderBy($orderColumn, $orderDir);
 
         /*
@@ -410,65 +385,46 @@ if ($request->from == 'dashboard') {
             $data[] = [
 
                 'id' => $log->id,
-
                 'lead_name' => $log->lead_name ?? 'N/A',
-
                 'lead_email' => $log->lead_email ?? 'N/A',
-
                 'step' => $log->step ?? '-',
-
                 'subject' => $log->subject
                     ? Str::limit($log->subject, 40)
                     : '-',
-
                 'status_badge' => $this->getStatusBadge($log->status),
-
                 'scheduled_at' => $this->convertToIST($log->scheduled_at),
-
                 'sent_at' => $this->convertToIST($log->sent_at),
-
                 'seen_at' => $this->convertToIST($log->seen_at),
-
                 'whatsapp_clicks' => $whatsappClicks
                     ? '<span class="badge bg-success">' . $whatsappClicks . '</span>'
                     : '0',
-
                 'instagram_clicks' => $instagramClicks
                     ? '<span class="badge bg-danger">' . $instagramClicks . '</span>'
                     : '0',
-
                 'facebook_messenger_clicks' => $fbMessengerClicks
                     ? '<span class="badge bg-primary">' . $fbMessengerClicks . '</span>'
                     : '0',
-
                 'threads_clicks' => $threadsClicks
                     ? '<span class="badge bg-secondary">' . $threadsClicks . '</span>'
                     : '0',
-
                 'telegram_clicks' => $telegramClicks
                     ? '<span class="badge bg-info">' . $telegramClicks . '</span>'
                     : '0',
-
                 'snapchat_clicks' => $snapchatClicks
                     ? '<span class="badge bg-warning">' . $snapchatClicks . '</span>'
                     : '0',
-
                 'x_clicks' => $xClicks
                     ? '<span class="badge bg-dark">' . $xClicks . '</span>'
                     : '0',
-
                 'linkedin_clicks' => $linkedinClicks
                     ? '<span class="badge bg-primary">' . $linkedinClicks . '</span>'
                     : '0',
-
                 'other_clicks' => $otherClicks
                     ? '<span class="badge bg-secondary">' . $otherClicks . '</span>'
                     : '0',
-
                 'total_clicks' => $totalClicks
                     ? '<span class="badge bg-dark fs-6">' . $totalClicks . '</span>'
                     : '0',
-
             ];
         }
 
@@ -501,13 +457,21 @@ if ($request->from == 'dashboard') {
     private function getStatusBadge($status)
     {
         $badges = [
-            'pending' => '<span class="badge bg-secondary">⏳ Pending</span>',
-            'sent' => '<span class="badge bg-info">📤 Sent</span>',
-            'seen' => '<span class="badge bg-primary">👁️ Seen</span>',
-            'interested' => '<span class="badge bg-success">❤️ Interested</span>',
+            'pending' => '<span class="badge bg-warning">⏳ Pending</span>',
+            'send' => '<span class="badge bg-success">📤 Sent</span>',
+            'seen' => '<span class="badge bg-info">👁️ Seen</span>',
+            'interested' => '<span class="badge bg-primary">❤️ Interested</span>',
             'not_interested' => '<span class="badge bg-danger">💔 Not Interested</span>',
             'failed' => '<span class="badge bg-dark">❌ Failed</span>'
         ];
+
+
+        //  'pending' => '<span class="badge bg-secondary">⏳ Pending</span>',
+        //     'sent' => '<span class="badge bg-info">📤 Sent</span>',
+        //     'seen' => '<span class="badge bg-primary">👁️ Seen</span>',
+        //     'interested' => '<span class="badge bg-success">❤️ Interested</span>',
+        //     'not_interested' => '<span class="badge bg-danger">💔 Not Interested</span>',
+        //     'failed' => '<span class="badge bg-dark">❌ Failed</span>'
 
         return $badges[$status] ?? '<span class="badge bg-secondary">' . $status . '</span>';
     }
@@ -706,8 +670,17 @@ if ($request->from == 'dashboard') {
             });
         }
 
+        // ─── Sorting (mirror DataTable's default or user selection) ────
+        if ($request->filled('order')) {
+            // You can parse DataTable's order array if needed
+            // For simplicity, we'll sort by step numerically (common use case)
+            $query->orderByRaw("CAST(step AS UNSIGNED) ASC");
+        } else {
+            $query->orderByRaw("CAST(step AS UNSIGNED) ASC");
+        }
+
         // Order by ID descending (same as DataTable default order)
-        $query->orderBy('campaign_logs.id', 'desc');
+        // $query->orderBy('campaign_logs.id', 'desc');
 
         // ---------- Generate CSV ----------
         $fileName = 'campaign_logs_' . date('Y-m-d') . '.csv';

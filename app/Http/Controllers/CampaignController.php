@@ -124,6 +124,45 @@ class CampaignController extends Controller
         return true;
     }
 
+    // public function leadResponse($logId, $status)
+    // {
+    //     if (!in_array($status, ['interested', 'not_interested'])) {
+    //         abort(404);
+    //     }
+
+    //     $log = CampaignLog::find($logId);
+
+    //     if (!$log) {
+    //         abort(404);
+    //     }
+
+    //     $log->status = $status;
+    //     $log->save();
+
+    //     $lead = Lead::find($log->lead_id);
+    //     if ($lead) {
+    //         if ($status == 'not_interested') {
+    //             // Unsubscribe
+    //             $lead->is_unsubscribed = 1;
+    //             $lead->save();
+
+    //             CampaignLog::where('lead_id', $lead->id)
+    //                 ->where('status', 'pending')
+    //                 ->update([
+    //                     'status' => 'not_interested'
+    //                 ]);
+    //         } elseif ($status == 'interested') {
+
+    //             // Subscribe again
+    //             $lead->is_unsubscribed = 0;
+    //             $lead->save();
+    //         }
+    //     }
+
+    //     return view('emails.response', compact('status'));
+    // }
+
+
     public function leadResponse($logId, $status)
     {
         if (!in_array($status, ['interested', 'not_interested'])) {
@@ -131,31 +170,22 @@ class CampaignController extends Controller
         }
 
         $log = CampaignLog::find($logId);
-
         if (!$log) {
             abort(404);
         }
 
+        // ✅ Only update this specific log
         $log->status = $status;
         $log->save();
 
         $lead = Lead::find($log->lead_id);
         if ($lead) {
             if ($status == 'not_interested') {
-                // Unsubscribe
+                // Unsubscribe the lead (stops all future emails)
                 $lead->is_unsubscribed = 1;
                 $lead->save();
 
-                CampaignLog::where('lead_id', $lead->id)
-                    ->where('status', 'pending')
-                    ->update([
-                        // 'status' => 'Not Interested'
-
-                        'status' => 'not_interested'
-                    ]);
             } elseif ($status == 'interested') {
-
-                // Subscribe again
                 $lead->is_unsubscribed = 0;
                 $lead->save();
             }

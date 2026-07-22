@@ -157,8 +157,8 @@ $(document).ready(function () {
         // Column Reorder
         colReorder: true,
         // Save column order, search, page etc.
-        stateSave: true,
-        stateDuration: -1,
+        stateSave: false,
+        // stateDuration: -1,
         ajax: {
             url: "{{ route('report.campaign.data') }}",
             type: "POST",
@@ -202,7 +202,7 @@ $(document).ready(function () {
             { data: 'total_clicks', orderable: false, searchable: false }
         ],
         order: [
-            [0, 'desc']
+            [3, 'asc']
         ],
         pageLength: 10,
         language: {

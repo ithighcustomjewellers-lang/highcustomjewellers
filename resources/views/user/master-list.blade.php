@@ -557,16 +557,12 @@ $(document).ready(function() {
     function applyAdminUpdateHighlighting() {
         var rows = $('#sequencesTable tbody tr');
         var firstUpdatedRow = null;
-
         rows.each(function(index) {
             var row = $(this);
             var rowData = table.row(row).data();
-
             row.removeClass('admin-updated-row first-updated-row');
-
             if (rowData && rowData.is_admin_updated == 1) {
                 row.addClass('admin-updated-row');
-
                 if (!firstUpdatedRow) {
                     firstUpdatedRow = row;
                 }
@@ -575,7 +571,6 @@ $(document).ready(function() {
 
         if (firstUpdatedRow) {
             firstUpdatedRow.addClass('first-updated-row');
-
             var stepCell = firstUpdatedRow.find('td:eq(4)');
             if (stepCell.length && !stepCell.find('.new-badge').length) {
                 stepCell.prepend('<span class="badge bg-danger new-badge me-1">🔥 NEW</span>');

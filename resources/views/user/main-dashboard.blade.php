@@ -81,6 +81,33 @@
         background: #fd7e14;
     }
 
+    .bg-qr-scan {
+        background: rgba(var(--bs-info-rgb), var(--bs-text-opacity)) !important;
+    }
+
+    .bg-qr-scan-color {
+        color: rgba(var(--bs-info-rgb), var(--bs-text-opacity)) !important;
+    }
+
+    .bg-total-leads {
+        background: #9642f5;
+    }
+
+    .chart-scroll {
+        height: 315 px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .chart-scroll::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .chart-scroll::-webkit-scrollbar-thumb {
+        background: #bdbdbd;
+        border-radius: 20px;
+    }
+
     /* Responsive */
 
     @media (max-width:1600px) {
@@ -115,6 +142,10 @@
         .dashboard-stats {
             grid-template-columns: 1fr;
         }
+    }
+
+    .bg-leads {
+        color: #9642f5;
     }
 </style>
 
@@ -181,6 +212,41 @@
     </div>
     <div class="row g-4">
         <div class="dashboard-stats">
+            <a href="#" class="text-decoration-none text-dark">
+                <div class="card dashboard-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="card-info">
+                            <div>
+                                <h6 class="bg-qr-scan-color">QR Scans</h6>
+                                <h2>{{ number_format($stats['qr_scans']) }}</h2>
+                                <small> Total QR code scans</small>
+                            </div>
+                            <div class="dashboard-icon bg-qr-scan">
+                                <i class="fas fa-qrcode"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ route('dashboard.total.leads.list') }}" class="text-decoration-none text-dark">
+                <div class="card dashboard-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="card-info">
+                            <div>
+                                <h6 class="bg-leads">Total Leads</h6>
+                                <h2>{{ number_format($stats['total_leads']) }}</h2>
+                                <small>Total leads</small>
+                            </div>
+                            <div class="dashboard-icon bg-total-leads">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+
             {{-- Total Mail --}}
             <a href="{{ route('report.campaign', [
                 'filter' => request('filter', 'today'),
@@ -361,237 +427,301 @@
                     </div>
                 </div>
             </a>
-
-
-            <a href="{{ route('dashboard.total.leads.list') }}" class="text-decoration-none text-dark">
-                <div class="card dashboard-card border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="card-info">
-                            <div>
-                                <h6 class="text-danger">Total Leads</h6>
-                                <h2>{{ number_format($stats['total_leads']) }}</h2>
-                                <small>Total leads</small>
-                            </div>
-                            <div class="dashboard-icon bg-not-interest">
-                                <i class="fas fa-users"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </a>
         </div>
+    </div>
 
-        <div class="row mt-4">
-            <!-- Campaign Status Overview -->
-            <div class="col-md-6 mb-4">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0">Campaign Status Overview</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="campaignStatusChart"></div>
-                    </div>
+    <div class="row mt-4">
+        <!-- Campaign Status -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Campaign Status Overview</h5>
                 </div>
-            </div>
-            <!-- Platform Click Tracking -->
-            <div class="col-md-6 mb-4">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0">Platform Click Tracking</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="platformClickChart"></div>
-                    </div>
+                <div class="card-body">
+                    <div id="campaignStatusChart"></div>
                 </div>
             </div>
         </div>
 
-        <div class="row mt-4">
-            <!-- QR Scans -->
-            <div class="col-md-6 mb-3">
-                <div class="card dashboard-card shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <h6 class="text-info">
-                            <i class="fas fa-qrcode"></i> QR Scans
-                        </h6>
-                        <h2>{{ number_format($stats['qr_scans']) }}</h2>
-                        <small class="text-muted">
-                            Total QR code scans
-                        </small>
-                    </div>
+        <!-- Platform Click Tracking -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Platform Click Tracking</h5>
+                </div>
+                <div class="card-body">
+                    <div id="platformClickChart"></div>
                 </div>
             </div>
+        </div>
 
-            <!-- Button Clicks -->
-            <div class="col-md-6 mb-3">
-                <div class="card dashboard-card shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <h6 class="text-success">
-                            <i class="fas fa-mouse-pointer"></i> Button Clicks
-                        </h6>
-                        <h2>{{ number_format($stats['button_clicks']) }}</h2>
-                        <small class="text-muted">
-                            Total tracked button clicks
-                        </small>
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar text-success me-2"></i>
+                        Button Click Analytics
+                    </h5>
+
+                    <span class="badge bg-success fs-6">
+                        Total:
+                        <span id="totalButtonClicks">0</span>
+                    </span>
+                </div>
+                <div class="card-body p-2">
+                    <div class="chart-scroll">
+                        <div id="buttonClickBarChart"></div>
                     </div>
                 </div>
             </div>
         </div>
-        <script src="{{ asset('js/apexcharts.js') }}"></script>
-        <script>
-            let campaignChart;
-            $(document).ready(function() {
 
-                $.ajax({
-                    url: "{{ route('dashboard-chart-data') }}",
-                    type: "GET",
-                    data: {
-                        filter: "{{ request('filter', 'today') }}",
-                        start_date: "{{ request('start_date') }}",
-                        end_date: "{{ request('end_date') }}"
-                    },
+    </div>
 
-                    success: function(response) {
+    <script src="{{ asset('js/apexcharts.js') }}"></script>
+    <script>
+        let campaignChart;
+        $(document).ready(function() {
 
-                        if (campaignChart) {
-                            campaignChart.destroy();
-                        }
+            $.ajax({
+                url: "{{ route('dashboard-chart-data') }}",
+                type: "GET",
+                data: {
+                    filter: "{{ request('filter', 'today') }}",
+                    start_date: "{{ request('start_date') }}",
+                    end_date: "{{ request('end_date') }}"
+                },
 
-                        var options = {
-                            series: [
-                                response.pending,
-                                response.sent,
-                                response.seen,
-                                response.fail,
-                                response.interested,
-                                response.not_interested
-                            ],
+                success: function(response) {
 
-                            colors: [
-                                '#f59e0b', // Pending - Orange
-                                '#10b981', // Sent - Green
-                                '#8b5cf6', // Seen - Purple
-                                '#ef4444', // Fail - Red
-                                '#06b6d4', // Interested - Cyan
-                                '#6b7280' // Not Interested - Gray
-                            ],
-                            chart: {
-                                type: 'donut',
-                                height: 350
-                            },
-                            labels: [
-                                'Pending',
-                                'Sent',
-                                'Seen',
-                                'Fail',
-                                'Interested',
-                                'Not Interested'
-                            ],
+                    if (campaignChart) {
+                        campaignChart.destroy();
+                    }
 
-                            legend: {
-                                position: 'right'
-                            },
-                            plotOptions: {
-                                pie: {
-                                    donut: {
-                                        size: '60%',
-                                        labels: {
+                    var options = {
+                        series: [
+                            response.pending,
+                            response.sent,
+                            response.seen,
+                            response.fail,
+                            response.interested,
+                            response.not_interested
+                        ],
+
+                        colors: [
+                            '#f59e0b', // Pending - Orange
+                            '#10b981', // Sent - Green
+                            '#8b5cf6', // Seen - Purple
+                            '#ef4444', // Fail - Red
+                            '#06b6d4', // Interested - Cyan
+                            '#6b7280' // Not Interested - Gray
+                        ],
+                        chart: {
+                            type: 'donut',
+                            height: 300
+                        },
+                        labels: [
+                            'Pending',
+                            'Sent',
+                            'Seen',
+                            'Fail',
+                            'Interested',
+                            'Not Interested'
+                        ],
+
+                        legend: {
+                            position: 'right'
+                        },
+                        plotOptions: {
+                            pie: {
+                                donut: {
+                                    size: '60%',
+                                    labels: {
+                                        show: true,
+                                        total: {
                                             show: true,
-                                            total: {
-                                                show: true,
-                                                showAlways: true,
-                                                label: 'Total Mail',
-                                                formatter: function() {
-                                                    return response.total_mail;
-                                                }
+                                            showAlways: true,
+                                            label: 'Total Mail',
+                                            formatter: function() {
+                                                return response.total_mail;
                                             }
                                         }
                                     }
                                 }
                             }
-                        };
+                        }
+                    };
 
-                        campaignChart = new ApexCharts(
-                            document.querySelector("#campaignStatusChart"),
-                            options
-                        );
+                    campaignChart = new ApexCharts(
+                        document.querySelector("#campaignStatusChart"),
+                        options
+                    );
 
-                        campaignChart.render();
-                    }
-                });
-
+                    campaignChart.render();
+                }
             });
 
-            let platformChart;
+        });
 
-            $(document).ready(function() {
+        let platformChart;
 
-                $.ajax({
-                    url: "{{ route('dashboard-platform-click-chart') }}",
-                    type: "GET",
-                    data: {
-                        filter: "{{ request('filter', 'today') }}",
-                        start_date: "{{ request('start_date') }}",
-                        end_date: "{{ request('end_date') }}"
-                    },
-                    success: function(response) {
+        $(document).ready(function() {
 
-                        if (platformChart) {
-                            platformChart.destroy();
-                        }
+            $.ajax({
+                url: "{{ route('dashboard-platform-click-chart') }}",
+                type: "GET",
+                data: {
+                    filter: "{{ request('filter', 'today') }}",
+                    start_date: "{{ request('start_date') }}",
+                    end_date: "{{ request('end_date') }}"
+                },
+                success: function(response) {
 
-                        var options = {
-                            series: response.series,
+                    if (platformChart) {
+                        platformChart.destroy();
+                    }
 
-                            colors: [
-                                '#25D366', // WhatsApp
-                                '#E4405F', // Instagram
-                                '#1877F2', // Facebook Messenger
-                                '#229ED9', // Telegram
-                                '#0A66C2', // LinkedIn
-                                '#000000', // X
-                                '#7C3AED', // Threads
-                                '#6B7280' // Other
-                            ],
-                            chart: {
-                                type: 'donut',
-                                height: 350
-                            },
-                            labels: response.labels,
+                    var options = {
+                        series: response.series,
 
-                            legend: {
-                                position: 'right'
-                            },
+                        colors: [
+                            '#25D366', // WhatsApp
+                            '#E4405F', // Instagram
+                            '#1877F2', // Facebook Messenger
+                            '#229ED9', // Telegram
+                            '#0A66C2', // LinkedIn
+                            '#000000', // X
+                            '#7C3AED', // Threads
+                            '#6B7280' // Other
+                        ],
+                        chart: {
+                            type: 'donut',
+                            height: 300
+                        },
+                        labels: response.labels,
 
-                            plotOptions: {
-                                pie: {
-                                    donut: {
-                                        size: '60%',
-                                        labels: {
+                        legend: {
+                            position: 'right'
+                        },
+
+                        plotOptions: {
+                            pie: {
+                                donut: {
+                                    size: '60%',
+                                    labels: {
+                                        show: true,
+                                        total: {
                                             show: true,
-                                            total: {
-                                                show: true,
-                                                showAlways: true,
-                                                label: 'Total Clicks',
-                                                formatter: function() {
-                                                    return response.total;
-                                                }
+                                            showAlways: true,
+                                            label: 'Total Clicks',
+                                            formatter: function() {
+                                                return response.total;
                                             }
                                         }
                                     }
                                 }
                             }
-                        };
+                        }
+                    };
 
-                        platformChart = new ApexCharts(
-                            document.querySelector("#platformClickChart"),
-                            options
-                        );
+                    platformChart = new ApexCharts(
+                        document.querySelector("#platformClickChart"),
+                        options
+                    );
 
-                        platformChart.render();
-                    }
-                });
-
+                    platformChart.render();
+                }
             });
-        </script>
-    @endsection
+
+        });
+
+        let buttonClickBarChart;
+
+        $(function() {
+            $.ajax({
+                url: "{{ route('dashboard-button-click-chart') }}",
+                type: "GET",
+                data: {
+                    filter: "{{ request('filter', 'today') }}",
+                    start_date: "{{ request('start_date') }}",
+                    end_date: "{{ request('end_date') }}"
+                },
+
+                success: function(response) {
+                    $("#totalButtonClicks").text(response.total);
+                    if (buttonClickBarChart) {
+                        buttonClickBarChart.destroy();
+                    }
+                    var chartHeight = Math.max(
+                        response.labels.length * 32,
+                        400
+                    );
+
+                    $("#buttonClickBarChart").css("height", chartHeight + "px");
+                    buttonClickBarChart = new ApexCharts(
+
+                        document.querySelector("#buttonClickBarChart"), {
+                            chart: {
+                                type: 'bar',
+                                height: chartHeight,
+                                toolbar: {
+                                    show: false
+                                }
+                            },
+
+                            series: [{
+                                name: 'Clicks',
+                                data: response.series
+                            }],
+                            plotOptions: {
+                                bar: {
+                                    horizontal: true,
+                                    distributed: true,
+                                    borderRadius: 6,
+                                    barHeight: '60%'
+                                }
+                            },
+
+                            colors: [
+                                '#25D366',
+                                '#0A66C2',
+                                '#E4405F',
+                                '#FF0000',
+                                '#1877F2',
+                                '#229ED9',
+                                '#7C3AED',
+                                '#000000',
+                                '#f59e0b',
+                                '#10b981'
+                            ],
+
+                            xaxis: {
+                                categories: response.labels,
+                                title: {
+                                    text: 'Clicks'
+                                }
+                            },
+
+                            dataLabels: {
+                                enabled: true
+                            },
+
+                            legend: {
+                                show: false
+                            },
+
+                            tooltip: {
+                                y: {
+                                    formatter: function(val) {
+                                        return val + " Clicks";
+                                    }
+                                }
+                            }
+                        }
+                    );
+                    buttonClickBarChart.render();
+                }
+            });
+        });
+    </script>
+@endsection

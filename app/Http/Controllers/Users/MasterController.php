@@ -522,7 +522,6 @@ class MasterController extends Controller
         $orderDir = $request->input('order.0.dir', 'desc');
 
 
-
         // $query->orderBy('step', 'asc');
 
         // Order by admin_updated_at first (show updated sequences at top)
@@ -769,8 +768,6 @@ class MasterController extends Controller
                 $validated['attachment_size'] = $sequence->attachment_size;
             }
 
-
-
             // ========== COMPANY LOGO ==========
             if ($request->hasFile('company_logo')) {
                 $request->validate(['company_logo' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048']);
@@ -835,8 +832,6 @@ class MasterController extends Controller
                     //     continue;
 
                     // }
-
-
 
                     // for the same Step
                     $alreadyHasStep = CampaignLog::where('user_id', $userId)
